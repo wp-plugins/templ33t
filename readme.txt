@@ -22,19 +22,19 @@ Extract the zip file and just drop the contents in the wp-content/plugins/ direc
 
 **Configuration File**: create a file named templ33t.xml in your theme directory. It should be structured like this:
 
-&lt;templ33t&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;template&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;file&gt;custom-footer-template.php&lt;/file&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;main&gt;Main Content&lt;/main&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;block&gt;Custom_Footer&lt;/block&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/template&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;template&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;file&gt;two-column-template.php&lt;/file&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;main&gt;Left_Column&lt;/main&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;block&gt;Right_Column&lt;/block&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;block&gt;Custom_Footer&lt;/block&gt;<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/template&gt;<br/>
-&lt;/templ33t&gt;<br/>
+&lt;templ33t&gt;
+&lt;template&gt;
+&lt;file&gt;custom-footer-template.php&lt;/file&gt;
+&lt;main&gt;Main Content&lt;/main&gt;
+&lt;block&gt;Custom_Footer&lt;/block&gt;
+&lt;/template&gt;
+&lt;template&gt;
+&lt;file&gt;two-column-template.php&lt;/file&gt;
+&lt;main&gt;Left_Column&lt;/main&gt;
+&lt;block&gt;Right_Column&lt;/block&gt;
+&lt;block&gt;Custom_Footer&lt;/block&gt;
+&lt;/template&gt;
+&lt;/templ33t&gt;
 
 You can have as many <template> elements as you like. Each one identifies the template file name (<file>), the label for the main content tab (<main>) and all custom content blocks (<block>) added to your template code.
 
