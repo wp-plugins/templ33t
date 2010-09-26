@@ -22,19 +22,19 @@ Extract the zip file and just drop the contents in the wp-content/plugins/ direc
 
 **Configuration File**: create a file named templ33t.xml in your theme directory. It should be structured like this:
 
-<templ33t>
-	<template>
-		<file>custom-footer-template.php</file>
-		<main>Main Content</main>
-		<block>Custom_Footer</block>
-	</template>
-	<template>
-		<file>two-column-template.php</file>
-		<main>Left_Column</main>
-		<block>Right_Column</block>
-		<block>Custom_Footer</block>
-	</template>
-</templ33t>
+&lt;templ33t&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;template&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;file&gt;custom-footer-template.php&lt;/file&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;main&gt;Main Content&lt;/main&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;block&gt;Custom_Footer&lt;/block&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/template&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;template&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;file&gt;two-column-template.php&lt;/file&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;main&gt;Left_Column&lt;/main&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;block&gt;Right_Column&lt;/block&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;block&gt;Custom_Footer&lt;/block&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/template&gt;<br/>
+&lt;/templ33t&gt;<br/>
 
 You can have as many <template> elements as you like. Each one identifies the template file name (<file>), the label for the main content tab (<main>) and all custom content blocks (<block>) added to your template code.
 
