@@ -1,6 +1,6 @@
 ﻿=== Templ33t ===
 Contributors: Ryan Willis
-Tags: template, page, admin, custom fields, blocks, cms
+Tags: tabs, tabbed, editor, editable, template, templete, page, admin, custom fields, blocks, cms, teml33t
 Requires at least: 2.9
 Tested up to: 3.0.1
 Stable tag: 0.1
