@@ -36,7 +36,7 @@ Extract the zip file and just drop the contents in the wp-content/plugins/ direc
 &lt;/template&gt;
 &lt;/templ33t&gt;
 
-You can have as many <template> elements as you like. Each one identifies the template file name (<file>), the label for the main content tab (<main>) and all custom content blocks (<block>) added to your template code.
+You can have as many &lt;template&gt; elements as you like. Each one identifies the template file name (&lt;file&gt;), the label for the main content tab (&lt;main&gt;) and all custom content blocks (&lt;block&gt;) added to your template code.
 
 **Multi-Site Installation**: Drop the contents in the wp-content/mu-plugins directory. Move templ33t.php into the parent directory and change the TEMPL33T\_ASSETS path definition near the top of the file to WP\_CONTENT.'/mu-plugins/templ33t/'
 
