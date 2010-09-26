@@ -1,0 +1,69 @@
+/*
+/--------------------------------------------------------------------\
+|                                                                    |
+| License: GPL                                                       |
+|                                                                    |
+| Templ33t - Adds tabs to edit page for custom content blocks in     |
+| WordPress page templates                                           |
+| Copyright (C) 2010, Ryan Willis,                                   |
+| http://www.totallyryan.com                                         |
+| All rights reserved.                                               |
+|                                                                    |
+| This program is free software; you can redistribute it and/or      |
+| modify it under the terms of the GNU General Public License        |
+| as published by the Free Software Foundation; either version 2     |
+| of the License, or (at your option) any later version.             |
+|                                                                    |
+| This program is distributed in the hope that it will be useful,    |
+| but WITHOUT ANY WARRANTY; without even the implied warranty of     |
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      |
+| GNU General Public License for more details.                       |
+|                                                                    |
+| You should have received a copy of the GNU General Public License  |
+| along with this program; if not, write to the                      |
+| Free Software Foundation, Inc.                                     |
+| 51 Franklin Street, Fifth Floor                                    |
+| Boston, MA  02110-1301, USA                                        |
+|                                                                    |
+\--------------------------------------------------------------------/
+*/
+
+div#templ33t_control {
+	margin-bottom: 6px;
+}
+
+div#templ33t_control ul {
+	list-style: none;
+	height: 27px;
+	border-bottom: 1px solid #909090;
+}
+
+div#templ33t_control ul li {
+	float: left;
+	height: 26px;
+	margin: 0px 6px 0px 4px;
+	background: #dfdfdf url("../../../wp-admin/images/gray-grad.png") repeat-x left top;
+	border: 1px solid #909090;
+	border-bottom: 0px;
+	-moz-border-radius: 4px 4px 0px 0px;
+	-khtml-border-radius: 4px 4px 0px 0px;
+	-webkit-border-radius: 4px 4px 0px 0px;
+	border-radius: 4px 4px 0px 0px;
+}
+
+div#templ33t_control ul li a {
+	display: block;
+	height: 26px;
+	padding: 0px 12px;
+	line-height: 26px;
+	text-decoration: none;
+}
+
+div#templ33t_control ul li.selected {
+	background: #FFF none;
+	height: 27px;
+}
+
+div#templ33t_main_content {
+	display: none;
+}
