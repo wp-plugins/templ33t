@@ -1,0 +1,4 @@
+TODO:
+
+* generate meta field if it does not exist on the page for some reason
+* make content blocks searchable like the main content (is there a hook for this?)

@@ -108,11 +108,28 @@ function templ33t_placeControl() {
 
 function templ33t_hideCustomFields() {
 
+	var erel;
+
 	jQuery('div#templ33t_control a').each(
 		function() {
-			
-			if(jQuery(this).attr('rel') != 'default')
-				jQuery('tr#meta-'+jQuery(this).attr('rel')).addClass('templ33t_cf').hide();
+
+			erel = jQuery(this).attr('rel');
+
+			if(erel != 'default') {
+
+				if(jQuery('tr#meta-'+erel).length){
+
+					jQuery('tr#meta-'+erel+' textarea').addClass('templ33t_val_'+erel);
+					jQuery('tr#meta-'+erel).addClass('templ33t_cf').hide();
+
+				} else {
+
+					$(this).after('<input type="hidden" class="templ33t_val_'+erel+'" name="meta['+erel+'][value]" value="" />');
+					
+				}
+
+			}
+				
 			
 		}
 	);
@@ -129,7 +146,7 @@ function templ33t_switchEditor() {
 	if(crel == 'default') {
 		jQuery('div#templ33t_main_content').html(ccontent);
 	} else {
-		jQuery('tr#meta-'+crel+' textarea').val(ccontent);
+		jQuery('.templ33t_val_'+crel).val(ccontent);
 	}
 
 	if(nrel == 'default') {
@@ -137,7 +154,7 @@ function templ33t_switchEditor() {
 		jQuery('#content_ifr').contents().find('body').html(ncontent);
 		jQuery('#editorcontainer textarea').text(ncontent);
 	} else {
-		ncontent = jQuery('tr#meta-'+nrel+' textarea').val();
+		ncontent = jQuery('.templ33t_val_'+nrel).val();
 		jQuery('#content_ifr').contents().find('body').html(ncontent);
 		jQuery('#editorcontainer textarea').text(ncontent);
 	}
