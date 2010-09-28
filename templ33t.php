@@ -44,6 +44,12 @@ Author URI: http://www.totallyryan.com
 define ('TEMPL33T_ASSETS', WP_PLUGIN_URL.'/templ33t/');
 
 /**
+ * Database version
+ */
+global $templ33t_db_version;
+$templ33t_db_version = "0.2";
+
+/**
  * Theme-specific templ33t configuration file (set by templ33t_init)
  */
 $templ33t_file = null;
@@ -76,12 +82,70 @@ $templ33t_render = false;
  */
 $templ33t_available = array();
 
+// add install hook
+register_activation_hook(__FILE__, 'templ33t_install');
+
 // add plugin hooks
 if(in_array(basename($_SERVER['PHP_SELF']), array('page.php', 'page-new.php', 'post.php', 'post-new.php'))) {
 	add_action('admin_init', 'templ33t_init', 1);
 	add_action('posts_selection', 'templ33t_handle_meta', 1);
 	add_action('admin_head', 'templ33t_header', 1);
 	add_action('edit_page_form', 'templ33t_elements', 1);
+}
+
+/**
+ * Create db tables
+ */
+function templ33t_install() {
+
+	global $wpdb, $templ33t_db_version;
+
+	$table_name = $wpdb->prefix . "templ33t_blocks";
+
+	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+
+		$sql = 'CREATE TABLE `'.$table_name.'` (
+					`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
+					`theme_id` int(11) DEFAULT NULL,
+					`block_name` varchar(30) DEFAULT NULL,
+					`block_slug` varchar(30) DEFAULT NULL,
+					PRIMARY KEY  (`templ33t_block_id`)
+				);';
+
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($sql);
+
+		add_option("templ33t_db_version", $templ33t_db_version);
+
+	}
+
+	/*
+	$installed_version = get_option( "templ33t_db_version" );
+
+	if($installed_version != $templ33t_db_version) {
+
+		$sql = 'CREATE TABLE `'.$table_name.'` (
+					`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
+					`blog_id` int(11) DEFAULT NULL,
+					`theme` varchar(255) DEFAULT NULL,
+					`block_name` varchar(30) DEFAULT NULL,
+					`block_slug` varchar(30) DEFAULT NULL,
+					PRIMARY KEY  (`templ33t_block_id`)
+				);';
+
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($sql);
+
+		update_option("templ33t_db_version", $templ33t_db_version);
+
+	}
+	*/
+}
+
+function templ33t_uninstall() {
+
+
+
 }
 
 /**
@@ -95,6 +159,10 @@ if(in_array(basename($_SERVER['PHP_SELF']), array('page.php', 'page-new.php', 'p
 function templ33t_init() {
 
 	global $templ33t_file, $templ33t_xml, $templ33t_templates;
+
+	// register scripts & styles
+	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS.'templ33t.js');
+	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
 
 	// generate config file path
 	$templ33t_file = get_template_directory().'/templ33t.xml';
