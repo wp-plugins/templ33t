@@ -33,6 +33,8 @@ var ctemp = 0;
 jQuery(document).ready(
 	function() {
 
+		//alert(TL33T_def.toString());
+
 		// save current template index
 		ctemp = jQuery('select#page_template').attr('selectedIndex');
 		

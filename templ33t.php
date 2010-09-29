@@ -61,6 +61,11 @@ $templ33t_file = null;
 $templ33t_xml = null;
 
 /**
+ * Pages to initialize tab functionality
+ */
+$templ33t_tab_pages = array('page.php', 'page-new.php', 'post.php', 'post-new.php');
+
+/**
  * Array of templates and configured blocks (set by templ33t_init)
  */
 $templ33t_templates = array();
@@ -85,13 +90,11 @@ $templ33t_available = array();
 // add install hook
 register_activation_hook(__FILE__, 'templ33t_install');
 
-// add plugin hooks
-if(in_array(basename($_SERVER['PHP_SELF']), array('page.php', 'page-new.php', 'post.php', 'post-new.php'))) {
-	add_action('admin_init', 'templ33t_init', 1);
-	add_action('posts_selection', 'templ33t_handle_meta', 1);
-	add_action('admin_head', 'templ33t_header', 1);
-	add_action('edit_page_form', 'templ33t_elements', 1);
-}
+// initialize plugin
+add_action('admin_init', 'templ33t_init', 1);
+
+// add settings page
+add_action('admin_menu', 'templ33t_menu');
 
 /**
  * Create db tables
@@ -106,7 +109,7 @@ function templ33t_install() {
 
 		$sql = 'CREATE TABLE `'.$table_name.'` (
 					`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
-					`theme_id` int(11) DEFAULT NULL,
+					`theme` int(11) DEFAULT NULL,
 					`block_name` varchar(30) DEFAULT NULL,
 					`block_slug` varchar(30) DEFAULT NULL,
 					PRIMARY KEY  (`templ33t_block_id`)
@@ -148,6 +151,12 @@ function templ33t_uninstall() {
 
 }
 
+function templ33t_menu() {
+
+	add_submenu_page('options-general.php', 'Templ33t Settings', 'Templ33t Settings', 'edit_themes', 'templ33t_settings', 'templ33t_settings');
+	
+}
+
 /**
  * Loads theme-specific configuration file, records available templates and
  * their blocks.
@@ -158,41 +167,167 @@ function templ33t_uninstall() {
  */
 function templ33t_init() {
 
-	global $templ33t_file, $templ33t_xml, $templ33t_templates;
-
-	// register scripts & styles
-	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS.'templ33t.js');
+	global $templ33t_tab_pages, $templ33t_file, $templ33t_xml, $templ33t_templates;
+	
+	// register styles & scripts
 	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
+	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS.'templ33t.js');
+	wp_register_script('templ33t_settings_scripts', TEMPL33T_ASSETS.'templ33t_settings.js');
 
-	// generate config file path
-	$templ33t_file = get_template_directory().'/templ33t.xml';
+	// initialize tab
+	if(in_array(basename($_SERVER['PHP_SELF']), $templ33t_tab_pages)) {
 
-	if(file_exists($templ33t_file)) {
+		// add hooks
+		add_action('posts_selection', 'templ33t_handle_meta', 1);
+		add_action('admin_print_styles', 'templ33t_styles', 1);
+		add_action('admin_print_scripts', 'templ33t_scripts', 1);
+		add_action('edit_page_form', 'templ33t_elements', 1);
 
-		// parse configuration file
-		$templ33t_xml = new SimpleXMLElement(file_get_contents($templ33t_file));
+		// generate config file path
+		$templ33t_file = get_template_directory().'/templ33t.xml';
 
-		if(property_exists($templ33t_xml, 'template')) {
+		if(file_exists($templ33t_file)) {
 
-			// record templates and blocks
-			foreach($templ33t_xml->template as $template) {
+			// parse configuration file
+			$templ33t_xml = new SimpleXMLElement(file_get_contents($templ33t_file));
 
-				$templ33t_templates[(string)$template->file] = array(
-					'main' => (property_exists($template, 'main') ? (string)$template->main : ''),
-					'blocks' => array(),
-				);
-				
-				if(property_exists($template, 'block')) {
-					foreach($template->block as $block) {
-						$templ33t_templates[(string)$template->file]['blocks'][] = (string)$block;
+			if(property_exists($templ33t_xml, 'template')) {
+
+				// record templates and blocks
+				foreach($templ33t_xml->template as $template) {
+
+					$templ33t_templates[(string)$template->file] = array(
+						'main' => (property_exists($template, 'main') ? (string)$template->main : ''),
+						'blocks' => array(),
+					);
+
+					if(property_exists($template, 'block')) {
+						foreach($template->block as $block) {
+							$templ33t_templates[(string)$template->file]['blocks'][] = (string)$block;
+						}
 					}
+
 				}
 
 			}
 
 		}
-		
+
+	} elseif(basename($_SERVER['PHP_SELF']) == 'options-general.php' && $_GET['page'] == 'templ33t_settings') {
+
+		// add styles & scripts
+		add_action('admin_print_styles', 'templ33t_styles', 1);
+		add_action('admin_print_scripts', 'templ33t_settings_scripts', 1);
+
+		// handle settings page post
+		templ33t_handle_settings();
+
 	}
+
+}
+
+function templ33t_settings_scripts() {
+
+	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
+
+}
+
+function templ33t_handle_settings() {
+
+	if(!empty($_POST) && array_key_exists('templ33t', $_POST)) {
+
+		
+
+	}
+
+}
+
+function templ33t_settings() {
+
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'templ33t_blocks';
+
+	$themes = get_themes();
+
+	$theme_count = count($themes);
+
+	$theme_selected = key($themes);
+
+	$block_data = $wpdb->get_results('SELECT * FROM `'.$table_name.'`', ARRAY_A);
+
+	$blocks = array();
+
+	foreach($block_data as $key => $val) {
+
+		if(!array_key_exists($val['theme'], $blocks)) {
+
+			$blocks[$val['theme']] = array($val['block_slug'] => $val['block_name']);
+
+		} else {
+
+			$blocks[$val['theme']][$val['block_slug']] = $val['block_name'];
+
+		}
+
+	}
+
+	?>
+
+	<h2>Templ33t Block Settings</h2>
+
+	<div id="templ33t_settings">
+
+		<div class="templ33t_themes">
+
+			<ul>
+				<?php $x = 1; foreach($themes as $key => $val) { ?>
+				<li class="<?php if($theme_selected == $key) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
+					<?php echo $key; ?>
+				</li>
+				<?php $x++; } ?>
+			</ul>
+
+		</div>
+
+		<div class="templ33t_blocks">
+
+			<?php foreach($themes as $key => $val) { ?>
+			<div class="templ33t_block_list_<?php echo $val['Template']; if($theme_selected == $key) echo ' templ33t_active'; else echo ' templ33t_hidden'; ?>">
+
+				<div>
+					<form action="" method="post">
+
+						<input type="hidden" name="templ33t_theme" value="<?php echo $val['Template']; ?>" />
+						<input type="text" name="templ33t_block" value="" />
+						<input type="submit" value="Add Custom Block" />
+						
+					</form>
+				</div>
+
+				<?php if(array_key_exists($val['Template'], $blocks)) { ?>
+				<ul>
+					<?php foreach($blocks[$val['Template']] as $key => $val) { ?>
+					<li>
+						<?php echo str_replace('_', ' ', $val); ?>
+					</li>
+					<?php } ?>
+				</ul>
+				<?php } else { ?>
+				<p>No Custom Blocks Created</p>
+				<?php } ?>
+			</div>
+			<?php } ?>
+
+			<div class="templ33t_clear"></div>
+
+		</div>
+
+		<div class="templ33t_clear"></div>
+
+	</div>
+
+	<?php
 
 }
 
@@ -262,19 +397,32 @@ function templ33t_handle_meta() {
 
 }
 
+function templ33t_styles() {
+	wp_enqueue_style('templ33t_styles');
+}
+
+function templ33t_scripts() {
+
+	global $post;
+
+	wp_enqueue_script('templ33t_scripts');
+
+	wp_localize_script('templ33t_scripts', 'TL33T_current', array('template' => $post->page_template));
+
+	templ33t_js_obj();
+
+}
+
 /**
- * Adds templ33t css and javascript functions/variables to the header.
+ * Outputs templ33t javascript template map object.
  *
  * @global array $templ33t_templates
- * @global object $post
  */
-function templ33t_header() {
+function templ33t_js_obj() {
 
-	global $templ33t_templates, $post;
+	global $templ33t_templates;
 
-	// output style and js
-	echo '<link rel="stylesheet" href="'.TEMPL33T_ASSETS.'templ33t.css" />';
-	echo '<script type="text/javascript"> TL33T_current = "'.$post->page_template.'"; ';
+	echo '<script type="text/javascript"> ';
 
 	// output js template map
 	if(!empty($templ33t_templates)) {
@@ -296,9 +444,6 @@ function templ33t_header() {
 	}
 
 	echo '</script>';
-
-	// output templ33t control js
-	echo '<script type="text/javascript" src="'.TEMPL33T_ASSETS.'templ33t.js"></script>';
 
 }
 

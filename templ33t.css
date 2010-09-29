@@ -67,3 +67,90 @@ div#templ33t_control ul li.selected {
 div#templ33t_main_content {
 	display: none;
 }
+
+div#templ33t_settings {
+	width: 600px;
+	margin: 0px auto;
+	border: 1px solid #303030;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	-khtml-border-radius: 4px;
+	border-radius: 4px;
+}
+
+div.templ33t_themes {
+	float: left;
+	max-height: 500px;
+	width: 230px;
+	margin: 0px;
+	padding: 0px;
+	overflow: auto;
+	background: #C0C0C0;
+	-moz-border-radius: 4px 0px 0px 4px;
+	-webkit-border-radius: 4px 0px 0px 4px;
+	-khtml-border-radius: 4px 0px 0px 4px;
+	border-radius: 4px 0px 0px 4px;
+}
+
+div.templ33t_themes ul li {
+	padding: 3px 6px;
+	font-size: 12pt;
+	background: transparent;
+	cursor: pointer;
+}
+
+div.templ33t_themes ul li.first {
+	-moz-border-radius: 4px 0px 0px 0px;
+	-webkit-border-radius: 4px 0px 0px 0px;
+	-khtml-border-radius: 4px 0px 0px 0px;
+	border-radius: 4px 0px 0px 0px;
+}
+
+div.templ33t_themes ul li.last {
+	-moz-border-radius: 0px 0px 0px 4px;
+	-webkit-border-radius: 0px 0px 0px 4px;
+	-khtml-border-radius: 0px 0px 0px 4px;
+	border-radius: 0px 0px 0px 4px;
+}
+
+div.templ33t_themes ul li.selected {
+	background: #FFF;
+}
+
+div.templ33t_blocks {
+	margin: 0px 0px 0px 230px;
+	padding-top: 12px;
+	background: #FFF;
+	border: 1px solid #FFF;
+	-moz-border-radius: 0px 4px 4px 0px;
+	-webkit-border-radius: 0px 4px 4px 0px;
+	-khtml-border-radius: 0px 4px 4px 0px;
+	border-radius: 0px 4px 4px 0px;
+}
+
+div.templ33t_blocks div div {
+	
+	text-align: center;
+}
+
+div.templ33t_blocks div input[type=text] {
+	width: 209px;
+}
+
+div.templ33t_blocks p {
+	text-align: center;
+}
+
+
+
+div.templ33t_active {
+	display: block;
+}
+
+div.templ33t_hidden {
+	display: none;
+}
+
+.templ33t_clear {
+	clear: both;
+}
