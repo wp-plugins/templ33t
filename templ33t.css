@@ -69,8 +69,7 @@ div#templ33t_main_content {
 }
 
 div#templ33t_settings {
-	width: 600px;
-	margin: 0px auto;
+	margin: 0px 18px 0px 0px;
 	border: 1px solid #303030;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
@@ -129,12 +128,12 @@ div.templ33t_blocks {
 }
 
 div.templ33t_blocks div div {
-	
+	margin: 0px 0px 12px 0px;
 	text-align: center;
 }
 
 div.templ33t_blocks div input[type=text] {
-	width: 209px;
+	
 }
 
 div.templ33t_blocks p {
@@ -147,6 +146,7 @@ div.templ33t_blocks ul {
 
 div.templ33t_blocks ul li {
 	margin: 12px 0px;
+	font-size: 14pt;
 }
 
 div.templ33t_blocks ul li a {
@@ -159,7 +159,7 @@ div.templ33t_blocks ul li a {
 
 div.templ33t_blocks ul li > span {
 	display: block;
-	margin-right: 28px;
+	margin-right: 36px;
 	padding: 3px 6px;
 	background: #E0E0E0;
 	border: 1px solid #C0C0C0;
@@ -185,4 +185,12 @@ div.templ33t_hidden {
 
 .templ33t_clear {
 	clear: both;
+}
+
+.templ33t_light {
+	color: #AAA;
+}
+
+.templ33t_error {
+	color: #FF0000;
 }

@@ -87,6 +87,18 @@ $templ33t_render = false;
  */
 $templ33t_available = array();
 
+/**
+ * Array of error message strings
+ */
+$templ33t_errors = array(
+	'theme' => 'Please choose a theme.',
+	'template' => 'Please enter a template file name.',
+	'block' => 'Please enter a custom block name.',
+	'duplicate' => 'This block already exists.',
+	'noblock' => 'Invalid block.',
+	'noaction' => 'Invalid action.',
+);
+
 // add install hook
 register_activation_hook(__FILE__, 'templ33t_install');
 
@@ -106,20 +118,33 @@ function templ33t_install() {
 
 	global $wpdb, $templ33t_db_version;
 
-	$table_name = $wpdb->prefix . "templ33t_blocks";
+	$template_table_name = $wpdb->prefix . "templ33t_templates";
+	$block_table_name = $wpdb->prefix . "templ33t_blocks";
 
 	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 
-		$sql = 'CREATE TABLE `'.$table_name.'` (
-					`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
-					`theme` varchar(255) DEFAULT NULL,
-					`block_name` varchar(30) DEFAULT NULL,
-					`block_slug` varchar(30) DEFAULT NULL,
-					PRIMARY KEY  (`templ33t_block_id`)
-				);';
+		$sql_templates = 'CREATE TABLE `'.$template_table_name.'` (
+			`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
+			`theme` varchar(50) DEFAULT NULL,
+			`template` varchar(255) DEFAULT NULL,
+			`main_label` varchar(255) DEFAULT NULL,
+			PRIMARY KEY (`templ33t_template_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
+
+		$sql_blocks = 'CREATE TABLE `'.$block_table_name.'` (
+			`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
+			`template_id` int(11) DEFAULT NULL,
+			`block_name` varchar(30) DEFAULT NULL,
+			`block_slug` varchar(30) DEFAULT NULL,
+			PRIMARY KEY (`templ33t_block_id`),
+			KEY `FK_templ33t_blocks_templ33t_templates` (`template_id`),
+			CONSTRAINT `FK_templ33t_blocks_templ33t_templates` FOREIGN KEY (`template_id`) REFERENCES `'.$template_table_name.'` (`templ33t_template_id`) ON DELETE CASCADE
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
 
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($sql);
+
+		dbDelta($sql_templates);
+		dbDelta($sql_blocks);
 
 		add_option("templ33t_db_version", $templ33t_db_version);
 
@@ -130,17 +155,28 @@ function templ33t_install() {
 
 	if($installed_version != $templ33t_db_version) {
 
-		$sql = 'CREATE TABLE `'.$table_name.'` (
-					`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
-					`blog_id` int(11) DEFAULT NULL,
-					`theme` varchar(255) DEFAULT NULL,
-					`block_name` varchar(30) DEFAULT NULL,
-					`block_slug` varchar(30) DEFAULT NULL,
-					PRIMARY KEY  (`templ33t_block_id`)
-				);';
+		$sql_templates = 'CREATE TABLE `'.$template_table_name.'` (
+			`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
+			`theme` varchar(50) DEFAULT NULL,
+			`template` varchar(255) DEFAULT NULL,
+			`main_label` varchar(255) DEFAULT NULL,
+			PRIMARY KEY (`templ33t_template_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
+
+		$sql_blocks = 'CREATE TABLE `'.$block_table_name.'` (
+			`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
+			`template_id` int(11) DEFAULT NULL,
+			`block_name` varchar(30) DEFAULT NULL,
+			`block_slug` varchar(30) DEFAULT NULL,
+			PRIMARY KEY (`templ33t_block_id`),
+			KEY `FK_templ33t_blocks_templ33t_templates` (`template_id`),
+			CONSTRAINT `FK_templ33t_blocks_templ33t_templates` FOREIGN KEY (`template_id`) REFERENCES `'.$template_table_name.'` (`templ33t_template_id`) ON DELETE CASCADE
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
 
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($sql);
+
+		dbDelta($sql_templates);
+		dbDelta($sql_blocks);
 
 		update_option("templ33t_db_version", $templ33t_db_version);
 
@@ -152,11 +188,14 @@ function templ33t_uninstall() {
 
 	global $wpdb;
 
-	$table_name = $wpdb->prefix . "templ33t_blocks";
+	$template_table_name = $wpdb->prefix . "templ33t_templates";
+	$block_table_name = $wpdb->prefix . "templ33t_blocks";
 
-	$sql = 'DROP TABLE IF EXISTS `'.$table_name.'`;';
+	$sql_blocks = 'DROP TABLE IF EXISTS `'.$block_table_name.'`;';
+	$wpdb->query($sql_blocks);
 
-	$wpdb->query($sql);
+	$sql_templates = 'DROP TABLE IF EXISTS `'.$template_table_name.'`;';
+	$wpdb->query($sql_templates);
 
 	delete_option("templ33t_db_version");
 
@@ -237,12 +276,6 @@ function templ33t_init() {
 
 }
 
-function templ33t_settings_scripts() {
-
-	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
-
-}
-
 function templ33t_handle_settings() {
 
 	global $wpdb;
@@ -251,21 +284,70 @@ function templ33t_handle_settings() {
 
 	if(!empty($_POST) && array_key_exists('templ33t', $_POST)) {
 
-		$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $_POST['templ33t_block'])))));
+		$required = array(
+			'templ33t_theme',
+			'templ33t_template',
+			'templ33t_block'
+		);
 
-		$check = $wpdb->get_row('SELECT * FROM `'.$table_name.'` WHERE `block_slug` = "'.$slug.'" LIMIT 1', ARRAY_A);
+		if($_POST['templ33t_all'] == 1) $_POST['templ33t_template'] = 'ALL';
 
-		if(empty($check)) {
+		$errors = array();
 
-			$insert = $wpdb->insert($table_name, array('theme' => $_POST['templ33t_theme'], 'block_name' => htmlspecialchars($_POST['templ33t_block'], ENT_QUOTES), 'block_slug' => $slug));
+		// check and sterilize
+		foreach($required as $field) {
+			if(!array_key_exists($field, $_POST)) {
+				$errors[] = str_replace('templ33t_', '', $field);
+			} else {
+				$_POST[$field] = htmlspecialchars($_POST[$field], ENT_QUOTES);
+			}
+		}
+
+		if(!empty($errors)) {
+
+			$redirect = 'options-general.php?page=templ33t_settings';
+
+			if(array_key_exists('templ33t_theme', $_POST)) $redirect .= '&theme='.$_POST['templ33t_theme'];
+
+			$redirect .= '&error='.implode('|', $errors);
+
+			wp_redirect($redirect);
 
 		} else {
 
-			
+			$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $_POST['templ33t_block'])))));
+
+			$check = $wpdb->get_row('SELECT * FROM `'.$table_name.'` WHERE `theme` = "'.$_POST['templ33t_theme'].'" AND `block_slug` = "'.$slug.'" LIMIT 1', ARRAY_A);
+
+			if(empty($check)) {
+
+				$i_arr = array(
+					'theme' => $_POST['templ33t_theme'],
+					'template' => $_POST['templ33t_template'],
+					'block_name' => $_POST['templ33t_block'],
+					'block_slug' => $slug
+				);
+
+				$insert = $wpdb->insert(
+					$table_name,
+					$i_arr
+				);
+
+				$redirect = 'options-general.php?page=templ33t_settings&theme='.$_POST['templ33t_theme'];
+
+				wp_redirect($redirect);
+
+			} else {
+
+				$redirect = 'options-general.php?page=templ33t_settings&error=duplicate';
+
+				wp_redirect($redirect);
+
+			}
 
 		}
 		
-		wp_redirect('options-general.php?page=templ33t_settings&theme='.$_POST['templ33t_theme']);
+		
 		
 	}
 
@@ -285,23 +367,38 @@ function templ33t_handle_settings() {
 
 					wp_redirect('options-general.php?page=templ33t_settings&theme='.$row['theme']);
 
+				} else {
+
+					wp_redirect('options-general.php?page=templ33t_settings&error=noblock');
+
 				}
+
+				break;
+
+			default:
+
+				wp_redirect('options-general.php?page=templ33t_settings&error=noaction');
 
 				break;
 
 		}
 
-
-
 	}
+
+}
+
+function templ33t_settings_scripts() {
+
+	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 }
 
 function templ33t_settings() {
 
-	global $wpdb;
+	global $wpdb, $templ33t_errors;
 
-	$table_name = $wpdb->prefix . 'templ33t_blocks';
+	$templates_table_name = $wpdb->prefix . 'templ33t_templates';
+	$blocks_table_name = $wpdb->prefix . 'templ33t_blocks';
 
 	$themes = get_themes();
 
@@ -314,27 +411,63 @@ function templ33t_settings() {
 		$theme_selected = $top['Template'];
 	}
 
-	$block_data = $wpdb->get_results('SELECT * FROM `'.$table_name.'`', ARRAY_A);
+	$block_data = $wpdb->get_results(
+		'SELECT a.*, b.templ33t_template_id, b.template, b.theme
+		FROM `'.$blocks_table_name.'` as a
+		JOIN `'.$templates_table_name.'` as b ON (a.template_id = b.templ33t_template_id)
+		ORDER BY `template`, `block_name`',
+		ARRAY_A
+	);
 
 	$blocks = array();
+	$templates = array();
 
 	foreach($block_data as $key => $val) {
+		
+		if(!array_key_exists($val['theme'], $templates)) {
+			$templates[$val['theme']] = array($val['templ33t_template_id'] => $val['template']);
+		} else {
+			$templates[$val['theme']][$val['templ33t_template_id']] = $val['template'];
+		}
 
 		if(!array_key_exists($val['theme'], $blocks)) {
 
-			$blocks[$val['theme']] = array($val['block_slug'] => $val['block_name']);
+			$blocks[$val['theme']] = array($val['template'] => array($val['block_slug'] => $val['block_name']));
+			
+		} elseif(!array_key_exists($val['template'], $blocks[$val['theme']])) {
+
+			$blocks[$val['theme']][$val['template']] = array($val['block_slug'] => $val['block_name']);
 
 		} else {
 
-			$blocks[$val['theme']][$val['block_slug']] = $val['block_name'];
+			$blocks[$val['theme']][$val['template']][$val['block_slug']] = $val['block_name'];
 
 		}
 
 	}
 
+	$error = null;
+	if(isset($_GET['error'])) {
+		if(strpos($_GET['error'], '|') !== false) {
+			$error = explode('|', $_GET['error']);
+			foreach($error as $key => $err) {
+				$error[$key] = $templ33t_errors[$err];
+			}
+			$error = implode('<br/>', $error);
+		} else {
+			$error = $templ33t_errors[$_GET['error']];
+		}
+	}
+
 	?>
 
 	<h2>Templ33t Block Settings</h2>
+
+	<?php if(!empty($error)) { ?>
+	<p class="templ33t_error">
+		<?php echo $error; ?>
+	</p>
+	<?php } ?>
 
 	<div id="templ33t_settings">
 
@@ -358,32 +491,45 @@ function templ33t_settings() {
 				<div>
 					<form method="post">
 
+						Add template: 
 						<input type="hidden" name="templ33t_theme" value="<?php echo $val['Template']; ?>" />
-						<input type="text" name="templ33t_block" value="" />
-						<input type="submit" name="templ33t" value="Add Custom Block" />
+						<input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" />
+						<input type="text" class="templ33t_main_label" name="templ33t_main_label" value="" size="30" />
+						<input type="submit" name="templ33t_new_template" value="Add Block" />
 						
 					</form>
 				</div>
 
 				<hr/>
 
-				<?php if(array_key_exists($val['Template'], $blocks)) { ?>
+				<?php if(isset($templates[$val['Template']]) && !empty($templates[$val['Template']])) { ?>
 				<ul>
-					<?php foreach($blocks[$val['Template']] as $key => $val) { ?>
+					<?php foreach($templates[$val['Template']] as $tkey => $tval) { ?>
 					<li>
-						<a href="options-general.php?page=templ33t_settings&t_action=delete&t_block=<?php echo $key; ?>" onclick="return confirm('Are you sure you want to delete this block reference?');">[X]</a>
-						<span>
-							<span>
-								(<?php echo $key; ?>)
-							</span>
-							<?php echo $val; ?>
-						</span>
+						<div class="templ33t_right">
+							<form method="post">
+
+							</form>
+						</div>
+						<h4><?php echo $tval; ?></h4>
+						<?php if(isset($blocks[$val['Template']]) && isset($blocks[$val['Template']][$tval['template']]) && !empty($blocks[$val['Template']][$tval['template']])) { ?>
+						<ul>
+							<?php foreach($blocks[$val['Template']][$tval['template']] as $bkey => $bval) { ?>
+							<li>
+								<?php echo $bval; ?> (<?php echo $bkey; ?>)
+							</li>
+							<?php } ?>
+						</ul>
+						<?php } else { ?>
+						<p>No Content Blocks</p>
+						<?php } ?>
 					</li>
 					<?php } ?>
 				</ul>
 				<?php } else { ?>
-				<p>No Custom Blocks Created</p>
+				<p>No Templates</p>
 				<?php } ?>
+				
 			</div>
 			<?php } ?>
 
@@ -415,7 +561,7 @@ function templ33t_handle_meta() {
 	global $templ33t_meta, $templ33t_templates, $templ33t_render, $post, $table_prefix, $wpdb;
 
 	if(empty($templ33t_meta) && $templ33t_meta !== false) {
-		
+
 		// grab meta
 		$meta = has_meta($post->ID);
 
