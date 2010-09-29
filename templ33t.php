@@ -90,6 +90,9 @@ $templ33t_available = array();
 // add install hook
 register_activation_hook(__FILE__, 'templ33t_install');
 
+// add uninstall hook
+register_deactivation_hook(__FILE__, 'templ33t_uninstall');
+
 // initialize plugin
 add_action('admin_init', 'templ33t_init', 1);
 
@@ -109,7 +112,7 @@ function templ33t_install() {
 
 		$sql = 'CREATE TABLE `'.$table_name.'` (
 					`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
-					`theme` int(11) DEFAULT NULL,
+					`theme` varchar(255) DEFAULT NULL,
 					`block_name` varchar(30) DEFAULT NULL,
 					`block_slug` varchar(30) DEFAULT NULL,
 					PRIMARY KEY  (`templ33t_block_id`)
@@ -147,7 +150,15 @@ function templ33t_install() {
 
 function templ33t_uninstall() {
 
+	global $wpdb;
 
+	$table_name = $wpdb->prefix . "templ33t_blocks";
+
+	$sql = 'DROP TABLE IF EXISTS `'.$table_name.'`;';
+
+	$wpdb->query($sql);
+
+	delete_option("templ33t_db_version");
 
 }
 
@@ -234,9 +245,53 @@ function templ33t_settings_scripts() {
 
 function templ33t_handle_settings() {
 
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'templ33t_blocks';
+
 	if(!empty($_POST) && array_key_exists('templ33t', $_POST)) {
 
+		$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $_POST['templ33t_block'])))));
+
+		$check = $wpdb->get_row('SELECT * FROM `'.$table_name.'` WHERE `block_slug` = "'.$slug.'" LIMIT 1', ARRAY_A);
+
+		if(empty($check)) {
+
+			$insert = $wpdb->insert($table_name, array('theme' => $_POST['templ33t_theme'], 'block_name' => htmlspecialchars($_POST['templ33t_block'], ENT_QUOTES), 'block_slug' => $slug));
+
+		} else {
+
+			
+
+		}
 		
+		wp_redirect('options-general.php?page=templ33t_settings&theme='.$_POST['templ33t_theme']);
+		
+	}
+
+	if(isset($_GET['t_action'])) {
+
+		switch($_GET['t_action']) {
+
+			case 'delete':
+
+				$row = $wpdb->get_row('SELECT * FROM `'.$table_name.'` WHERE `block_slug` = "'.htmlspecialchars($_GET['t_block'], ENT_QUOTES).'"', ARRAY_A);
+
+				if(!empty($row)) {
+
+					$sql = 'DELETE FROM `'.$table_name.'` WHERE `templ33t_block_id` = '.$row['templ33t_block_id'];
+
+					$wpdb->query($sql);
+
+					wp_redirect('options-general.php?page=templ33t_settings&theme='.$row['theme']);
+
+				}
+
+				break;
+
+		}
+
+
 
 	}
 
@@ -252,7 +307,12 @@ function templ33t_settings() {
 
 	$theme_count = count($themes);
 
-	$theme_selected = key($themes);
+	if(isset($_GET['theme'])) {
+		$theme_selected = $_GET['theme'];
+	} else {
+		$top = current($themes);
+		$theme_selected = $top['Template'];
+	}
 
 	$block_data = $wpdb->get_results('SELECT * FROM `'.$table_name.'`', ARRAY_A);
 
@@ -282,7 +342,7 @@ function templ33t_settings() {
 
 			<ul>
 				<?php $x = 1; foreach($themes as $key => $val) { ?>
-				<li class="<?php if($theme_selected == $key) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
+				<li class="<?php if($theme_selected == $val['Template']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
 					<?php echo $key; ?>
 				</li>
 				<?php $x++; } ?>
@@ -293,23 +353,31 @@ function templ33t_settings() {
 		<div class="templ33t_blocks">
 
 			<?php foreach($themes as $key => $val) { ?>
-			<div class="templ33t_block_list_<?php echo $val['Template']; if($theme_selected == $key) echo ' templ33t_active'; else echo ' templ33t_hidden'; ?>">
+			<div class="templ33t_block_list_<?php echo $val['Template']; if($theme_selected == $val['Template']) echo ' templ33t_active'; else echo ' templ33t_hidden'; ?>">
 
 				<div>
-					<form action="" method="post">
+					<form method="post">
 
 						<input type="hidden" name="templ33t_theme" value="<?php echo $val['Template']; ?>" />
 						<input type="text" name="templ33t_block" value="" />
-						<input type="submit" value="Add Custom Block" />
+						<input type="submit" name="templ33t" value="Add Custom Block" />
 						
 					</form>
 				</div>
+
+				<hr/>
 
 				<?php if(array_key_exists($val['Template'], $blocks)) { ?>
 				<ul>
 					<?php foreach($blocks[$val['Template']] as $key => $val) { ?>
 					<li>
-						<?php echo str_replace('_', ' ', $val); ?>
+						<a href="options-general.php?page=templ33t_settings&t_action=delete&t_block=<?php echo $key; ?>" onclick="return confirm('Are you sure you want to delete this block reference?');">[X]</a>
+						<span>
+							<span>
+								(<?php echo $key; ?>)
+							</span>
+							<?php echo $val; ?>
+						</span>
 					</li>
 					<?php } ?>
 				</ul>
