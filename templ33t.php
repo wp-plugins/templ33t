@@ -50,17 +50,6 @@ global $templ33t_db_version;
 $templ33t_db_version = "0.2";
 
 /**
- * Theme-specific templ33t configuration file (set by templ33t_init)
- */
-$templ33t_file = null;
-
-/**
- * Parsed theme-specific configuration file in SimpleXML object form (set by
- * templ33t_init)
- */
-$templ33t_xml = null;
-
-/**
  * Pages to initialize tab functionality
  */
 $templ33t_tab_pages = array('page.php', 'page-new.php', 'post.php', 'post-new.php');
@@ -74,6 +63,12 @@ $templ33t_templates = array();
  * Array of templ33t related custom fields (set by templ33t_handle_meta)
  */
 $templ33t_meta = array();
+
+/**
+ * Flags whether the meta has been fetched. Used to keep duplicate action calls
+ * from fetching meta data multiple times.
+ */
+$templ33t_meta_fetched = false;
 
 /**
  * Boolean value checked before rendering templ33t scripts/elements
@@ -93,8 +88,10 @@ $templ33t_available = array();
 $templ33t_errors = array(
 	'theme' => 'Please choose a theme.',
 	'template' => 'Please enter a template file name.',
+	'mainlabel' => 'Please enter the main label for this template.',
 	'block' => 'Please enter a custom block name.',
-	'duplicate' => 'This block already exists.',
+	'duptemp' => 'This template has already been added.',
+	'dupblock' => 'This block already exists.',
 	'noblock' => 'Invalid block.',
 	'noaction' => 'Invalid action.',
 );
@@ -112,7 +109,7 @@ add_action('admin_init', 'templ33t_init', 1);
 add_action('admin_menu', 'templ33t_menu');
 
 /**
- * Create db tables
+ * Create options and tables
  */
 function templ33t_install() {
 
@@ -133,6 +130,7 @@ function templ33t_install() {
 
 		$sql_blocks = 'CREATE TABLE `'.$block_table_name.'` (
 			`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
+			`theme` varchar(255) DEFAULT NULL,
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
@@ -184,23 +182,34 @@ function templ33t_install() {
 	*/
 }
 
+/**
+ * Remove plugin options and tables
+ * @global object $wpdb
+ */
 function templ33t_uninstall() {
 
 	global $wpdb;
 
+	// set table names
 	$template_table_name = $wpdb->prefix . "templ33t_templates";
 	$block_table_name = $wpdb->prefix . "templ33t_blocks";
 
+	// drop blocks table
 	$sql_blocks = 'DROP TABLE IF EXISTS `'.$block_table_name.'`;';
 	$wpdb->query($sql_blocks);
 
+	// drop templates table
 	$sql_templates = 'DROP TABLE IF EXISTS `'.$template_table_name.'`;';
 	$wpdb->query($sql_templates);
 
+	// remove db version option
 	delete_option("templ33t_db_version");
 
 }
 
+/**
+ * Add templ33t menu item
+ */
 function templ33t_menu() {
 
 	add_submenu_page('options-general.php', 'Templ33t Settings', 'Templ33t Settings', 'edit_themes', 'templ33t_settings', 'templ33t_settings');
@@ -217,7 +226,7 @@ function templ33t_menu() {
  */
 function templ33t_init() {
 
-	global $templ33t_tab_pages, $templ33t_file, $templ33t_xml, $templ33t_templates;
+	global $templ33t_tab_pages, $templ33t_templates, $wpdb;
 	
 	// register styles & scripts
 	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
@@ -233,34 +242,38 @@ function templ33t_init() {
 		add_action('admin_print_scripts', 'templ33t_scripts', 1);
 		add_action('edit_page_form', 'templ33t_elements', 1);
 
-		// generate config file path
-		$templ33t_file = get_template_directory().'/templ33t.xml';
+		// set table names
+		$template_table_name = $wpdb->prefix.'templ33t_templates';
+		$block_table_name = $wpdb->prefix.'templ33t_blocks';
 
-		if(file_exists($templ33t_file)) {
+		// grab theme name
+		$theme = get_template();
 
-			// parse configuration file
-			$templ33t_xml = new SimpleXMLElement(file_get_contents($templ33t_file));
+		$template_sql = 'SELECT a.*, b.template, b.main_label
+			FROM `'.$block_table_name.'` as a
+			LEFT JOIN `'.$template_table_name.'` as b ON (a.template_id = b.templ33t_template_id)
+			WHERE a.`theme` = "'.$theme.'"';
 
-			if(property_exists($templ33t_xml, 'template')) {
+		// grab templates from the database
+		$templates = $wpdb->get_results($template_sql, ARRAY_A);
 
-				// record templates and blocks
-				foreach($templ33t_xml->template as $template) {
+		// map templates and blocks
+		if(!empty($templates)) {
+			foreach($templates as $tmp) {
 
-					$templ33t_templates[(string)$template->file] = array(
-						'main' => (property_exists($template, 'main') ? (string)$template->main : ''),
-						'blocks' => array(),
-					);
-
-					if(property_exists($template, 'block')) {
-						foreach($template->block as $block) {
-							$templ33t_templates[(string)$template->file]['blocks'][] = (string)$block;
-						}
-					}
-
+				// fill out default data for theme-wide blocks
+				if(empty($tmp['template'])) {
+					$tmp['template'] = 'ALL';
+					$tmp['main_label'] = 'Main Content';
+				}
+				
+				if(!array_key_exists($tmp['template'], $templ33t_templates)) {
+					$templ33t_templates[$tmp['template']] = array('main' => $tmp['main_label'], 'blocks' => array($tmp['block_slug'] => $tmp['block_name']));
+				} else {
+					$templ33t_templates[$tmp['template']]['blocks'][$tmp['block_slug']] = $tmp['block_name'];
 				}
 
 			}
-
 		}
 
 	} elseif(basename($_SERVER['PHP_SELF']) == 'options-general.php' && $_GET['page'] == 'templ33t_settings') {
@@ -276,109 +289,224 @@ function templ33t_init() {
 
 }
 
+/**
+ * Catch and act upon settings post & actions
+ * @global object $wpdb
+ */
 function templ33t_handle_settings() {
 
 	global $wpdb;
 
-	$table_name = $wpdb->prefix . 'templ33t_blocks';
+	$template_table_name = $wpdb->prefix . 'templ33t_templates';
+	$block_table_name = $wpdb->prefix . 'templ33t_blocks';
 
-	if(!empty($_POST) && array_key_exists('templ33t', $_POST)) {
+	// catch settings via post
+	if(!empty($_POST)) {
 
-		$required = array(
-			'templ33t_theme',
-			'templ33t_template',
-			'templ33t_block'
-		);
+		// add template to theme
+		if(array_key_exists('templ33t_new_template', $_POST)) {
 
-		if($_POST['templ33t_all'] == 1) $_POST['templ33t_template'] = 'ALL';
+			// required (non-empty) fields array
+			$required = array(
+				'templ33t_theme',
+				'templ33t_template',
+				'templ33t_main_label',
+			);
 
-		$errors = array();
+			$errors = array();
 
-		// check and sterilize
-		foreach($required as $field) {
-			if(!array_key_exists($field, $_POST)) {
-				$errors[] = str_replace('templ33t_', '', $field);
-			} else {
-				$_POST[$field] = htmlspecialchars($_POST[$field], ENT_QUOTES);
+			// check and sterilize
+			foreach($required as $field) {
+				if(!array_key_exists($field, $_POST)) {
+					$errors[] = str_replace('templ33t_', '', $field);
+				} else {
+					$_POST[$field] = htmlspecialchars($_POST[$field], ENT_QUOTES);
+				}
 			}
-		}
 
-		if(!empty($errors)) {
+			if(!empty($errors)) {
 
-			$redirect = 'options-general.php?page=templ33t_settings';
+				// redirect with errors
+				$redirect = 'options-general.php?page=templ33t_settings';
+				if(array_key_exists('templ33t_theme', $_POST)) $redirect .= '&theme='.$_POST['templ33t_theme'];
+				elseif(array_key_exists('theme', $_GET)) $redirect .= '&theme='.$_GET['theme'];
+				$redirect .= '&error='.implode('|', $errors);
+				wp_redirect($redirect);
 
-			if(array_key_exists('templ33t_theme', $_POST)) $redirect .= '&theme='.$_POST['templ33t_theme'];
+			} else {
 
-			$redirect .= '&error='.implode('|', $errors);
-
-			wp_redirect($redirect);
-
-		} else {
-
-			$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $_POST['templ33t_block'])))));
-
-			$check = $wpdb->get_row('SELECT * FROM `'.$table_name.'` WHERE `theme` = "'.$_POST['templ33t_theme'].'" AND `block_slug` = "'.$slug.'" LIMIT 1', ARRAY_A);
-
-			if(empty($check)) {
-
+				// set up insert array
 				$i_arr = array(
 					'theme' => $_POST['templ33t_theme'],
 					'template' => $_POST['templ33t_template'],
-					'block_name' => $_POST['templ33t_block'],
-					'block_slug' => $slug
+					'main_label' => $_POST['templ33t_main_label']
 				);
 
-				$insert = $wpdb->insert(
-					$table_name,
-					$i_arr
-				);
+				// check for duplicates
+				$check = $wpdb->get_row('SELECT * FROM `'.$template_table_name.'` WHERE `theme` = "'.$i_arr['theme'].'" AND `template` = "'.$i_arr['template'].'" LIMIT 1', ARRAY_A);
 
-				$redirect = 'options-general.php?page=templ33t_settings&theme='.$_POST['templ33t_theme'];
+				if(empty($check)) {
 
+					// insert record
+					$insert = $wpdb->insert(
+						$template_table_name,
+						$i_arr
+					);
+
+					// return to settings page
+					$redirect = 'options-general.php?page=templ33t_settings&theme='.$i_arr['theme'];
+					wp_redirect($redirect);
+
+				} else {
+
+					// redirect with error
+					$redirect = 'options-general.php?page=templ33t_settings&theme='.$i_arr['theme'].'&error=duptemp';
+					wp_redirect($redirect);
+
+				}
+
+			}
+
+		// add block to template
+		} elseif(array_key_exists('templ33t_new_block', $_POST)) {
+
+			// required (non-empty) fields array
+			$required = array(
+				'templ33t_theme',
+				'templ33t_template',
+				'templ33t_block'
+			);
+
+			$errors = array();
+
+			// check and sterilize
+			foreach($required as $field) {
+				if(!array_key_exists($field, $_POST)) {
+					$errors[] = str_replace('templ33t_', '', $field);
+				} else {
+					$_POST[$field] = htmlspecialchars($_POST[$field], ENT_QUOTES);
+				}
+			}
+
+			if(!empty($errors)) {
+
+				// redirect with errors
+				$redirect = 'options-general.php?page=templ33t_settings';
+				if(array_key_exists('templ33t_theme', $_POST)) $redirect .= '&theme='.$_POST['templ33t_theme'];
+				$redirect .= '&error='.implode('|', $errors);
 				wp_redirect($redirect);
 
 			} else {
 
-				$redirect = 'options-general.php?page=templ33t_settings&error=duplicate';
+				// set up insert array
+				$i_arr = array(
+					'theme' => $_POST['templ33t_theme'],
+					'template_id' => $_POST['templ33t_template'],
+					'block_name' => $_POST['templ33t_block'],
+					'block_slug' => '',
+				);
 
-				wp_redirect($redirect);
+				// remove template definition if set to all
+				if($i_arr['template_id'] == 'ALL') unset($i_arr['template_id']);
+				
+				// generate slug
+				$i_arr['block_slug'] = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $_POST['templ33t_block'])))));
+
+				// set where conditions for template_id
+				$t_where = '`template_id` IS NULL';
+				if(array_key_exists('template_id', $i_arr))
+					$t_where = '('.$t_where.' OR `template_id` = "'.$i_arr['template_id'].'")';
+					
+				// check for duplicates
+				$check = $wpdb->get_row(
+					'SELECT * FROM `'.$block_table_name.'`
+					WHERE
+						`theme` = "'.$i_arr['theme'].'"
+						AND '.$t_where.'
+						AND `block_slug` = "'.$i_arr['block_slug'].'"
+					LIMIT 1',
+					ARRAY_A
+				);
+
+				if(empty($check)) {
+
+					// save block
+					$insert = $wpdb->insert(
+						$block_table_name,
+						$i_arr
+					);
+					
+					// return to settings page
+					$redirect = 'options-general.php?page=templ33t_settings&theme='.$_POST['templ33t_theme'];
+					wp_redirect($redirect);
+
+				} else {
+
+					// redirect with error
+					$redirect = 'options-general.php?page=templ33t_settings&error=dupblock';
+					wp_redirect($redirect);
+
+				}
 
 			}
-
+		
 		}
-		
-		
 		
 	}
 
+	// catch actions sent via GET
 	if(isset($_GET['t_action'])) {
 
 		switch($_GET['t_action']) {
 
-			case 'delete':
+			// delete template
+			case 'deltemp':
 
-				$row = $wpdb->get_row('SELECT * FROM `'.$table_name.'` WHERE `block_slug` = "'.htmlspecialchars($_GET['t_block'], ENT_QUOTES).'"', ARRAY_A);
+				// grab template
+				$row = $wpdb->get_row('SELECT * FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = "'.htmlspecialchars($_GET['tid'], ENT_QUOTES).'"', ARRAY_A);
 
 				if(!empty($row)) {
 
-					$sql = 'DELETE FROM `'.$table_name.'` WHERE `templ33t_block_id` = '.$row['templ33t_block_id'];
-
+					// delete if exists
+					$sql = 'DELETE FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = '.$row['templ33t_template_id'].' LIMIT 1';
 					$wpdb->query($sql);
-
 					wp_redirect('options-general.php?page=templ33t_settings&theme='.$row['theme']);
 
 				} else {
 
-					wp_redirect('options-general.php?page=templ33t_settings&error=noblock');
+					// return error if non-existent
+					wp_redirect('options-general.php?page=templ33t_settings&theme='.$_GET['theme'].'&error=notemp');
 
 				}
 
 				break;
 
+			// delete block
+			case 'delblock':
+
+				// grab block
+				$row = $wpdb->get_row('SELECT * FROM `'.$block_table_name.'` WHERE `templ33t_block_id` = "'.htmlspecialchars($_GET['bid'], ENT_QUOTES).'"', ARRAY_A);
+
+				if(!empty($row)) {
+
+					// delete if exists
+					$sql = 'DELETE FROM `'.$block_table_name.'` WHERE `templ33t_block_id` = '.$row['templ33t_block_id'].' LIMIT 1';
+					$wpdb->query($sql);
+					wp_redirect('options-general.php?page=templ33t_settings&theme='.$row['theme']);
+
+				} else {
+
+					// return error if non-existent
+					wp_redirect('options-general.php?page=templ33t_settings&theme='.$_GET['theme'].'&error=noblock');
+
+				}
+
+				break;
+
+			// return error on invalid action
 			default:
 
-				wp_redirect('options-general.php?page=templ33t_settings&error=noaction');
-
+				wp_redirect('options-general.php?page=templ33t_settings&theme='.$_GET['theme'].'&error=noaction');
 				break;
 
 		}
@@ -387,65 +515,74 @@ function templ33t_handle_settings() {
 
 }
 
+/**
+ * Enqueue js for settings page
+ */
 function templ33t_settings_scripts() {
 
 	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 }
 
+/**
+ * Output Templ33t settings page.
+ * @global object $wpdb
+ * @global array $templ33t_errors
+ */
 function templ33t_settings() {
 
 	global $wpdb, $templ33t_errors;
 
+	// set table names
 	$templates_table_name = $wpdb->prefix . 'templ33t_templates';
 	$blocks_table_name = $wpdb->prefix . 'templ33t_blocks';
 
+	// grab theme list
 	$themes = get_themes();
 
+	// count themes
 	$theme_count = count($themes);
 
+	// select theme
 	if(isset($_GET['theme'])) {
-		$theme_selected = $_GET['theme'];
+		$theme_selected = htmlspecialchars($_GET['theme'], ENT_QUOTES);
 	} else {
 		$top = current($themes);
 		$theme_selected = $top['Template'];
 	}
 
-	$block_data = $wpdb->get_results(
-		'SELECT a.*, b.templ33t_template_id, b.template, b.theme
-		FROM `'.$blocks_table_name.'` as a
-		JOIN `'.$templates_table_name.'` as b ON (a.template_id = b.templ33t_template_id)
-		ORDER BY `template`, `block_name`',
+	// grab templates for selected theme
+	$templates = $wpdb->get_results(
+		'SELECT `templ33t_template_id`, `template`, `main_label`
+		FROM `'.$templates_table_name.'`
+		WHERE `theme` = "'.$theme_selected.'"',
 		ARRAY_A
 	);
 
-	$blocks = array();
-	$templates = array();
+	// grab blocks for theme
+	$blocks = $wpdb->get_results(
+		'SELECT *
+		FROM `'.$blocks_table_name.'`
+		WHERE `theme` = "'.$theme_selected.'"
+		ORDER BY `block_name`',
+		ARRAY_A
+	);
 
-	foreach($block_data as $key => $val) {
-		
-		if(!array_key_exists($val['theme'], $templates)) {
-			$templates[$val['theme']] = array($val['templ33t_template_id'] => $val['template']);
+	// map blocks to templates
+	$block_map = array();
+	foreach($blocks as $key => $val) {
+
+		if(empty($val['template_id'])) $val['template_id'] = 'ALL';
+
+		if(!array_key_exists($val['template_id'], $block_map)) {
+			$block_map[$val['template_id']] = array($val['templ33t_block_id'] => $val);
 		} else {
-			$templates[$val['theme']][$val['templ33t_template_id']] = $val['template'];
-		}
-
-		if(!array_key_exists($val['theme'], $blocks)) {
-
-			$blocks[$val['theme']] = array($val['template'] => array($val['block_slug'] => $val['block_name']));
-			
-		} elseif(!array_key_exists($val['template'], $blocks[$val['theme']])) {
-
-			$blocks[$val['theme']][$val['template']] = array($val['block_slug'] => $val['block_name']);
-
-		} else {
-
-			$blocks[$val['theme']][$val['template']][$val['block_slug']] = $val['block_name'];
-
+			$block_map[$val['template_id']][$val['templ33t_block_id']] = $val;
 		}
 
 	}
 
+	// parse error message
 	$error = null;
 	if(isset($_GET['error'])) {
 		if(strpos($_GET['error'], '|') !== false) {
@@ -476,7 +613,7 @@ function templ33t_settings() {
 			<ul>
 				<?php $x = 1; foreach($themes as $key => $val) { ?>
 				<li class="<?php if($theme_selected == $val['Template']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
-					<?php echo $key; ?>
+					<a href="options-general.php?page=templ33t_settings&theme=<?php echo $val['Template']; ?>"><?php echo $key; ?></a>
 				</li>
 				<?php $x++; } ?>
 			</ul>
@@ -485,38 +622,37 @@ function templ33t_settings() {
 
 		<div class="templ33t_blocks">
 
-			<?php foreach($themes as $key => $val) { ?>
-			<div class="templ33t_block_list_<?php echo $val['Template']; if($theme_selected == $val['Template']) echo ' templ33t_active'; else echo ' templ33t_hidden'; ?>">
+			<div>
 
 				<div>
 					<form method="post">
-
 						Add template: 
-						<input type="hidden" name="templ33t_theme" value="<?php echo $val['Template']; ?>" />
+						<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
 						<input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" />
 						<input type="text" class="templ33t_main_label" name="templ33t_main_label" value="" size="30" />
-						<input type="submit" name="templ33t_new_template" value="Add Block" />
-						
+						<input type="submit" name="templ33t_new_template" value="Add Template" />
 					</form>
 				</div>
 
 				<hr/>
 
-				<?php if(isset($templates[$val['Template']]) && !empty($templates[$val['Template']])) { ?>
 				<ul>
-					<?php foreach($templates[$val['Template']] as $tkey => $tval) { ?>
-					<li>
+					<li class="templ33t_all_box">
 						<div class="templ33t_right">
 							<form method="post">
-
+								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
+								<input type="hidden" name="templ33t_template" value="ALL" />
+								<input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" />
+								<input type="submit" name="templ33t_new_block" value="Add Block" />
 							</form>
 						</div>
-						<h4><?php echo $tval; ?></h4>
-						<?php if(isset($blocks[$val['Template']]) && isset($blocks[$val['Template']][$tval['template']]) && !empty($blocks[$val['Template']][$tval['template']])) { ?>
+						<h4>Theme Wide / All Templates</h4>
+						<?php if(array_key_exists('ALL', $block_map) && !empty($block_map['ALL'])) { ?>
 						<ul>
-							<?php foreach($blocks[$val['Template']][$tval['template']] as $bkey => $bval) { ?>
+							<?php foreach($block_map['ALL'] as $bkey => $bval) { ?>
 							<li>
-								<?php echo $bval; ?> (<?php echo $bkey; ?>)
+								<a href="options-general.php?page=templ33t_settings&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
+								<?php echo $bval['block_name']; ?> (<?php echo $bval['block_slug']; ?>)
 							</li>
 							<?php } ?>
 						</ul>
@@ -524,14 +660,37 @@ function templ33t_settings() {
 						<p>No Content Blocks</p>
 						<?php } ?>
 					</li>
-					<?php } ?>
+					<?php if(!empty($templates)) { foreach($templates as $tkey => $tval) { ?>
+					<li class="templ33t_template_box">
+						<div class="templ33t_right">
+							<form method="post">
+								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
+								<input type="hidden" name="templ33t_template" value="<?php echo $tval['templ33t_template_id']; ?>" />
+								<input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" />
+								<input type="submit" name="templ33t_new_block" value="Add Block" />
+							</form>
+						</div>
+						<h4><?php echo $tval['template']; ?></h4>
+						<ul>
+							<li>
+								<?php echo $tval['main_label']; ?> (main content label)
+							</li>
+							<?php if(array_key_exists($tval['templ33t_template_id'], $block_map) && !empty($block_map[$tval['templ33t_template_id']])) { foreach($block_map[$tval['templ33t_template_id']] as $bkey => $bval) { ?>
+							<li>
+								<a href="options-general.php?page=templ33t_settings&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
+								<?php echo $bval['block_name']; ?> (<?php echo $bval['block_slug']; ?>)
+							</li>
+							<?php } } ?>
+						</ul>
+						<p class="templ33t_right">
+							<a href="options-general.php?page=templ33t_settings&theme=<?php echo $theme_selected; ?>&t_action=deltemp&tid=<?php echo $tval['templ33t_template_id']; ?>" onclick="return confirm('Are you sure you want to remove this template and all content blocks associated with it?');">Remove This Template</a>
+						</p>
+					</li>
+					<?php } } ?>
 				</ul>
-				<?php } else { ?>
-				<p>No Templates</p>
-				<?php } ?>
+				
 				
 			</div>
-			<?php } ?>
 
 			<div class="templ33t_clear"></div>
 
@@ -558,49 +717,92 @@ function templ33t_settings() {
  */
 function templ33t_handle_meta() {
 
-	global $templ33t_meta, $templ33t_templates, $templ33t_render, $post, $table_prefix, $wpdb;
+	global $templ33t_meta, $templ33t_templates, $templ33t_meta_fetched, $templ33t_render, $post, $wpdb;
 
-	if(empty($templ33t_meta) && $templ33t_meta !== false) {
+	if(!$templ33t_meta_fetched) {
+
+		$templ33t_meta_fetched = true;
 
 		// grab meta
 		$meta = has_meta($post->ID);
 
 		// filter out unrelated
 		foreach($meta as $key => $val) {
-			if(strpos($val['meta_key'], 'templ33t_') !== false)
-				$templ33t_meta[str_replace('templ33t_', '', $val['meta_key'])] = array('id' => $val['meta_id'], 'value' => $val['meta_value']);
+			if(strpos($val['meta_key'], 'templ33t_') !== false) {
+				$slug = str_replace('templ33t_', '', $val['meta_key']);
+				$bdata = array(
+					'id' => $val['meta_id'],
+					'label' => '',
+					'value' => $val['meta_value']
+				);
+				$templ33t_meta[$slug] = $bdata;
+			}
 		}
 
 		// set default page filename
 		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = 'page.php';
 
-		// check for template definitions, create any non-existent blocks and reload
+		// check for template definition and create any non-existent blocks
 		if(array_key_exists($post->page_template, $templ33t_templates) && !empty($templ33t_templates[$post->page_template]['blocks'])) {
 
-			// flag
-			$templ33t_render = true;
+			// check for template blocks
+			if(!empty($templ33t_templates[$post->page_template]['blocks'])) {
 
-			// add missing custom fields
-			foreach($templ33t_templates[$post->page_template]['blocks'] as $key => $block) {
-				if(!array_key_exists($block, $templ33t_meta)) {
-					
-					if(add_post_meta($post->ID, 'templ33t_'.$block, '', true)) {
+				// flag
+				$templ33t_render = true;
 
-						$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$table_prefix.'postmeta` LIMIT 1');
-						$templ33t_meta[$block] = array(
-							'id' => $meta_id[0],
-							'value' => '',
-						);
-						
+				// add missing custom fields
+				foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
+					if(!array_key_exists($slug, $templ33t_meta)) {
+						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
+							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
+							$templ33t_meta[$slug] = array(
+								'id' => $meta_id[0],
+								'label' => $block,
+								'value' => '',
+							);
+						}
+					} else {
+						$templ33t_meta[$slug]['label'] = $block;
 					}
-					
 				}
+
 			}
 
-		} elseif(empty($templ33t_meta)) {
+		}
+		
+		// check for theme-wide definition and create any non-existent blocks
+		if(array_key_exists('ALL', $templ33t_templates) && !empty($templ33t_templates['ALL']['blocks'])) {
+			
+			// check for template blocks
+			if(!empty($templ33t_templates['ALL']['blocks'])) {
+			
+				// flag
+				$templ33t_render = true;
+
+				// add missing custom fields
+				foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
+					if(!array_key_exists($slug, $templ33t_meta)) {
+						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
+							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
+							$templ33t_meta[$slug] = array(
+								'id' => $meta_id[0],
+								'label' => $block,
+								'value' => '',
+							);
+						}
+					} else {
+						$templ33t_meta[$slug]['label'] = $block;
+					}
+				}
+			
+			}
+
+		}
+
+		if(!$templ33t_render) {
 
 			// current template uses no tabs
-			$templ33t_render = false;
 			$templ33t_meta = false;
 
 		}
@@ -611,10 +813,17 @@ function templ33t_handle_meta() {
 
 }
 
+/**
+ * Enqueue Templ33t stylesheet
+ */
 function templ33t_styles() {
 	wp_enqueue_style('templ33t_styles');
 }
 
+/**
+ * Enqueue Templ33t tab scripts and generate js tab map object
+ * @global object $post
+ */
 function templ33t_scripts() {
 
 	global $post;
@@ -643,7 +852,7 @@ function templ33t_js_obj() {
 
 		$arr = array();
 		foreach($templ33t_templates as $template => $config) {
-			$str = '"'.$template.'": {main: "'.$config['main'].'", blocks: ['
+			$str = '"'.$template.'": {main: "'.htmlspecialchars($config['main'], ENT_QUOTES).'", blocks: ['
 				.(!empty($config['blocks']) ? '"'.implode('", "', $config['blocks']).'"' : '').']}';
 			$arr[] = $str;
 		}
@@ -675,14 +884,31 @@ function templ33t_elements() {
 
 	if($templ33t_render && !empty($templ33t_meta)) {
 
+		// grab main label
+		if(array_key_exists($post->page_template, $templ33t_templates))
+			$main_label = $templ33t_templates[$post->page_template]['main'];
+		else
+			$main_label = $templ33t_templates['ALL']['main'];
+
 		// output tab bar
 		echo '<div id="templ33t_control" style="display: none;"><ul>';
-		echo '<li id="templ33t_default" class="selected"><a href="" rel="default">'.str_replace('_', ' ', $templ33t_templates[$post->page_template]['main']).'</a><div id="templ33t_main_content"></div></li>';
+		echo '<li id="templ33t_default" class="selected"><a href="" rel="default">'.$main_label.'</a><div id="templ33t_main_content"></div></li>';
 
-		foreach($templ33t_templates[$post->page_template]['blocks'] as $key => $val) {
-			echo '<li><a href="#" rel="'.$templ33t_meta[$val]['id'].'">'.str_replace('_', ' ', $val).'</a></li>';
+		// output template specific tabs
+		if(array_key_exists($post->page_template, $templ33t_templates)) {
+			foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
+				echo '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block.'</a></li>';
+			}
 		}
 
+		// output theme-wide tabs
+		if(array_key_exists('ALL', $templ33t_templates)) {
+			foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
+				echo '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block.'</a></li>';
+			}
+		}
+
+		// close tab bar
 		echo '</ul></div>';
 		
 	}
@@ -698,11 +924,13 @@ function templ33t_elements() {
  */
 function templ33t_block($block = null) {
 
-	global $templ33t_available, $post;
+	global $templ33t_available, $templ33t_meta, $post;
 
 	// grab custom fields
 	if(empty($templ33t_available))
-		$templ33t_available = get_post_custom();
+		$templ33t_available = get_post_custom($post->ID);
+	
+	if(!is_array($templ33t_available)) $templ33t_available = array();
 
 	// output block if exists
 	if(array_key_exists('templ33t_'.$block, $templ33t_available)) {

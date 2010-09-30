@@ -3,7 +3,7 @@
 jQuery(document).ready(
 	function() {
 		
-		jQuery('div.templ33t_themes ul li').click(templ33t_configTheme);
+		//jQuery('div.templ33t_themes ul li').click(templ33t_configTheme);
 
 		jQuery('input.templ33t_template')
 			.focusin(function(){ if(jQuery(this).val() == 'Template Filename') jQuery(this).val('').removeClass('templ33t_light'); })
