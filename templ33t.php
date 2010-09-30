@@ -41,7 +41,7 @@ Author URI: http://www.totallyryan.com
 /**
  * Url path to plugin assets
  */
-define ('TEMPL33T_ASSETS', WP_PLUGIN_URL.'/templ33t/');
+define ('TEMPL33T_ASSETS', WP_PLUGINS_URL.'/templ33t/');
 
 /**
  * Database version
@@ -127,6 +127,8 @@ function templ33t_install() {
 
 	global $wpdb, $templ33t_db_version;
 
+	error_log('TEMPL33T_TEST!!!');
+
 	$template_table_name = $wpdb->prefix . "templ33t_templates";
 	$block_table_name = $wpdb->prefix . "templ33t_blocks";
 
@@ -156,7 +158,8 @@ function templ33t_install() {
 		dbDelta($sql_templates);
 		dbDelta($sql_blocks);
 
-		add_option("templ33t_db_version", $templ33t_db_version);
+		if(function_exists('add_site_option')) add_site_option("templ33t_db_version", $templ33t_db_version);
+		else add_option("templ33t_db_version", $templ33t_db_version);
 
 	}
 
@@ -175,6 +178,7 @@ function templ33t_install() {
 
 		$sql_blocks = 'CREATE TABLE `'.$block_table_name.'` (
 			`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
+			`theme` varchar(255) DEFAULT NULL,
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
@@ -215,7 +219,8 @@ function templ33t_uninstall() {
 	$wpdb->query($sql_templates);
 
 	// remove db version option
-	delete_option("templ33t_db_version");
+	if(function_exists('delete_site_option')) delete_site_option("templ33t_db_version");
+	else delete_option("templ33t_db_version");
 
 }
 
@@ -249,12 +254,20 @@ function templ33t_menu() {
  */
 function templ33t_init() {
 
-	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_tab_pages, $templ33t_templates, $wpdb;
+	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_db_version, $templ33t_tab_pages, $templ33t_templates, $wpdb;
 	
 	// register styles & scripts
 	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
 	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS.'templ33t.js');
 	wp_register_script('templ33t_settings_scripts', TEMPL33T_ASSETS.'templ33t_settings.js');
+
+	// check db version or create tables if no version
+	if(function_exists('get_site_option')) $installed_version = get_site_option("templ33t_db_version");
+	else $installed_version = get_option('templ33t_db_version');
+	if($installed_version != $templ33t_db_version) {
+		templ33t_uninstall();
+		templ33t_install();
+	}
 
 	// initialize tab
 	if(in_array(basename($_SERVER['PHP_SELF']), $templ33t_tab_pages)) {
