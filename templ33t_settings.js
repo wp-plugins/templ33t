@@ -2,8 +2,6 @@
 
 jQuery(document).ready(
 	function() {
-		
-		//jQuery('div.templ33t_themes ul li').click(templ33t_configTheme);
 
 		jQuery('input.templ33t_template')
 			.focusin(function(){ if(jQuery(this).val() == 'Template Filename') jQuery(this).val('').removeClass('templ33t_light'); })
@@ -17,5 +15,18 @@ jQuery(document).ready(
 			.val('Main Label')
 			.addClass('templ33t_light');
 
+		jQuery('input.templ33t_block')
+			.focusin(function(){ if(jQuery(this).val() == 'Block Name') jQuery(this).val('').removeClass('templ33t_light'); })
+			.focusout(function() { if(jQuery(this).val() == '') jQuery(this).val('Block Name').addClass('templ33t_light'); })
+			.val('Block Name')
+			.addClass('templ33t_light');
+
+		var liselected = jQuery('div.templ33t_themes ul li.selected');
+		var pos = liselected.index() * liselected.innerHeight();
+
+		if(liselected.parent().parent().height() < pos)
+			liselected.parent().parent().scrollTop(pos);
+
+		
 	}
 );

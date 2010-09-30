@@ -126,7 +126,7 @@ function templ33t_hideCustomFields() {
 
 				} else {
 
-					$(this).after('<input type="hidden" class="templ33t_val_'+erel+'" name="meta['+erel+'][value]" value="" />');
+					jQuery(this).after('<input type="hidden" class="templ33t_val_'+erel+'" name="meta['+erel+'][value]" value="" />');
 					
 				}
 

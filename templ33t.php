@@ -92,9 +92,21 @@ $templ33t_errors = array(
 	'block' => 'Please enter a custom block name.',
 	'duptemp' => 'This template has already been added.',
 	'dupblock' => 'This block already exists.',
+	'notemp' => 'This template file does not exist in the chosen theme.',
 	'noblock' => 'Invalid block.',
 	'noaction' => 'Invalid action.',
 );
+
+/**
+ * Where to put the menu. Set by templ33t_init. Value depends on multisite status.
+ */
+$templeet_menu_parent;
+
+/**
+ * Url for templ33t settings page. Set by templ33t_init. Value depends on multisite
+ * status
+ */
+$templ33t_settings_url;
 
 // add install hook
 register_activation_hook(__FILE__, 'templ33t_install');
@@ -212,8 +224,19 @@ function templ33t_uninstall() {
  */
 function templ33t_menu() {
 
-	add_submenu_page('options-general.php', 'Templ33t Settings', 'Templ33t Settings', 'edit_themes', 'templ33t_settings', 'templ33t_settings');
+	global $templ33t_menu_parent, $templ33t_settings_url;
+
+	// set menu parent and settings url
+	if(function_exists('is_multisite') && is_multisite()) {
+		$templ33t_menu_parent = 'ms-admin.php';
+		$templ33t_settings_url = $templ33t_menu_parent.'?page=templ33t_settings';
+	} else {
+		$templ33t_menu_parent = 'options-general.php';
+		$templ33t_settings_url = $templ33t_menu_parent.'?page=templ33t_settings';
+	}
 	
+	add_submenu_page($templ33t_menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', 'templ33t_settings');
+
 }
 
 /**
@@ -226,7 +249,7 @@ function templ33t_menu() {
  */
 function templ33t_init() {
 
-	global $templ33t_tab_pages, $templ33t_templates, $wpdb;
+	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_tab_pages, $templ33t_templates, $wpdb;
 	
 	// register styles & scripts
 	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
@@ -276,7 +299,7 @@ function templ33t_init() {
 			}
 		}
 
-	} elseif(basename($_SERVER['PHP_SELF']) == 'options-general.php' && $_GET['page'] == 'templ33t_settings') {
+	} elseif(basename($_SERVER['PHP_SELF']) == $templ33t_menu_parent && $_GET['page'] == 'templ33t_settings') {
 
 		// add styles & scripts
 		add_action('admin_print_styles', 'templ33t_styles', 1);
@@ -295,7 +318,7 @@ function templ33t_init() {
  */
 function templ33t_handle_settings() {
 
-	global $wpdb;
+	global $templ33t_menu_parent, $templ33t_settings_url, $wpdb;
 
 	$template_table_name = $wpdb->prefix . 'templ33t_templates';
 	$block_table_name = $wpdb->prefix . 'templ33t_blocks';
@@ -324,10 +347,13 @@ function templ33t_handle_settings() {
 				}
 			}
 
+			if(!file_exists(WP_CONTENT_DIR . '/themes/' . $_POST['templ33t_theme'] . '/' . $_POST['templ33t_template']))
+				$errors[] = 'notemp';
+
 			if(!empty($errors)) {
 
 				// redirect with errors
-				$redirect = 'options-general.php?page=templ33t_settings';
+				$redirect = $templ33t_settings_url;
 				if(array_key_exists('templ33t_theme', $_POST)) $redirect .= '&theme='.$_POST['templ33t_theme'];
 				elseif(array_key_exists('theme', $_GET)) $redirect .= '&theme='.$_GET['theme'];
 				$redirect .= '&error='.implode('|', $errors);
@@ -354,13 +380,13 @@ function templ33t_handle_settings() {
 					);
 
 					// return to settings page
-					$redirect = 'options-general.php?page=templ33t_settings&theme='.$i_arr['theme'];
+					$redirect = $templ33t_settings_url.'&theme='.$i_arr['theme'];
 					wp_redirect($redirect);
 
 				} else {
 
 					// redirect with error
-					$redirect = 'options-general.php?page=templ33t_settings&theme='.$i_arr['theme'].'&error=duptemp';
+					$redirect = $templ33t_settings_url.'&theme='.$i_arr['theme'].'&error=duptemp';
 					wp_redirect($redirect);
 
 				}
@@ -391,7 +417,7 @@ function templ33t_handle_settings() {
 			if(!empty($errors)) {
 
 				// redirect with errors
-				$redirect = 'options-general.php?page=templ33t_settings';
+				$redirect = $templ33t_settings_url;
 				if(array_key_exists('templ33t_theme', $_POST)) $redirect .= '&theme='.$_POST['templ33t_theme'];
 				$redirect .= '&error='.implode('|', $errors);
 				wp_redirect($redirect);
@@ -437,13 +463,13 @@ function templ33t_handle_settings() {
 					);
 					
 					// return to settings page
-					$redirect = 'options-general.php?page=templ33t_settings&theme='.$_POST['templ33t_theme'];
+					$redirect = $templ33t_settings_url.'&theme='.$_POST['templ33t_theme'];
 					wp_redirect($redirect);
 
 				} else {
 
 					// redirect with error
-					$redirect = 'options-general.php?page=templ33t_settings&error=dupblock';
+					$redirect = $templ33t_settings_url.'&error=dupblock';
 					wp_redirect($redirect);
 
 				}
@@ -470,12 +496,12 @@ function templ33t_handle_settings() {
 					// delete if exists
 					$sql = 'DELETE FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = '.$row['templ33t_template_id'].' LIMIT 1';
 					$wpdb->query($sql);
-					wp_redirect('options-general.php?page=templ33t_settings&theme='.$row['theme']);
+					wp_redirect($templ33t_settings_url.'&theme='.$row['theme']);
 
 				} else {
 
 					// return error if non-existent
-					wp_redirect('options-general.php?page=templ33t_settings&theme='.$_GET['theme'].'&error=notemp');
+					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=notemp');
 
 				}
 
@@ -492,12 +518,12 @@ function templ33t_handle_settings() {
 					// delete if exists
 					$sql = 'DELETE FROM `'.$block_table_name.'` WHERE `templ33t_block_id` = '.$row['templ33t_block_id'].' LIMIT 1';
 					$wpdb->query($sql);
-					wp_redirect('options-general.php?page=templ33t_settings&theme='.$row['theme']);
+					wp_redirect($templ33t_settings_url.'&theme='.$row['theme']);
 
 				} else {
 
 					// return error if non-existent
-					wp_redirect('options-general.php?page=templ33t_settings&theme='.$_GET['theme'].'&error=noblock');
+					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=noblock');
 
 				}
 
@@ -506,7 +532,7 @@ function templ33t_handle_settings() {
 			// return error on invalid action
 			default:
 
-				wp_redirect('options-general.php?page=templ33t_settings&theme='.$_GET['theme'].'&error=noaction');
+				wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=noaction');
 				break;
 
 		}
@@ -531,7 +557,7 @@ function templ33t_settings_scripts() {
  */
 function templ33t_settings() {
 
-	global $wpdb, $templ33t_errors;
+	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_errors, $wpdb;
 
 	// set table names
 	$templates_table_name = $wpdb->prefix . 'templ33t_templates';
@@ -547,8 +573,7 @@ function templ33t_settings() {
 	if(isset($_GET['theme'])) {
 		$theme_selected = htmlspecialchars($_GET['theme'], ENT_QUOTES);
 	} else {
-		$top = current($themes);
-		$theme_selected = $top['Template'];
+		$theme_selected = get_template();
 	}
 
 	// grab templates for selected theme
@@ -613,7 +638,7 @@ function templ33t_settings() {
 			<ul>
 				<?php $x = 1; foreach($themes as $key => $val) { ?>
 				<li class="<?php if($theme_selected == $val['Template']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
-					<a href="options-general.php?page=templ33t_settings&theme=<?php echo $val['Template']; ?>"><?php echo $key; ?></a>
+					<a href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $val['Template']; ?>"><?php echo $key; ?></a>
 				</li>
 				<?php $x++; } ?>
 			</ul>
@@ -646,13 +671,14 @@ function templ33t_settings() {
 								<input type="submit" name="templ33t_new_block" value="Add Block" />
 							</form>
 						</div>
-						<h4>Theme Wide / All Templates</h4>
+						<h2>Theme Wide / All Templates</h2>
+						<hr/>
 						<?php if(array_key_exists('ALL', $block_map) && !empty($block_map['ALL'])) { ?>
 						<ul>
 							<?php foreach($block_map['ALL'] as $bkey => $bval) { ?>
 							<li>
-								<a href="options-general.php?page=templ33t_settings&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
 								<?php echo $bval['block_name']; ?> (<?php echo $bval['block_slug']; ?>)
+								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
 							</li>
 							<?php } ?>
 						</ul>
@@ -670,21 +696,24 @@ function templ33t_settings() {
 								<input type="submit" name="templ33t_new_block" value="Add Block" />
 							</form>
 						</div>
-						<h4><?php echo $tval['template']; ?></h4>
+						<h2><?php echo $tval['template']; ?></h2>
+						<hr/>
 						<ul>
 							<li>
 								<?php echo $tval['main_label']; ?> (main content label)
 							</li>
 							<?php if(array_key_exists($tval['templ33t_template_id'], $block_map) && !empty($block_map[$tval['templ33t_template_id']])) { foreach($block_map[$tval['templ33t_template_id']] as $bkey => $bval) { ?>
 							<li>
-								<a href="options-general.php?page=templ33t_settings&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
 								<?php echo $bval['block_name']; ?> (<?php echo $bval['block_slug']; ?>)
+								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
 							</li>
 							<?php } } ?>
 						</ul>
+						<br/>
 						<p class="templ33t_right">
-							<a href="options-general.php?page=templ33t_settings&theme=<?php echo $theme_selected; ?>&t_action=deltemp&tid=<?php echo $tval['templ33t_template_id']; ?>" onclick="return confirm('Are you sure you want to remove this template and all content blocks associated with it?');">Remove This Template</a>
+							<a class="deltemp" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=deltemp&tid=<?php echo $tval['templ33t_template_id']; ?>" onclick="return confirm('Are you sure you want to remove this template and all content blocks associated with it?');">Remove This Template</a>
 						</p>
+						<div class="templ33t_clear_right"></div>
 					</li>
 					<?php } } ?>
 				</ul>

@@ -144,43 +144,65 @@ div.templ33t_blocks div input[type=text] {
 	
 }
 
-div.templ33t_blocks p {
+div.templ33t_blocks > div > p {
 	text-align: center;
 }
 
 div.templ33t_blocks ul {
 	margin: 12px;
+	padding-top: 12px;
 }
 
-div.templ33t_blocks ul li {
-	margin: 12px 0px;
-	font-size: 14pt;
-}
-
-div.templ33t_blocks ul li a {
-	display: block;
-	float: right;
-	border: 1px solid #FFF;
-	color: #FF0000;
-	text-decoration: none;
-}
-
-div.templ33t_blocks ul li > span {
-	display: block;
-	margin-right: 36px;
-	padding: 3px 6px;
-	background: #E0E0E0;
-	border: 1px solid #C0C0C0;
+.templ33t_all_box {
+	margin-bottom: 22px;
+	padding: 12px 18px;
+	background: #FFF;
+	border: 1px solid #909090;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	-khtml-border-radius: 4px;
 	border-radius: 4px;
 }
 
-div.templ33t_blocks ul li > span > span {
-	float: right;
+.templ33t_template_box {
+	padding: 12px 18px;
+	background: #E0E0E0;
+	border: 1px solid #909090;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	-khtml-border-radius: 4px;
+	border-radius: 4px;
 }
 
+.templ33t_all_box h2, .templ33t_template_box h2 {
+	margin: 6px 0px 18px 0px;
+}
+
+.templ33t_all_box p, .templ33t_template_box p {
+	font-size: 11pt;
+}
+
+div.templ33t_blocks ul ul {
+	list-style: disc;
+}
+
+div.templ33t_blocks ul ul li {
+	font-size: 11pt;
+}
+
+a.delblock {
+	color: #FF0000;
+	text-decoration: none;
+}
+
+a.deltemp {
+	padding: 3px 6px;
+	background: #FF0000;
+	border: 0px;
+	font-weight: bold;
+	color: #FFF;
+	text-decoration: none;
+}
 
 
 div.templ33t_active {
@@ -193,6 +215,13 @@ div.templ33t_hidden {
 
 div.templ33t_right {
 	float: right;
+	margin: 0px;
+	padding: 0px;
+}
+
+div.templ33t_right form {
+	margin: 0px;
+	padding: 0px;
 }
 
 p.templ33t_right {
@@ -201,6 +230,10 @@ p.templ33t_right {
 
 .templ33t_clear {
 	clear: both;
+}
+
+.templ33t_clear_right {
+	clear: right;
 }
 
 .templ33t_light {
