@@ -135,29 +135,26 @@ function templ33t_install() {
 
 	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 
-		$sql_templates = 'CREATE TABLE `'.$template_table_name.'` (
+		$sql = 'CREATE TABLE `'.$template_table_name.'` (
 			`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
 			`theme` varchar(50) DEFAULT NULL,
 			`template` varchar(255) DEFAULT NULL,
 			`main_label` varchar(255) DEFAULT NULL,
-			PRIMARY KEY (`templ33t_template_id`)
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
-
-		$sql_blocks = 'CREATE TABLE `'.$block_table_name.'` (
+			PRIMARY KEY  (`templ33t_template_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+			
+			CREATE TABLE `'.$block_table_name.'` (
 			`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
 			`theme` varchar(255) DEFAULT NULL,
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
-			PRIMARY KEY (`templ33t_block_id`),
-			KEY `FK_templ33t_blocks_templ33t_templates` (`template_id`),
-			CONSTRAINT `FK_templ33t_blocks_templ33t_templates` FOREIGN KEY (`template_id`) REFERENCES `'.$template_table_name.'` (`templ33t_template_id`) ON DELETE CASCADE
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
+			PRIMARY KEY  (`templ33t_block_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
 
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-		dbDelta($sql_templates);
-		dbDelta($sql_blocks);
+		dbDelta($sql);
 
 		if(function_exists('add_site_option')) {
 			add_site_option('templ33t_db_version', $templ33t_db_version);
@@ -315,35 +312,6 @@ function templ33t_init() {
 		}
 
 		$templ33t_templates = array_key_exists($theme, $templ33t_map) ? $templ33t_map[$theme] : array();
-
-		/*
-		$template_sql = 'SELECT a.*, b.template, b.main_label
-			FROM `'.$block_table_name.'` as a
-			LEFT JOIN `'.$template_table_name.'` as b ON (a.template_id = b.templ33t_template_id)
-			WHERE a.`theme` = "'.$theme.'"';
-
-		// grab templates from the database
-		$templates = $wpdb->get_results($template_sql, ARRAY_A);
-
-		// map templates and blocks
-		if(!empty($templates)) {
-			foreach($templates as $tmp) {
-
-				// fill out default data for theme-wide blocks
-				if(empty($tmp['template'])) {
-					$tmp['template'] = 'ALL';
-					$tmp['main_label'] = 'Main Content';
-				}
-				
-				if(!array_key_exists($tmp['template'], $templ33t_templates)) {
-					$templ33t_templates[$tmp['template']] = array('main' => $tmp['main_label'], 'blocks' => array($tmp['block_slug'] => $tmp['block_name']));
-				} else {
-					$templ33t_templates[$tmp['template']]['blocks'][$tmp['block_slug']] = $tmp['block_name'];
-				}
-
-			}
-		}
-		*/
 
 	} elseif(basename($_SERVER['PHP_SELF']) == $templ33t_menu_parent && $_GET['page'] == 'templ33t_settings') {
 
@@ -562,9 +530,12 @@ function templ33t_handle_settings() {
 				if(!empty($row)) {
 
 					// delete if exists
-					$sql = 'DELETE FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = '.$row['templ33t_template_id'].' LIMIT 1';
-					$wpdb->query($sql);
+					$sql_temp = 'DELETE FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = '.$row['templ33t_template_id'].' LIMIT 1';
+					$wpdb->query($sql_temp);
 
+					$sql_block = 'DELETE FROM `'.$block_table_name.'` WHERE `template_id` = '.$row['templ33t_template_id'];
+					$wpdb->query($sql_block);
+					
 					// update map dev version
 					if(function_exists('get_site_option')) {
 						$t_dev = get_site_option('templ33t_map_dev');
