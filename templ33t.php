@@ -41,7 +41,7 @@ Author URI: http://www.totallyryan.com
 /**
  * Url path to plugin assets
  */
-define ('TEMPL33T_ASSETS', WP_PLUGINS_URL.'/templ33t/');
+define ('TEMPL33T_ASSETS', WP_PLUGIN_URL.'/templ33t/');
 
 /**
  * Database version
