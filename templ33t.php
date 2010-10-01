@@ -130,8 +130,8 @@ function templ33t_install() {
 
 	error_log('TEMPL33T_TEST!!!');
 
-	$template_table_name = $wpdb->prefix . "templ33t_templates";
-	$block_table_name = $wpdb->prefix . "templ33t_blocks";
+	$template_table_name = $wpdb->base_prefix . "templ33t_templates";
+	$block_table_name = $wpdb->base_prefix . "templ33t_blocks";
 
 	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 
@@ -218,8 +218,8 @@ function templ33t_uninstall() {
 	global $wpdb;
 
 	// set table names
-	$template_table_name = $wpdb->prefix . "templ33t_templates";
-	$block_table_name = $wpdb->prefix . "templ33t_blocks";
+	$template_table_name = $wpdb->base_prefix . "templ33t_templates";
+	$block_table_name = $wpdb->base_prefix . "templ33t_blocks";
 
 	// drop blocks table
 	$sql_blocks = 'DROP TABLE IF EXISTS `'.$block_table_name.'`;';
@@ -299,8 +299,8 @@ function templ33t_init() {
 		add_action('edit_page_form', 'templ33t_elements', 1);
 
 		// set table names
-		$template_table_name = $wpdb->prefix.'templ33t_templates';
-		$block_table_name = $wpdb->prefix.'templ33t_blocks';
+		$template_table_name = $wpdb->base_prefix.'templ33t_templates';
+		$block_table_name = $wpdb->base_prefix.'templ33t_blocks';
 
 		// grab theme name
 		$theme = get_template();
@@ -334,8 +334,8 @@ function templ33t_handle_settings() {
 
 	global $templ33t_menu_parent, $templ33t_settings_url, $wpdb;
 
-	$template_table_name = $wpdb->prefix . 'templ33t_templates';
-	$block_table_name = $wpdb->prefix . 'templ33t_blocks';
+	$template_table_name = $wpdb->base_prefix . 'templ33t_templates';
+	$block_table_name = $wpdb->base_prefix . 'templ33t_blocks';
 
 	// catch settings via post
 	if(!empty($_POST)) {
@@ -697,8 +697,8 @@ function templ33t_settings() {
 	}
 
 	// set table names
-	$templates_table_name = $wpdb->prefix . 'templ33t_templates';
-	$blocks_table_name = $wpdb->prefix . 'templ33t_blocks';
+	$templates_table_name = $wpdb->base_prefix . 'templ33t_templates';
+	$blocks_table_name = $wpdb->base_prefix . 'templ33t_blocks';
 
 	// grab theme list
 	$themes = get_themes();
@@ -932,7 +932,7 @@ function templ33t_handle_meta() {
 				foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
 					if(!array_key_exists($slug, $templ33t_meta)) {
 						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
-							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
+							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->base_prefix.'postmeta` LIMIT 1');
 							$templ33t_meta[$slug] = array(
 								'id' => $meta_id[0],
 								'label' => $block,
@@ -961,7 +961,7 @@ function templ33t_handle_meta() {
 				foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
 					if(!array_key_exists($slug, $templ33t_meta)) {
 						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
-							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
+							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->base_prefix.'postmeta` LIMIT 1');
 							$templ33t_meta[$slug] = array(
 								'id' => $meta_id[0],
 								'label' => $block,
