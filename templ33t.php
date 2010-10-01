@@ -249,11 +249,14 @@ function templ33t_uninstall() {
  */
 function templ33t_menu() {
 
-	global $templ33t_menu_parent, $templ33t_settings_url;
-
+	global $templ33t_menu_parent, $templ33t_settings_url, $wp_version;
+	
 	// set menu parent and settings url
 	if(function_exists('is_multisite') && is_multisite()) {
-		$templ33t_menu_parent = 'ms-admin.php';
+		if($wp_version{0} < 3)
+			$templ33t_menu_parent = 'wpmu-admin.php';
+		else
+			$templ33t_menu_parent = 'ms-admin.php';
 		$templ33t_settings_url = $templ33t_menu_parent.'?page=templ33t_settings';
 	} else {
 		$templ33t_menu_parent = 'options-general.php';
@@ -676,6 +679,8 @@ function templ33t_handle_settings() {
  */
 function templ33t_settings_scripts() {
 
+	wp_deregister_script('jquery');
+	wp_register_script('jquery', 'http://code.jquery.com/jquery-1.4.2.min.js');
 	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 }
@@ -735,16 +740,18 @@ function templ33t_settings() {
 
 	// map blocks to templates
 	$block_map = array();
-	foreach($blocks as $key => $val) {
+	if(!empty($blocks)) {
+		foreach($blocks as $key => $val) {
 
-		if(empty($val['template_id'])) $val['template_id'] = 'ALL';
+			if(empty($val['template_id'])) $val['template_id'] = 'ALL';
 
-		if(!array_key_exists($val['template_id'], $block_map)) {
-			$block_map[$val['template_id']] = array($val['templ33t_block_id'] => $val);
-		} else {
-			$block_map[$val['template_id']][$val['templ33t_block_id']] = $val;
+			if(!array_key_exists($val['template_id'], $block_map)) {
+				$block_map[$val['template_id']] = array($val['templ33t_block_id'] => $val);
+			} else {
+				$block_map[$val['template_id']][$val['templ33t_block_id']] = $val;
+			}
+
 		}
-
 	}
 
 	// parse error message
@@ -789,7 +796,9 @@ function templ33t_settings() {
 			<ul>
 				<?php $x = 1; foreach($themes as $key => $val) { ?>
 				<li class="<?php if($theme_selected == $val['Template']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
-					<a href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $val['Template']; ?>"><?php echo $key; ?></a>
+					<a href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $val['Template']; ?>">
+						<?php if(strlen($key) > 22) echo substr($key, 0, 22).'...'; else echo $key; ?>
+					</a>
 				</li>
 				<?php $x++; } ?>
 			</ul>
@@ -1109,15 +1118,15 @@ function templ33t_block($block = null) {
 	// grab custom fields
 	if(empty($templ33t_available))
 		$templ33t_available = get_post_custom($post->ID);
-	
+
 	if(!is_array($templ33t_available)) $templ33t_available = array();
 
 	// output block if exists
 	if(array_key_exists('templ33t_'.$block, $templ33t_available)) {
 		if(is_array($templ33t_available['templ33t_'.$block]))
-			echo $templ33t_available['templ33t_'.$block][0];
+			echo apply_filters('the_content', $templ33t_available['templ33t_'.$block][0]);
 		else
-			$templ33t_available['templ33t_'.$block];
+			echo apply_filters('the_content', $templ33t_available['templ33t_'.$block]);
 	}
 
 }
