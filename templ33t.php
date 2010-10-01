@@ -94,6 +94,7 @@ $templ33t_errors = array(
 	'dupblock' => 'This block already exists.',
 	'notemp' => 'This template file does not exist in the chosen theme.',
 	'noblock' => 'Invalid block.',
+	'nopub' => 'The most recent configuration has already been published.',
 	'noaction' => 'Invalid action.',
 );
 
@@ -158,8 +159,17 @@ function templ33t_install() {
 		dbDelta($sql_templates);
 		dbDelta($sql_blocks);
 
-		if(function_exists('add_site_option')) add_site_option("templ33t_db_version", $templ33t_db_version);
-		else add_option("templ33t_db_version", $templ33t_db_version);
+		if(function_exists('add_site_option')) {
+			add_site_option('templ33t_db_version', $templ33t_db_version);
+			add_site_option('templ33t_map_pub', 0);
+			add_site_option('templ33t_map_dev', 0);
+			add_site_option('templ33t_map', serialize(array()));
+		} else {
+			add_option('templ33t_db_version', $templ33t_db_version);
+			add_option('templ33t_map_pub', 0);
+			add_option('templ33t_map_dev', 0);
+			add_option('templ33t_map', serialize(array()));
+		}
 
 	}
 
@@ -192,7 +202,11 @@ function templ33t_install() {
 		dbDelta($sql_templates);
 		dbDelta($sql_blocks);
 
-		update_option("templ33t_db_version", $templ33t_db_version);
+		if(function_exists('update_site_option')) {
+			update_site_option('templ33t_db_version', $templ33t_db_version);
+		} else {
+			update_option('templ33t_db_version', $templ33t_db_version);
+		}
 
 	}
 	*/
@@ -219,9 +233,18 @@ function templ33t_uninstall() {
 	$wpdb->query($sql_templates);
 
 	// remove db version option
-	if(function_exists('delete_site_option')) delete_site_option("templ33t_db_version");
-	else delete_option("templ33t_db_version");
-
+	if(function_exists('delete_site_option')) {
+		delete_site_option('templ33t_db_version');
+		delete_site_option('templ33t_map_pub');
+		delete_site_option('templ33t_map_dev');
+		delete_site_option('templ33t_map');
+	} else {
+		delete_option('templ33t_db_version');
+		delete_option('templ33t_map_pub');
+		delete_option('templ33t_map_dev');
+		delete_option('templ33t_map');
+	}
+	
 }
 
 /**
@@ -285,6 +308,15 @@ function templ33t_init() {
 		// grab theme name
 		$theme = get_template();
 
+		if(function_exists('get_site_option')) {
+			$templ33t_map = unserialize(get_site_option('templ33t_map'));
+		} else {
+			$templ33t_map = unserialize(get_option('templ33t_map'));
+		}
+
+		$templ33t_templates = array_key_exists($theme, $templ33t_map) ? $templ33t_map[$theme] : array();
+
+		/*
 		$template_sql = 'SELECT a.*, b.template, b.main_label
 			FROM `'.$block_table_name.'` as a
 			LEFT JOIN `'.$template_table_name.'` as b ON (a.template_id = b.templ33t_template_id)
@@ -311,6 +343,7 @@ function templ33t_init() {
 
 			}
 		}
+		*/
 
 	} elseif(basename($_SERVER['PHP_SELF']) == $templ33t_menu_parent && $_GET['page'] == 'templ33t_settings') {
 
@@ -353,7 +386,7 @@ function templ33t_handle_settings() {
 
 			// check and sterilize
 			foreach($required as $field) {
-				if(!array_key_exists($field, $_POST)) {
+				if(!array_key_exists($field, $_POST) || empty($_POST[$field])) {
 					$errors[] = str_replace('templ33t_', '', $field);
 				} else {
 					$_POST[$field] = htmlspecialchars($_POST[$field], ENT_QUOTES);
@@ -392,6 +425,17 @@ function templ33t_handle_settings() {
 						$i_arr
 					);
 
+					// update map dev version
+					if(function_exists('get_site_option')) {
+						$t_dev = get_site_option('templ33t_map_dev');
+						$t_dev++;
+						update_site_option('templ33t_map_dev', $t_dev);
+					} else {
+						$t_dev = get_option('templ33t_map_dev');
+						$t_dev++;
+						update_option('templ33t_map_dev', $t_dev);
+					}
+
 					// return to settings page
 					$redirect = $templ33t_settings_url.'&theme='.$i_arr['theme'];
 					wp_redirect($redirect);
@@ -420,7 +464,7 @@ function templ33t_handle_settings() {
 
 			// check and sterilize
 			foreach($required as $field) {
-				if(!array_key_exists($field, $_POST)) {
+				if(!array_key_exists($field, $_POST) || empty($_POST[$field])) {
 					$errors[] = str_replace('templ33t_', '', $field);
 				} else {
 					$_POST[$field] = htmlspecialchars($_POST[$field], ENT_QUOTES);
@@ -474,6 +518,17 @@ function templ33t_handle_settings() {
 						$block_table_name,
 						$i_arr
 					);
+
+					// update map dev version
+					if(function_exists('get_site_option')) {
+						$t_dev = get_site_option('templ33t_map_dev');
+						$t_dev++;
+						update_site_option('templ33t_map_dev', $t_dev);
+					} else {
+						$t_dev = get_option('templ33t_map_dev');
+						$t_dev++;
+						update_option('templ33t_map_dev', $t_dev);
+					}
 					
 					// return to settings page
 					$redirect = $templ33t_settings_url.'&theme='.$_POST['templ33t_theme'];
@@ -509,6 +564,18 @@ function templ33t_handle_settings() {
 					// delete if exists
 					$sql = 'DELETE FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = '.$row['templ33t_template_id'].' LIMIT 1';
 					$wpdb->query($sql);
+
+					// update map dev version
+					if(function_exists('get_site_option')) {
+						$t_dev = get_site_option('templ33t_map_dev');
+						$t_dev++;
+						update_site_option('templ33t_map_dev', $t_dev);
+					} else {
+						$t_dev = get_option('templ33t_map_dev');
+						$t_dev++;
+						update_option('templ33t_map_dev', $t_dev);
+					}
+
 					wp_redirect($templ33t_settings_url.'&theme='.$row['theme']);
 
 				} else {
@@ -531,6 +598,18 @@ function templ33t_handle_settings() {
 					// delete if exists
 					$sql = 'DELETE FROM `'.$block_table_name.'` WHERE `templ33t_block_id` = '.$row['templ33t_block_id'].' LIMIT 1';
 					$wpdb->query($sql);
+
+					// update map dev version
+					if(function_exists('get_site_option')) {
+						$t_dev = get_site_option('templ33t_map_dev');
+						$t_dev++;
+						update_site_option('templ33t_map_dev', $t_dev);
+					} else {
+						$t_dev = get_option('templ33t_map_dev');
+						$t_dev++;
+						update_option('templ33t_map_dev', $t_dev);
+					}
+
 					wp_redirect($templ33t_settings_url.'&theme='.$row['theme']);
 
 				} else {
@@ -540,6 +619,71 @@ function templ33t_handle_settings() {
 
 				}
 
+				break;
+
+			// publish latest template map
+			case 'publish':
+
+				// get current configuration versions
+				if(function_exists('get_site_option')) {
+					$pub = get_site_option('templ33t_map_pub');
+					$dev = get_site_option('templ33t_map_dev');
+				} else {
+					$pub = get_option('templ33t_map_pub');
+					$dev = get_option('templ33t_map_dev');
+				}
+
+				if($pub < $dev) {
+
+					$template_sql = 'SELECT a.*, b.template, b.main_label
+						FROM `'.$block_table_name.'` as a
+						LEFT JOIN `'.$template_table_name.'` as b ON (a.template_id = b.templ33t_template_id)';
+
+					// grab templates from the database
+					$templates = $wpdb->get_results($template_sql, ARRAY_A);
+
+					$templ33t_map = array();
+
+					// map templates and blocks
+					if(!empty($templates)) {
+						foreach($templates as $tmp) {
+
+							// add theme to map
+							if(!array_key_exists($tmp['theme'], $templ33t_map))
+								$templ33t_map[$tmp['theme']] = array();
+
+							// fill out default data for theme-wide blocks
+							if(empty($tmp['template'])) {
+								$tmp['template'] = 'ALL';
+								$tmp['main_label'] = 'Main Content';
+							}
+
+							// add template to map
+							if(!array_key_exists($tmp['template'], $templ33t_map[$tmp['theme']]))
+								$templ33t_map[$tmp['theme']][$tmp['template']] = array('main' => $tmp['main_label'], 'blocks' => array());
+
+							// add block to map
+							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = $tmp['block_name'];
+
+						}
+					}
+
+					// save latest configuration version
+					if(function_exists('update_site_option')) {
+						update_site_option('templ33t_map', serialize($templ33t_map));
+						update_site_option('templ33t_map_pub', $dev);
+					} else {
+						update_option('templ33t_map', serialize($templ33t_map));
+						update_option('templ33t_map_pub', $dev);
+					}
+
+					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme']);
+
+				} else {
+
+					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=nopub');
+
+				}
 				break;
 
 			// return error on invalid action
@@ -571,6 +715,15 @@ function templ33t_settings_scripts() {
 function templ33t_settings() {
 
 	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_errors, $wpdb;
+
+	// get current configuration versions
+	if(function_exists('get_site_option')) {
+		$pub = get_site_option('templ33t_map_pub');
+		$dev = get_site_option('templ33t_map_dev');
+	} else {
+		$pub = get_option('templ33t_map_pub');
+		$dev = get_option('templ33t_map_dev');
+	}
 
 	// set table names
 	$templates_table_name = $wpdb->prefix . 'templ33t_templates';
@@ -638,11 +791,22 @@ function templ33t_settings() {
 
 	<h2>Templ33t Block Settings</h2>
 
+	<?php if($pub < $dev) { ?>
+	<div id="templ33t_publish">
+		<p>
+			Your configuration has changed. Would you like to publish it for use?
+			<a href="<?php echo $templ33t_settings_url.'&theme='.$theme_selected.'&t_action=publish'; ?>">Publish Configuration</a>
+		</p>
+	</div>
+	<?php } ?>
+
 	<?php if(!empty($error)) { ?>
 	<p class="templ33t_error">
 		<?php echo $error; ?>
 	</p>
 	<?php } ?>
+
+	<br/>
 
 	<div id="templ33t_settings">
 
@@ -663,7 +827,7 @@ function templ33t_settings() {
 			<div>
 
 				<div>
-					<form method="post">
+					<form id="templ33t_new_template" method="post">
 						Add template: 
 						<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
 						<input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" />
@@ -677,7 +841,7 @@ function templ33t_settings() {
 				<ul>
 					<li class="templ33t_all_box">
 						<div class="templ33t_right">
-							<form method="post">
+							<form id="templ33t_all_block" method="post">
 								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
 								<input type="hidden" name="templ33t_template" value="ALL" />
 								<input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" />
@@ -702,7 +866,7 @@ function templ33t_settings() {
 					<?php if(!empty($templates)) { foreach($templates as $tkey => $tval) { ?>
 					<li class="templ33t_template_box">
 						<div class="templ33t_right">
-							<form method="post">
+							<form id="templ33t_new_block" method="post">
 								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
 								<input type="hidden" name="templ33t_template" value="<?php echo $tval['templ33t_template_id']; ?>" />
 								<input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" />

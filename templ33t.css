@@ -68,6 +68,24 @@ div#templ33t_main_content {
 	display: none;
 }
 
+div#templ33t_publish {
+	margin: 12px 18px 0px 0px;
+	padding: 0px 18px;
+	background: #FFF;
+	border: 1px solid #909090;
+	font-weight: bold;
+}
+
+div#templ33t_publish p {
+	text-align: center;
+}
+
+div#templ33t_publish a {
+	padding: 3px 6px;
+	background: #006505;
+	color: #FFF;
+}
+
 div#templ33t_settings {
 	margin: 0px 18px 0px 0px;
 }
@@ -241,5 +259,11 @@ p.templ33t_right {
 }
 
 .templ33t_error {
+	margin: 12px 18px 0px 0px;
+	padding: 6px 18px;
+	background: #FFF;
+	border: 1px solid #909090;
+	font-weight: bold;
 	color: #FF0000;
+	text-align: center;
 }
