@@ -299,6 +299,8 @@ function templ33t_init() {
 		add_action('posts_selection', 'templ33t_handle_meta', 1);
 		add_action('admin_print_styles', 'templ33t_styles', 1);
 		add_action('admin_print_scripts', 'templ33t_scripts', 1);
+		add_filter('the_editor_content', 'templ33t_strip_comment', 1);
+		add_filter('content_save_pre', 'templ33t_add_comment', 10);
 		add_action('edit_page_form', 'templ33t_elements', 1);
 
 		// set table names
@@ -998,7 +1000,60 @@ function templ33t_handle_meta() {
 
 	}
 
+}
+
+function templ33t_add_comment($content = null) {
+
+	global $templ33t_templates;
+
+	if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
+
+		// get template from post
+		$template = array_key_exists('page_template', $_POST) && !empty($_POST['page_template']) ? $_POST['page_template'] : 'page.php';
+		if($template == 'default') $template = 'page.php';
+
+		$blocks = array();
+
+		// grab template blocks
+		if(array_key_exists($template, $templ33t_templates)) {
+			foreach($templ33t_templates[$template]['blocks'] as $key => $val) {
+				$blocks[] = 'templ33t_'.$key;
+			}
+		}
+
+		// grab theme-wide blocks
+		if(array_key_exists('ALL', $templ33t_templates)) {
+			foreach($templ33t_templates['ALL']['blocks'] as $key => $val) {
+				$blocks[] = 'templ33t_'.$key;
+			}
+		}
+
+		// append custom block data to content in TEMPL33T comment
+		if(!empty($blocks)) {
+
+			$append = '<!-- TEMPL33T: ';
+			foreach($_POST['meta'] as $key => $val) {
+				if(in_array($val['key'], $blocks)) {
+					$append .= " ".$val['value']." ";
+				}
+			}
+			$append .= ' -->';
+
+			$content .= "\n\n".$append;
+
+		}
+
+	}
+
+	return $content;
+
+}
+
+function templ33t_strip_comment($content = null) {
 	
+	$content = preg_replace('/([\s]{2}\<\!\-\- TEMPL33T\:[\s.]+\-\-\>)/i', '', $content);
+
+	return $content;
 
 }
 
