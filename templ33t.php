@@ -1041,13 +1041,13 @@ function templ33t_add_comment($content = null) {
 		// append custom block data to content in TEMPL33T comment
 		if(!empty($blocks)) {
 
-			$append = '<!-- TEMPL33T: ';
+			$append = '<!-- TEMPL33T[ ';
 			foreach($_POST['meta'] as $key => $val) {
 				if(in_array($val['key'], $blocks)) {
-					$append .= '  ::' . $val['key'] . ':: ' . preg_replace('/(<!--.+?-->)/mi', '', preg_replace('/([\r\n]+)/im', ' ', $val['value']));
+					$append .= '  ::' . $val['key'] . ':: ' . preg_replace('/(<!--.+?-->)/mi', '', preg_replace('/([\r\n]+)/mi', ' ', $val['value']));
 				}
 			}
-			$append .= '  END_TEMPL33T -->';
+			$append .= ' ]END_TEMPL33T -->';
 
 			$content .= '  '.$append;
 
@@ -1066,7 +1066,7 @@ function templ33t_add_comment($content = null) {
  */
 function templ33t_strip_comment($content = null) {
 
-	$content = preg_replace('/(<!--\ TEMPL33T:.+?END\_TEMPL33T\ -->)/mi', '', $content);
+	$content = preg_replace('/(<!--\ TEMPL33T\[.+?\]END\_TEMPL33T\ -->)/mi', '', $content);
 
 	return $content;
 
@@ -1081,9 +1081,12 @@ function templ33t_content_filter($content = null) {
 
 	if(is_search()) {
 
-		$content = preg_replace('/(<!--\ TEMPL33T:)(.+?)(END\_TEMPL33T\ -->)/mi', '$2', $content);
-		$content = preg_replace('/(::[A-Z0-9\_\-]+::)/i', ' ... ', $content);
+		$content = preg_replace('/(::[A-Z0-9\_\-]+::)/i', ' ... ', preg_replace('/(<!--\ TEMPL33T\[)(.+?)(\]END\_TEMPL33T\ -->)/mi', '$2', $content));
 
+	} elseif(is_page()) {
+
+		$content = templ33t_strip_comment($content);
+		
 	}
 
 	return $content;
