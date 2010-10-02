@@ -121,6 +121,9 @@ add_action('admin_init', 'templ33t_init', 1);
 // add settings page
 add_action('admin_menu', 'templ33t_menu');
 
+// add content filter for search results
+add_filter('the_content', 'templ33t_content_filter', 1);
+
 /**
  * Create options and tables
  */
@@ -292,7 +295,7 @@ function templ33t_init() {
 		templ33t_install();
 	}
 
-	// initialize tab
+	// initialize tabs & content filters
 	if(in_array(basename($_SERVER['PHP_SELF']), $templ33t_tab_pages)) {
 
 		// add hooks
@@ -311,6 +314,7 @@ function templ33t_init() {
 		// grab theme name
 		$theme = get_template();
 
+		// grab template map
 		if(function_exists('get_site_option')) {
 			$templ33t_map = unserialize(get_site_option('templ33t_map'));
 		} else {
@@ -1002,6 +1006,12 @@ function templ33t_handle_meta() {
 
 }
 
+/**
+ * Append templ33t field content to main content in comment form for searchability.
+ * @global array $templ33t_templates
+ * @param string $content
+ * @return string
+ */
 function templ33t_add_comment($content = null) {
 
 	global $templ33t_templates;
@@ -1034,12 +1044,12 @@ function templ33t_add_comment($content = null) {
 			$append = '<!-- TEMPL33T: ';
 			foreach($_POST['meta'] as $key => $val) {
 				if(in_array($val['key'], $blocks)) {
-					$append .= " ".$val['value']." ";
+					$append .= '  ::' . $val['key'] . ':: ' . preg_replace('/(<!--.+?-->)/mi', '', preg_replace('/([\r\n]+)/im', ' ', $val['value']));
 				}
 			}
-			$append .= ' -->';
+			$append .= '  END_TEMPL33T -->';
 
-			$content .= "\n\n".$append;
+			$content .= '  '.$append;
 
 		}
 
@@ -1049,9 +1059,32 @@ function templ33t_add_comment($content = null) {
 
 }
 
+/**
+ * Remove templ33t field comment from end of page content before editing.
+ * @param string $content
+ * @return string
+ */
 function templ33t_strip_comment($content = null) {
-	
-	$content = preg_replace('/([\s]{2}\<\!\-\- TEMPL33T\:[\s.]+\-\-\>)/i', '', $content);
+
+	$content = preg_replace('/(<!--\ TEMPL33T:.+?END\_TEMPL33T\ -->)/mi', '', $content);
+
+	return $content;
+
+}
+
+/**
+ * Transform templ33t fields comment into appended text for search results
+ * @param string $content
+ * @return string
+ */
+function templ33t_content_filter($content = null) {
+
+	if(is_search()) {
+
+		$content = preg_replace('/(<!--\ TEMPL33T:)(.+?)(END\_TEMPL33T\ -->)/mi', '$2', $content);
+		$content = preg_replace('/(::[A-Z0-9\_\-]+::)/i', ' ... ', $content);
+
+	}
 
 	return $content;
 
