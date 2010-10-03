@@ -224,7 +224,7 @@ function templ33t_install() {
 		templ33t_add_option('templ33t_map_pub', 0);
 		templ33t_add_option('templ33t_map_dev', 0);
 		templ33t_add_option('templ33t_map', serialize(array()));
-		templ33t_add_option('templ33t_blogs', 1);
+		if($templ33t_multisite) templ33t_add_option('templ33t_blogs', 1);
 
 	} elseif($templ33t_multisite) {
 		
