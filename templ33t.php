@@ -50,6 +50,18 @@ global $templ33t_db_version;
 $templ33t_db_version = "0.2";
 
 /**
+ * Detect multisite
+ */
+global $templ33t_multisite;
+$templ33t_multisite = (function_exists('is_multisite') && is_multisite());
+
+/**
+ * Whether to use site option or blog option
+ */
+global $templ33t_site_option;
+$templ33t_site_option = function_exists('add_site_option');
+
+/**
  * Pages to initialize tab functionality
  */
 $templ33t_tab_pages = array('page.php', 'page-new.php', 'post.php', 'post-new.php');
@@ -125,17 +137,67 @@ add_action('admin_menu', 'templ33t_menu');
 add_filter('the_content', 'templ33t_content_filter', 1);
 
 /**
+ * Add option
+ * @global string $templ33t_site_option
+ * @param string $key
+ * @param string $val
+ * @return bool
+ */
+function templ33t_add_option($key, $val = null) {
+	global $templ33t_site_option;
+	if($templ33t_site_option) return add_site_option($key, $val);
+	else return add_option($key, $val);
+}
+
+/**
+ * Get option
+ * @global string $templ33t_site_option
+ * @param string $key
+ * @return string
+ */
+function templ33t_get_option($key) {
+	global $templ33t_site_option;
+	if($templ33t_site_option) return get_site_option($key);
+	else return get_option($key);
+}
+
+/**
+ * Update option
+ * @global string $templ33t_site_option
+ * @param string $key
+ * @param string $val
+ * @return bool
+ */
+function templ33t_update_option($key, $val = null) {
+	global $templ33t_site_option;
+	if($templ33t_site_option) return update_site_option($key, $val);
+	else return update_option($key, $val);
+}
+
+/**
+ * Dlete option
+ * @global string $templ33t_site_option
+ * @param string $key
+ * @return bool
+ */
+function templ33t_delete_option($key) {
+	global $templ33t_site_option;
+	if($templ33t_site_option) return delete_site_option($key);
+	else return delete_option($key);
+}
+
+/**
  * Create options and tables
  */
 function templ33t_install() {
 
-	global $wpdb, $templ33t_db_version;
+	global $templ33t_multisite, $templ33t_db_version, $wpdb;
 
 	$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
 	$template_table_name = $the_prefix . "templ33t_templates";
 	$block_table_name = $the_prefix . "templ33t_blocks";
 
-	if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+	if($wpdb->get_var("SHOW TABLES LIKE '$template_table_name'") != $template_table_name) {
 
 		$sql = 'CREATE TABLE `'.$template_table_name.'` (
 			`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -158,17 +220,17 @@ function templ33t_install() {
 
 		dbDelta($sql);
 
-		if(function_exists('add_site_option')) {
-			add_site_option('templ33t_db_version', $templ33t_db_version);
-			add_site_option('templ33t_map_pub', 0);
-			add_site_option('templ33t_map_dev', 0);
-			add_site_option('templ33t_map', serialize(array()));
-		} else {
-			add_option('templ33t_db_version', $templ33t_db_version);
-			add_option('templ33t_map_pub', 0);
-			add_option('templ33t_map_dev', 0);
-			add_option('templ33t_map', serialize(array()));
-		}
+		templ33t_add_option('templ33t_db_version', $templ33t_db_version);
+		templ33t_add_option('templ33t_map_pub', 0);
+		templ33t_add_option('templ33t_map_dev', 0);
+		templ33t_add_option('templ33t_map', serialize(array()));
+		templ33t_add_option('templ33t_blogs', 1);
+
+	} elseif($templ33t_multisite) {
+		
+		$count = templ33t_get_option('templ33t_blogs');
+		$count++;
+		templ33t_update_option('templ33t_blogs', $count);
 
 	}
 
@@ -177,35 +239,28 @@ function templ33t_install() {
 
 	if($installed_version != $templ33t_db_version) {
 
-		$sql_templates = 'CREATE TABLE `'.$template_table_name.'` (
+		$sql = 'CREATE TABLE `'.$template_table_name.'` (
 			`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
 			`theme` varchar(50) DEFAULT NULL,
 			`template` varchar(255) DEFAULT NULL,
 			`main_label` varchar(255) DEFAULT NULL,
-			PRIMARY KEY (`templ33t_template_id`)
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
+			PRIMARY KEY  (`templ33t_template_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-		$sql_blocks = 'CREATE TABLE `'.$block_table_name.'` (
+			CREATE TABLE `'.$block_table_name.'` (
 			`templ33t_block_id` int(11) NOT NULL AUTO_INCREMENT,
 			`theme` varchar(255) DEFAULT NULL,
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
-			PRIMARY KEY (`templ33t_block_id`),
-			KEY `FK_templ33t_blocks_templ33t_templates` (`template_id`),
-			CONSTRAINT `FK_templ33t_blocks_templ33t_templates` FOREIGN KEY (`template_id`) REFERENCES `'.$template_table_name.'` (`templ33t_template_id`) ON DELETE CASCADE
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1';
+			PRIMARY KEY  (`templ33t_block_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
 
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-		dbDelta($sql_templates);
-		dbDelta($sql_blocks);
+		dbDelta($sql);
 
-		if(function_exists('update_site_option')) {
-			update_site_option('templ33t_db_version', $templ33t_db_version);
-		} else {
-			update_option('templ33t_db_version', $templ33t_db_version);
-		}
+		templ33t_update_option('templ33t_db_version', $templ33t_db_version);
 
 	}
 	*/
@@ -217,34 +272,42 @@ function templ33t_install() {
  */
 function templ33t_uninstall() {
 
-	global $wpdb;
+	global $templ33t_multisite, $wpdb;
 
-	// set table names
-	$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
-	$template_table_name = $the_prefix . "templ33t_templates";
-	$block_table_name = $the_prefix . "templ33t_blocks";
+	// make sure uninstall only happens from main site
+	$uninstall = true;
 
-	// drop blocks table
-	$sql_blocks = 'DROP TABLE IF EXISTS `'.$block_table_name.'`;';
-	$wpdb->query($sql_blocks);
-
-	// drop templates table
-	$sql_templates = 'DROP TABLE IF EXISTS `'.$template_table_name.'`;';
-	$wpdb->query($sql_templates);
-
-	// remove db version option
-	if(function_exists('delete_site_option')) {
-		delete_site_option('templ33t_db_version');
-		delete_site_option('templ33t_map_pub');
-		delete_site_option('templ33t_map_dev');
-		delete_site_option('templ33t_map');
-	} else {
-		delete_option('templ33t_db_version');
-		delete_option('templ33t_map_pub');
-		delete_option('templ33t_map_dev');
-		delete_option('templ33t_map');
+	if($templ33t_multisite) {
+		$count = templ33t_get_option('templ33t_blogs');
+		if(($count - 1) > 0) $uninstall = false;
+		$count--;
+		templ33t_update_option('templ33t_blogs', $count);
 	}
-	
+
+	if($uninstall) {
+		
+		// set table names
+		$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
+		$template_table_name = $the_prefix . "templ33t_templates";
+		$block_table_name = $the_prefix . "templ33t_blocks";
+
+		// drop blocks table
+		$sql_blocks = 'DROP TABLE IF EXISTS `'.$block_table_name.'`;';
+		$wpdb->query($sql_blocks);
+
+		// drop templates table
+		$sql_templates = 'DROP TABLE IF EXISTS `'.$template_table_name.'`;';
+		$wpdb->query($sql_templates);
+
+		// remove db version option
+		templ33t_delete_option('templ33t_db_version');
+		templ33t_delete_option('templ33t_map_pub');
+		templ33t_delete_option('templ33t_map_dev');
+		templ33t_delete_option('templ33t_map');
+		if($templ33t_multisite) templ33t_delete_option('templ33t_blogs');
+
+	}
+
 }
 
 /**
@@ -280,16 +343,15 @@ function templ33t_menu() {
  */
 function templ33t_init() {
 
-	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_db_version, $templ33t_tab_pages, $templ33t_templates, $wpdb;
-	
+	global $templ33t_multisite, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_db_version, $templ33t_tab_pages, $templ33t_templates, $wpdb;
+
 	// register styles & scripts
 	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
 	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS.'templ33t.js');
 	wp_register_script('templ33t_settings_scripts', TEMPL33T_ASSETS.'templ33t_settings.js');
 
 	// check db version or create tables if no version
-	if(function_exists('get_site_option')) $installed_version = get_site_option("templ33t_db_version");
-	else $installed_version = get_option('templ33t_db_version');
+	$installed_version = templ33t_get_option('templ33t_db_version');
 	if($installed_version != $templ33t_db_version) {
 		templ33t_uninstall();
 		templ33t_install();
@@ -315,12 +377,9 @@ function templ33t_init() {
 		$theme = get_template();
 
 		// grab template map
-		if(function_exists('get_site_option')) {
-			$templ33t_map = unserialize(get_site_option('templ33t_map'));
-		} else {
-			$templ33t_map = unserialize(get_option('templ33t_map'));
-		}
+		$templ33t_map = unserialize(templ33t_get_option('templ33t_map'));
 
+		// get theme map
 		$templ33t_templates = array_key_exists($theme, $templ33t_map) ? $templ33t_map[$theme] : array();
 
 	} elseif(basename($_SERVER['PHP_SELF']) == $templ33t_menu_parent && $_GET['page'] == 'templ33t_settings') {
@@ -405,15 +464,9 @@ function templ33t_handle_settings() {
 					);
 
 					// update map dev version
-					if(function_exists('get_site_option')) {
-						$t_dev = get_site_option('templ33t_map_dev');
-						$t_dev++;
-						update_site_option('templ33t_map_dev', $t_dev);
-					} else {
-						$t_dev = get_option('templ33t_map_dev');
-						$t_dev++;
-						update_option('templ33t_map_dev', $t_dev);
-					}
+					$t_dev = templ33t_get_option('templ33t_map_dev');
+					$t_dev++;
+					templ33t_update_option('templ33t_map_dev', $t_dev);
 
 					// return to settings page
 					$redirect = $templ33t_settings_url.'&theme='.$i_arr['theme'];
@@ -499,15 +552,10 @@ function templ33t_handle_settings() {
 					);
 
 					// update map dev version
-					if(function_exists('get_site_option')) {
-						$t_dev = get_site_option('templ33t_map_dev');
-						$t_dev++;
-						update_site_option('templ33t_map_dev', $t_dev);
-					} else {
-						$t_dev = get_option('templ33t_map_dev');
-						$t_dev++;
-						update_option('templ33t_map_dev', $t_dev);
-					}
+					$t_dev = templ33t_get_option('templ33t_map_dev');
+					$t_dev++;
+					templ33t_update_option('templ33t_map_dev', $t_dev);
+					
 					
 					// return to settings page
 					$redirect = $templ33t_settings_url.'&theme='.$_POST['templ33t_theme'];
@@ -548,15 +596,9 @@ function templ33t_handle_settings() {
 					$wpdb->query($sql_block);
 					
 					// update map dev version
-					if(function_exists('get_site_option')) {
-						$t_dev = get_site_option('templ33t_map_dev');
-						$t_dev++;
-						update_site_option('templ33t_map_dev', $t_dev);
-					} else {
-						$t_dev = get_option('templ33t_map_dev');
-						$t_dev++;
-						update_option('templ33t_map_dev', $t_dev);
-					}
+					$t_dev = templ33t_get_option('templ33t_map_dev');
+					$t_dev++;
+					templ33t_update_option('templ33t_map_dev', $t_dev);
 
 					wp_redirect($templ33t_settings_url.'&theme='.$row['theme']);
 
@@ -582,15 +624,10 @@ function templ33t_handle_settings() {
 					$wpdb->query($sql);
 
 					// update map dev version
-					if(function_exists('get_site_option')) {
-						$t_dev = get_site_option('templ33t_map_dev');
-						$t_dev++;
-						update_site_option('templ33t_map_dev', $t_dev);
-					} else {
-						$t_dev = get_option('templ33t_map_dev');
-						$t_dev++;
-						update_option('templ33t_map_dev', $t_dev);
-					}
+					$t_dev = templ33t_get_option('templ33t_map_dev');
+					$t_dev++;
+					templ33t_update_option('templ33t_map_dev', $t_dev);
+					
 
 					wp_redirect($templ33t_settings_url.'&theme='.$row['theme']);
 
@@ -607,13 +644,8 @@ function templ33t_handle_settings() {
 			case 'publish':
 
 				// get current configuration versions
-				if(function_exists('get_site_option')) {
-					$pub = get_site_option('templ33t_map_pub');
-					$dev = get_site_option('templ33t_map_dev');
-				} else {
-					$pub = get_option('templ33t_map_pub');
-					$dev = get_option('templ33t_map_dev');
-				}
+				$pub = templ33t_get_option('templ33t_map_pub');
+				$dev = templ33t_get_option('templ33t_map_dev');
 
 				if($pub < $dev) {
 
@@ -651,13 +683,8 @@ function templ33t_handle_settings() {
 					}
 
 					// save latest configuration version
-					if(function_exists('update_site_option')) {
-						update_site_option('templ33t_map', serialize($templ33t_map));
-						update_site_option('templ33t_map_pub', $dev);
-					} else {
-						update_option('templ33t_map', serialize($templ33t_map));
-						update_option('templ33t_map_pub', $dev);
-					}
+					templ33t_update_option('templ33t_map', serialize($templ33t_map));
+					templ33t_update_option('templ33t_map_pub', $dev);
 
 					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme']);
 
@@ -701,13 +728,8 @@ function templ33t_settings() {
 	global $templ33t_menu_parent, $templ33t_settings_url, $templ33t_errors, $wpdb;
 
 	// get current configuration versions
-	if(function_exists('get_site_option')) {
-		$pub = get_site_option('templ33t_map_pub');
-		$dev = get_site_option('templ33t_map_dev');
-	} else {
-		$pub = get_option('templ33t_map_pub');
-		$dev = get_option('templ33t_map_dev');
-	}
+	$pub = templ33t_get_option('templ33t_map_pub');
+	$dev = templ33t_get_option('templ33t_map_dev');
 
 	// set table names
 	$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
