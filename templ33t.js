@@ -102,9 +102,11 @@ function templ33t_switchTemplate() {
 
 function templ33t_placeControl() {
 
-	jQuery('#postdivrich').before(jQuery('div#templ33t_control'));
 	jQuery('#postdivrich').attr('rel','default');
+	jQuery('#postdivrich').before(jQuery('div#templ33t_control'));
 	jQuery('div#templ33t_control').show();
+	jQuery('#postdivrich').before(jQuery('div#templ33t_descriptions'));
+	jQuery('div#templ33t_descriptions').show();
 
 }
 
@@ -165,6 +167,9 @@ function templ33t_switchEditor() {
 	
 	jQuery('div#templ33t_control li.selected').removeClass('selected');
 	jQuery(this).parent().addClass('selected');
+
+	jQuery('div.templ33t_desc_'+crel).addClass('templ33t_hidden');
+	jQuery('div.templ33t_desc_'+nrel).removeClass('templ33t_hidden');
 
 	return false;
 

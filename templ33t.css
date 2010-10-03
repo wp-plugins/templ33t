@@ -29,7 +29,7 @@
 */
 
 div#templ33t_control {
-	margin-bottom: 6px;
+	margin-bottom: 0px;
 }
 
 div#templ33t_control ul {
@@ -62,6 +62,22 @@ div#templ33t_control ul li a {
 div#templ33t_control ul li.selected {
 	background: #FFF none;
 	height: 27px;
+}
+
+div#templ33t_descriptions {
+
+}
+
+div.templ33t_description {
+	background: #FFF;
+	border-bottom: 1px solid #C0C0C0;
+	color: #909090;
+	margin-bottom: 6px;
+}
+
+div.templ33t_description p {
+	margin: 0px;
+	padding: 9px 9px;
 }
 
 div#templ33t_main_content {

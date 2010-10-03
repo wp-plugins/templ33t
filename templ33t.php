@@ -204,6 +204,7 @@ function templ33t_install() {
 			`theme` varchar(50) DEFAULT NULL,
 			`template` varchar(255) DEFAULT NULL,
 			`main_label` varchar(255) DEFAULT NULL,
+			`main_description` text NULL,
 			PRIMARY KEY  (`templ33t_template_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 			
@@ -213,6 +214,7 @@ function templ33t_install() {
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
+			`block_description` text NULL,
 			PRIMARY KEY  (`templ33t_block_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
 
@@ -244,6 +246,7 @@ function templ33t_install() {
 			`theme` varchar(50) DEFAULT NULL,
 			`template` varchar(255) DEFAULT NULL,
 			`main_label` varchar(255) DEFAULT NULL,
+			`main_description` text NULL,
 			PRIMARY KEY  (`templ33t_template_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -253,6 +256,7 @@ function templ33t_install() {
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
+			`block_description` text NULL,
 			PRIMARY KEY  (`templ33t_block_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
 
@@ -647,9 +651,9 @@ function templ33t_handle_settings() {
 				$pub = templ33t_get_option('templ33t_map_pub');
 				$dev = templ33t_get_option('templ33t_map_dev');
 
-				if($pub < $dev) {
+				//if($pub < $dev) {
 
-					$template_sql = 'SELECT a.*, b.template, b.main_label
+					$template_sql = 'SELECT a.*, b.template, b.main_label, b.main_description
 						FROM `'.$block_table_name.'` as a
 						LEFT JOIN `'.$template_table_name.'` as b ON (a.template_id = b.templ33t_template_id)';
 
@@ -670,14 +674,20 @@ function templ33t_handle_settings() {
 							if(empty($tmp['template'])) {
 								$tmp['template'] = 'ALL';
 								$tmp['main_label'] = 'Main Content';
+								$tmp['main_description'] = '';
 							}
 
 							// add template to map
-							if(!array_key_exists($tmp['template'], $templ33t_map[$tmp['theme']]))
-								$templ33t_map[$tmp['theme']][$tmp['template']] = array('main' => $tmp['main_label'], 'blocks' => array());
+							if(!array_key_exists($tmp['template'], $templ33t_map[$tmp['theme']])) {
+								$templ33t_map[$tmp['theme']][$tmp['template']] = array(
+									'main' => $tmp['main_label'],
+									'main_description' => $tmp['main_description'],
+									'blocks' => array()
+								);
+							}
 
 							// add block to map
-							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = $tmp['block_name'];
+							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = array('label' => $tmp['block_name'], 'description' => $tmp['block_description']);
 
 						}
 					}
@@ -688,11 +698,11 @@ function templ33t_handle_settings() {
 
 					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme']);
 
-				} else {
+				//} else {
 
-					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=nopub');
+				//	wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=nopub');
 
-				}
+				//}
 				break;
 
 			// return error on invalid action
@@ -743,7 +753,7 @@ function templ33t_settings() {
 	$theme_count = count($themes);
 
 	// select theme
-	if(isset($_GET['theme'])) {
+	if(isset($_GET['theme']) && !empty($_GET['theme'])) {
 		$theme_selected = htmlspecialchars($_GET['theme'], ENT_QUOTES);
 	} else {
 		$theme_selected = get_template();
@@ -975,12 +985,14 @@ function templ33t_handle_meta() {
 							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
 							$templ33t_meta[$slug] = array(
 								'id' => $meta_id[0],
-								'label' => $block,
+								'label' => $block['label'],
+								'description' => $block['description'],
 								'value' => '',
 							);
 						}
 					} else {
-						$templ33t_meta[$slug]['label'] = $block;
+						$templ33t_meta[$slug]['label'] = $block['label'];
+						$templ33t_meta[$slug]['description'] = $block['description'];
 					}
 				}
 
@@ -1004,12 +1016,13 @@ function templ33t_handle_meta() {
 							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
 							$templ33t_meta[$slug] = array(
 								'id' => $meta_id[0],
-								'label' => $block,
+								'label' => $block['label'],
 								'value' => '',
 							);
 						}
 					} else {
-						$templ33t_meta[$slug]['label'] = $block;
+						$templ33t_meta[$slug]['label'] = $block['label'];
+						$templ33t_meta[$slug]['description'] = $block['description'];
 					}
 				}
 			
@@ -1154,8 +1167,12 @@ function templ33t_js_obj() {
 
 		$arr = array();
 		foreach($templ33t_templates as $template => $config) {
+			$labels = array();
+			foreach($config['blocks'] as $key => $val) {
+				$labels[] = $val['label'];
+			}
 			$str = '"'.$template.'": {main: "'.htmlspecialchars($config['main'], ENT_QUOTES).'", blocks: ['
-				.(!empty($config['blocks']) ? '"'.implode('", "', $config['blocks']).'"' : '').']}';
+				.(!empty($labels) ? '"'.implode('", "', $labels).'"' : '').']}';
 			$arr[] = $str;
 		}
 
@@ -1187,31 +1204,41 @@ function templ33t_elements() {
 	if($templ33t_render && !empty($templ33t_meta)) {
 
 		// grab main label
-		if(array_key_exists($post->page_template, $templ33t_templates))
+		if(array_key_exists($post->page_template, $templ33t_templates)) {
 			$main_label = $templ33t_templates[$post->page_template]['main'];
-		else
+			$main_desc = $templ33t_templates[$post->page_template]['main_description'];
+		} else {
 			$main_label = $templ33t_templates['ALL']['main'];
+			$main_desc = $templ33t_templates['ALL']['main_description'];
+		}
 
-		// output tab bar
-		echo '<div id="templ33t_control" style="display: none;"><ul>';
-		echo '<li id="templ33t_default" class="selected"><a href="" rel="default">'.$main_label.'</a><div id="templ33t_main_content"></div></li>';
+		// set up item lists
+		$tabs = '';
+		$descs = '';
 
-		// output template specific tabs
+		// grab template specific tabs
 		if(array_key_exists($post->page_template, $templ33t_templates)) {
 			foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
-				echo '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block.'</a></li>';
+				$tabs .= '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block['label'].'</a></li>';
+				$descs .= '<div class="templ33t_description templ33t_desc_'.$templ33t_meta[$slug]['id'].' templ33t_hidden"><p>'.$block['description'].'</p></div>';
 			}
 		}
 
-		// output theme-wide tabs
+		// grab theme-wide tabs
 		if(array_key_exists('ALL', $templ33t_templates)) {
 			foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
-				echo '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block.'</a></li>';
+				$tabs .= '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block['label'].'</a></li>';
+				$descs .= '<div class="templ33t_description templ33t_desc_'.$templ33t_meta[$slug]['id'].' templ33t_hidden"><p>'.$block['description'].'</p></div>';
 			}
 		}
 
-		// close tab bar
-		echo '</ul></div>';
+		// output tab bar & descriptions
+		echo '<div id="templ33t_control" style="display: none;"><ul>';
+		echo '<li id="templ33t_default" class="selected"><a href="" rel="default">'.$main_label.'</a><div id="templ33t_main_content"></div></li>';
+		echo $tabs;
+		echo '</ul></div><div id="templ33t_descriptions" style="display: none;"><div class="templ33t_description templ33t_desc_default"><p>'.$main_desc.'</p></div>';
+		echo $descs;
+		echo '</div>';
 		
 	}
 
