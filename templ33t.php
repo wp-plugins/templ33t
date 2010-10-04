@@ -389,7 +389,7 @@ function templ33t_init() {
 	} elseif(basename($_SERVER['PHP_SELF']) == $templ33t_menu_parent && $_GET['page'] == 'templ33t_settings') {
 
 		// add styles & scripts
-		add_action('admin_print_styles', 'templ33t_styles', 1);
+		add_action('admin_print_styles', 'templ33t_settings_styles', 1);
 		add_action('admin_print_scripts', 'templ33t_settings_scripts', 1);
 
 		// handle settings page post
@@ -453,7 +453,8 @@ function templ33t_handle_settings() {
 				$i_arr = array(
 					'theme' => $_POST['templ33t_theme'],
 					'template' => $_POST['templ33t_template'],
-					'main_label' => $_POST['templ33t_main_label']
+					'main_label' => $_POST['templ33t_main_label'],
+					'main_description' => array_key_exists('templ33t_main_description', $_POST) ? htmlspecialchars($_POST['templ33t_main_description'], ENT_QUOTES) : '',
 				);
 
 				// check for duplicates
@@ -523,6 +524,7 @@ function templ33t_handle_settings() {
 					'template_id' => $_POST['templ33t_template'],
 					'block_name' => $_POST['templ33t_block'],
 					'block_slug' => '',
+					'block_description' => array_key_exists('templ33t_block_description', $_POST) ? htmlspecialchars($_POST['templ33t_block_description'], ENT_QUOTES) : '',
 				);
 
 				// remove template definition if set to all
@@ -718,12 +720,23 @@ function templ33t_handle_settings() {
 }
 
 /**
+ * Enqueue css for settings page
+ */
+function templ33t_settings_styles() {
+
+	wp_enqueue_style('templ33t_styles');
+	wp_enqueue_style('thickbox');
+
+}
+
+/**
  * Enqueue js for settings page
  */
 function templ33t_settings_scripts() {
 
 	wp_deregister_script('jquery');
 	wp_register_script('jquery', 'http://code.jquery.com/jquery-1.4.2.min.js');
+	wp_enqueue_script('thickbox');
 	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 }
@@ -761,7 +774,7 @@ function templ33t_settings() {
 
 	// grab templates for selected theme
 	$templates = $wpdb->get_results(
-		'SELECT `templ33t_template_id`, `template`, `main_label`
+		'SELECT `templ33t_template_id`, `template`, `main_label`, `main_description`
 		FROM `'.$templates_table_name.'`
 		WHERE `theme` = "'.$theme_selected.'"',
 		ARRAY_A
@@ -848,13 +861,42 @@ function templ33t_settings() {
 			<div>
 
 				<div>
-					<form id="templ33t_new_template" method="post">
-						Add template: 
-						<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-						<input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" />
-						<input type="text" class="templ33t_main_label" name="templ33t_main_label" value="" size="30" />
-						<input type="submit" name="templ33t_new_template" value="Add Template" />
-					</form>
+
+					<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_template_container&modal=true" class="thickbox">Add Template</a>
+
+					<div id="templ33t_new_template_container" style="display: none; text-align: center;">
+						<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
+							<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
+
+							<h2>Add a Template File</h2>
+
+							<br/>
+
+							<table border="0" width="100%">
+								<tr>
+									<td><label for="templ33t_template">Template File Name: </label></td>
+									<td><input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" /></td>
+								</tr>
+								<tr>
+									<td><label for="templ33t_main_label">Main Tab Label: </label></td>
+									<td><input type="text" class="templ33t_main_label" name="templ33t_main_label" value="" size="30" /></td>
+								</tr>
+								<tr>
+									<td valign="top"><label for="templ33t_main_description">Main Tab Description: </label></td>
+									<td><textarea class="templ33t_main_description" name="templ33t_main_description"></textarea></td>
+								</tr>
+								<tr>
+									<td colspan="2" align="center">
+										<br/>
+										<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+										<input type="submit" name="templ33t_new_template" value="Add Template" />
+									</td>
+								</tr>
+							</table>
+
+						</form>
+					</div>
+
 				</div>
 
 				<hr/>
@@ -862,12 +904,40 @@ function templ33t_settings() {
 				<ul>
 					<li class="templ33t_all_box">
 						<div class="templ33t_right">
-							<form id="templ33t_all_block" method="post">
-								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-								<input type="hidden" name="templ33t_template" value="ALL" />
-								<input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" />
-								<input type="submit" name="templ33t_new_block" value="Add Block" />
-							</form>
+
+
+							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_all_block_container&modal=true" class="thickbox">Add Content Block</a>
+
+							<div id="templ33t_all_block_container" style="display: none; text-align: center;">
+								<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
+									<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
+									<input type="hidden" name="templ33t_template" value="ALL" />
+
+									<h2>Add a Theme-Wide Content Block</h2>
+
+									<p>This content block will be available to all templates within this theme.</p>
+
+									<table border="0" width="100%">
+										<tr>
+											<td><label for="templ33t_main_label">Content Block Label: </label></td>
+											<td><input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" /></td>
+										</tr>
+										<tr>
+											<td valign="top"><label for="templ33t_block_description">Content Block Description: </label></td>
+											<td><textarea class="templ33t_block_description" name="templ33t_block_description"></textarea></td>
+										</tr>
+										<tr>
+											<td colspan="2" align="center">
+												<br/>
+												<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+												<input type="submit" name="templ33t_new_block" value="Add Block" />
+											</td>
+										</tr>
+									</table>
+
+								</form>
+							</div>
+							
 						</div>
 						<h2>Theme Wide / All Templates</h2>
 						<hr/>
@@ -875,8 +945,10 @@ function templ33t_settings() {
 						<ul>
 							<?php foreach($block_map['ALL'] as $bkey => $bval) { ?>
 							<li>
-								<?php echo $bval['block_name']; ?> (<?php echo $bval['block_slug']; ?>)
 								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
+								<strong><?php echo $bval['block_name']; ?></strong> (<?php echo $bval['block_slug']; ?>)<br/>
+								<hr/>
+								<p><?php echo $bval['block_description'] ? $bval['block_description'] : 'No Description'; ?></p>
 							</li>
 							<?php } ?>
 						</ul>
@@ -887,23 +959,58 @@ function templ33t_settings() {
 					<?php if(!empty($templates)) { foreach($templates as $tkey => $tval) { ?>
 					<li class="templ33t_template_box">
 						<div class="templ33t_right">
-							<form id="templ33t_new_block" method="post">
-								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-								<input type="hidden" name="templ33t_template" value="<?php echo $tval['templ33t_template_id']; ?>" />
-								<input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" />
-								<input type="submit" name="templ33t_new_block" value="Add Block" />
-							</form>
+
+
+
+							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_block_container&modal=true" class="thickbox">Add Content Block</a>
+
+							<div id="templ33t_new_block_container" style="display: none; text-align: center;">
+								<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
+									<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
+									<input type="hidden" name="templ33t_template" value="<?php echo $tval['templ33t_template_id']; ?>" />
+
+									<h2>Add a Theme-Wide Content Block</h2>
+
+									<p>This content block will be available to all templates within this theme.</p>
+
+									<table border="0" width="100%">
+										<tr>
+											<td><label for="templ33t_main_label">Content Block Label: </label></td>
+											<td><input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" /></td>
+										</tr>
+										<tr>
+											<td valign="top"><label for="templ33t_block_description">Content Block Description: </label></td>
+											<td><textarea class="templ33t_block_description" name="templ33t_block_description"></textarea></td>
+										</tr>
+										<tr>
+											<td colspan="2" align="center">
+												<br/>
+												<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+												<input type="submit" name="templ33t_new_block" value="Add Block" />
+											</td>
+										</tr>
+									</table>
+
+								</form>
+							</div>
+
+
+
 						</div>
 						<h2><?php echo $tval['template']; ?></h2>
 						<hr/>
 						<ul>
 							<li>
-								<?php echo $tval['main_label']; ?> (main content label)
+								<strong><?php echo $tval['main_label']; ?></strong> - main content label
+								<hr/>
+								<p><?php echo $tval['main_description'] ? $tval['main_description'] : 'No Description'; ?></p>
 							</li>
 							<?php if(array_key_exists($tval['templ33t_template_id'], $block_map) && !empty($block_map[$tval['templ33t_template_id']])) { foreach($block_map[$tval['templ33t_template_id']] as $bkey => $bval) { ?>
 							<li>
-								<?php echo $bval['block_name']; ?> (<?php echo $bval['block_slug']; ?>)
 								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
+								<strong><?php echo $bval['block_name']; ?></strong> (<?php echo $bval['block_slug']; ?>)<br/>
+								<hr/>
+								<p><?php echo $bval['block_description'] ? $bval['block_description'] : 'No Description'; ?></p>
 							</li>
 							<?php } } ?>
 						</ul>
