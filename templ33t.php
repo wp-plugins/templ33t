@@ -1387,8 +1387,10 @@ function templ33t_elements() {
  * @global array $templ33t_available
  * @global object $post
  * @param string $block
+ * @param string $before
+ * @param string $after
  */
-function templ33t_block($block = null) {
+function templ33t_block($block = null, $before = null, $after = null) {
 
 	global $templ33t_available, $templ33t_meta, $post;
 
@@ -1401,9 +1403,9 @@ function templ33t_block($block = null) {
 	// output block if exists
 	if(array_key_exists('templ33t_'.$block, $templ33t_available)) {
 		if(is_array($templ33t_available['templ33t_'.$block]))
-			echo apply_filters('the_content', $templ33t_available['templ33t_'.$block][0]);
+			echo apply_filters('the_content', $before.$templ33t_available['templ33t_'.$block][0].$after);
 		else
-			echo apply_filters('the_content', $templ33t_available['templ33t_'.$block]);
+			echo apply_filters('the_content', $before.$templ33t_available['templ33t_'.$block].$after);
 	}
 
 }
