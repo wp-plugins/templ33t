@@ -1090,16 +1090,18 @@ function templ33t_handle_meta() {
 		// grab meta
 		$meta = has_meta($post->ID);
 
-		// filter out unrelated
-		foreach($meta as $key => $val) {
-			if(strpos($val['meta_key'], 'templ33t_') !== false) {
-				$slug = str_replace('templ33t_', '', $val['meta_key']);
-				$bdata = array(
-					'id' => $val['meta_id'],
-					'label' => '',
-					'value' => $val['meta_value']
-				);
-				$templ33t_meta[$slug] = $bdata;
+		if(!empty($meta)) {
+			// filter out unrelated
+			foreach($meta as $key => $val) {
+				if(strpos($val['meta_key'], 'templ33t_') !== false) {
+					$slug = str_replace('templ33t_', '', $val['meta_key']);
+					$bdata = array(
+						'id' => $val['meta_id'],
+						'label' => '',
+						'value' => $val['meta_value']
+					);
+					$templ33t_meta[$slug] = $bdata;
+				}
 			}
 		}
 
