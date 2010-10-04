@@ -1074,7 +1074,7 @@ function templ33t_handle_meta() {
 		}
 
 		// set default page filename
-		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = 'page.php';
+		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = basename(get_page_template());
 
 		// check for template definition and create any non-existent blocks
 		if(array_key_exists($post->page_template, $templ33t_templates) && !empty($templ33t_templates[$post->page_template]['blocks'])) {
@@ -1161,8 +1161,8 @@ function templ33t_add_comment($content = null) {
 	if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
 
 		// get template from post
-		$template = array_key_exists('page_template', $_POST) && !empty($_POST['page_template']) ? $_POST['page_template'] : 'page.php';
-		if($template == 'default') $template = 'page.php';
+		$template = array_key_exists('page_template', $_POST) && !empty($_POST['page_template']) ? $_POST['page_template'] : basename(get_page_template());
+		if($template == 'default') $template = basename(get_page_template());
 
 		$blocks = array();
 
