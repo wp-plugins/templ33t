@@ -347,7 +347,7 @@ function templ33t_menu() {
  */
 function templ33t_init() {
 
-	global $templ33t_multisite, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_db_version, $templ33t_tab_pages, $templ33t_templates, $wpdb;
+	global $templ33t_multisite, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_db_version, $templ33t_tab_pages, $templ33t_templates, $user_ID, $wpdb, $wp_version;
 
 	// register styles & scripts
 	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
@@ -372,10 +372,40 @@ function templ33t_init() {
 		add_filter('content_save_pre', 'templ33t_add_comment', 10);
 		add_action('edit_page_form', 'templ33t_elements', 1);
 
-		// set table names
-		$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
-		$template_table_name = $the_prefix.'templ33t_templates';
-		$block_table_name = $the_prefix.'templ33t_blocks';
+		// create new page with forced template if from_template passed
+		if(in_array(basename($_SERVER['PHP_SELF']), array('page-new.php', 'post-new.php')) && array_key_exists('from_template', $_GET)) {
+
+			$has_title = (array_key_exists('post_title', $_POST) && !empty($_POST['post_title']));
+			$has_template = (array_key_exists('page_template', $_POST) && !empty($_POST['page_template']));
+
+			if($has_title && $has_template) {
+
+				// post data
+				$insert = array(
+					'post_type' => 'page',
+					'post_title' => $_POST['post_title'],
+					'post_content' => '',
+					'post_status' => 'draft',
+					'post_author' => $user_ID,
+				);
+
+				// save post as draft
+				$new_post = wp_insert_post($insert);
+
+				if($new_post > 0) {
+
+					// set template
+					update_post_meta($new_post, '_wp_page_template', $_POST['page_template']);
+
+					// redirect to edit page
+					$redirect_to = $wp_version{0} < 3 ? 'page.php?action=edit&post='.$new_post : 'post.php?action=edit&post='.$new_post;
+					wp_redirect($redirect_to);
+
+				}
+
+			}
+
+		}
 
 		// grab theme name
 		$theme = get_template();
@@ -962,9 +992,9 @@ function templ33t_settings() {
 
 
 
-							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_block_container&modal=true" class="thickbox">Add Content Block</a>
+							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_block_container_<?php echo $tval['templ33t_template_id']; ?>&modal=true" class="thickbox">Add Content Block</a>
 
-							<div id="templ33t_new_block_container" style="display: none; text-align: center;">
+							<div id="templ33t_new_block_container_<?php echo $tval['templ33t_template_id']; ?>" style="display: none; text-align: center;">
 								<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
 									<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
 									<input type="hidden" name="templ33t_template" value="<?php echo $tval['templ33t_template_id']; ?>" />

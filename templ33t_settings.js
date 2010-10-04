@@ -6,13 +6,13 @@ jQuery(document).ready(
 		jQuery('form#templ33t_new_template').submit(
 			function() {
 
-				if(jQuery('input.templ33t_template').val() == 'mytemplate.php')
+				if(jQuery('input.templ33t_template').hasClass('templ33t_light') && jQuery('input.templ33t_template').val() == 'mytemplate.php')
 					jQuery('input.templ33t_template').val('');
 
-				if(jQuery('input.templ33t_main_label').val() == 'Main Content')
+				if(jQuery('input.templ33t_main_label').hasClass('templ33t_light') && jQuery('input.templ33t_main_label').val() == 'Main Content')
 					jQuery('input.templ33t_main_label').val('');
 
-				if(jQuery('input.templ33t_main_description').val() == 'This is the main content section.')
+				if(jQuery('input.templ33t_main_description').hasClass('templ33t_light') && jQuery('input.templ33t_main_description').val() == 'This is the main content section.')
 					jQuery('input.templ33t_main_description').val('');
 
 			}
@@ -21,10 +21,10 @@ jQuery(document).ready(
 		jQuery('form#templ33t_all_block').submit(
 			function() {
 
-				if(jQuery('form#templ33t_all_block input.templ33t_block').val() == 'My Custom Area')
+				if(jQuery('form#templ33t_all_block input.templ33t_block').hasClass('templ33t_light') && jQuery('form#templ33t_all_block input.templ33t_block').val() == 'My Custom Area')
 					jQuery('form#templ33t_all_block input.templ33t_block').val('');
 
-				if(jQuery('input.templ33t_block_description').val() == 'Content entered here will be displayed in a custom block.')
+				if(jQuery('input.templ33t_block_description').hasClass('templ33t_light') && jQuery('input.templ33t_block_description').val() == 'Content entered here will be displayed in a custom block.')
 					jQuery('input.templ33t_block_description').val('');
 
 			}
@@ -33,10 +33,10 @@ jQuery(document).ready(
 		jQuery('form#templ33t_new_block').submit(
 			function() {
 
-				if(jQuery('form#templ33t_new_block input.templ33t_block').val() == 'My Custom Area')
+				if(jQuery('form#templ33t_new_block input.templ33t_block').hasClass('templ33t_light') && jQuery('form#templ33t_new_block input.templ33t_block').val() == 'My Custom Area')
 					jQuery('form#templ33t_new_block input.templ33t_block').val('');
 
-				if(jQuery('input.templ33t_block_description').val() == 'Content entered here will be displayed in a custom block.')
+				if(jQuery('input.templ33t_block_description').hasClass('templ33t_light') && jQuery('input.templ33t_block_description').val() == 'Content entered here will be displayed in a custom block.')
 					jQuery('input.templ33t_block_description').val('');
 
 			}
