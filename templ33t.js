@@ -107,6 +107,8 @@ function templ33t_placeControl() {
 	jQuery('div#templ33t_control').show();
 	jQuery('#postdivrich').before(jQuery('div#templ33t_descriptions'));
 	jQuery('div#templ33t_descriptions').show();
+	jQuery('#postdivrich').before(jQuery('div#templ33t_editors'));
+	jQuery('div#templ33t_editors').show();
 
 }
 
@@ -123,12 +125,14 @@ function templ33t_hideCustomFields() {
 
 				if(jQuery('tr#meta-'+erel).length){
 
-					jQuery('tr#meta-'+erel+' textarea').addClass('templ33t_val_'+erel);
-					jQuery('tr#meta-'+erel).addClass('templ33t_cf').hide();
+					//jQuery('tr#meta-'+erel+' textarea').addClass('templ33t_val_'+erel);
+					//jQuery('tr#meta-'+erel).addClass('templ33t_cf').hide();
+
+					jQuery('tr#meta-'+erel).remove();
 
 				} else {
 
-					jQuery(this).after('<input type="hidden" class="templ33t_val_'+erel+'" name="meta['+erel+'][value]" value="" />');
+					//jQuery(this).after('<input type="hidden" class="templ33t_val_'+erel+'" name="meta['+erel+'][value]" value="" />');
 					
 				}
 
@@ -187,4 +191,27 @@ function templ33t_cleanup() {
 
 	}
 	
+}
+
+var templ33t_editor_focus;
+
+function send_to_templ33t_field(h) {
+	
+	if ( templ33t_editor_focus ) ed = templ33t_editor_focus;
+	else if ( typeof tinyMCE == "undefined" ) ed = document.getElementById('content');
+	else { ed = tinyMCE.get('content');}
+	if ( typeof tinyMCE != 'undefined') {
+		ed.focus();
+		//if (tinymce.isIE)
+			//ed.selection.moveToBookmark(tinymce.EditorManager.activeEditor.windowManager.bookmark);
+		if ( h.indexOf('[caption') != -1 )
+			h = ed.plugins.wpeditimage._do_shcode(h);
+		ed.execCommand('mceInsertContent', false, h);
+	} else {
+		if ( templ33t_editor_focus ) edInsertContent(templ33t_editor_focus, h);
+		else edInsertContent(edCanvas, h);
+	}
+	tb_remove();
+	templ33t_editor_focus = undefined;
+
 }

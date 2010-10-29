@@ -39,9 +39,43 @@ Author URI: http://www.totallyryan.com
 */
 
 /**
- * Url path to plugin assets
+ * Backward Compatible Paths
  */
-define ('TEMPL33T_ASSETS', WP_PLUGIN_URL.'/templ33t/');
+if ( ! function_exists( 'is_ssl' ) ) {
+	function is_ssl() {
+		if ( isset($_SERVER['HTTPS']) ) {
+			if ( 'on' == strtolower($_SERVER['HTTPS']) )
+				return true;
+			if ( '1' == $_SERVER['HTTPS'] )
+				return true;
+		} elseif ( isset($_SERVER['SERVER_PORT']) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
+			return true;
+		}
+		return false;
+	}
+}
+if ( version_compare( get_bloginfo( 'version' ) , '3.0' , '<' ) && is_ssl() ) {
+	$wp_content_url = str_replace( 'http://' , 'https://' , get_option( 'siteurl' ) );
+} else {
+	$wp_content_url = get_option( 'siteurl' );
+}
+$wp_content_url .= '/wp-content';
+$wp_content_dir = ABSPATH . 'wp-content';
+$wp_plugin_url = $wp_content_url . '/plugins';
+$wp_plugin_dir = $wp_content_dir . '/plugins';
+$wpmu_plugin_url = $wp_content_url . '/mu-plugins';
+$wpmu_plugin_dir = $wp_content_dir . '/mu-plugins';
+
+/**
+ * Paths to plugin assets
+ */
+define ('TEMPL33T_ASSETS_URL', $wp_content_url.'/plugins/templ33t/');
+define ('TEMPL33T_ASSETS_DIR', $wp_content_dir.'/plugins/templ33t/');
+
+/**
+ * require templ33t object
+ */
+require_once(TEMPL33T_ASSETS_DIR . 'templ33t_object.php');
 
 /**
  * Database version
@@ -81,6 +115,11 @@ $templ33t_meta = array();
  * from fetching meta data multiple times.
  */
 $templ33t_meta_fetched = false;
+
+/**
+ * Array of templ33t plugins to load for this request
+ */
+$templ33t_plugins = array();
 
 /**
  * Boolean value checked before rendering templ33t scripts/elements
@@ -214,6 +253,7 @@ function templ33t_install() {
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
+			`block_type` varchar(30) DEFAULT NULL,
 			`block_description` text NULL,
 			PRIMARY KEY  (`templ33t_block_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
@@ -256,6 +296,7 @@ function templ33t_install() {
 			`template_id` int(11) DEFAULT NULL,
 			`block_name` varchar(30) DEFAULT NULL,
 			`block_slug` varchar(30) DEFAULT NULL,
+			`block_type` varchar(30) DEFAULT NULL,
 			`block_description` text NULL,
 			PRIMARY KEY  (`templ33t_block_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
@@ -278,7 +319,7 @@ function templ33t_uninstall() {
 
 	global $templ33t_multisite, $wpdb;
 
-	// make sure uninstall only happens from main site
+	// make sure uninstall only happens from last site
 	$uninstall = true;
 
 	if($templ33t_multisite) {
@@ -350,9 +391,9 @@ function templ33t_init() {
 	global $templ33t_multisite, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_db_version, $templ33t_tab_pages, $templ33t_templates, $user_ID, $wpdb, $wp_version;
 
 	// register styles & scripts
-	wp_register_style('templ33t_styles', TEMPL33T_ASSETS.'templ33t.css');
-	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS.'templ33t.js');
-	wp_register_script('templ33t_settings_scripts', TEMPL33T_ASSETS.'templ33t_settings.js');
+	wp_register_style('templ33t_styles', TEMPL33T_ASSETS_URL.'templ33t.css');
+	wp_register_script('templ33t_scripts', TEMPL33T_ASSETS_URL.'templ33t.js');
+	wp_register_script('templ33t_settings_scripts', TEMPL33T_ASSETS_URL.'templ33t_settings.js');
 
 	// check db version or create tables if no version
 	$installed_version = templ33t_get_option('templ33t_db_version');
@@ -425,6 +466,10 @@ function templ33t_init() {
 		// handle settings page post
 		templ33t_handle_settings();
 
+	} elseif(basename($_SERVER['PHP_SELF']) == 'media-upload.php') {
+
+		add_filter( 'media_send_to_editor', 'templ33t_intercept_media', 15 );
+
 	}
 
 }
@@ -435,7 +480,7 @@ function templ33t_init() {
  */
 function templ33t_handle_settings() {
 
-	global $templ33t_menu_parent, $templ33t_settings_url, $wpdb;
+	global $templ33t_menu_parent, $templ33t_settings_url, $wpdb, $wp_content_dir;
 
 	$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
 	$template_table_name = $the_prefix . 'templ33t_templates';
@@ -451,7 +496,7 @@ function templ33t_handle_settings() {
 			$required = array(
 				'templ33t_theme',
 				'templ33t_template',
-				'templ33t_main_label',
+				//'templ33t_main_label',
 			);
 
 			$errors = array();
@@ -465,7 +510,9 @@ function templ33t_handle_settings() {
 				}
 			}
 
-			if(!file_exists(WP_CONTENT_DIR . '/themes/' . $_POST['templ33t_theme'] . '/' . $_POST['templ33t_template']))
+			$tfile = $wp_content_dir . '/themes/' . $_POST['templ33t_theme'] . '/' . $_POST['templ33t_template'];
+			
+			if(!file_exists($tfile))
 				$errors[] = 'notemp';
 
 			if(!empty($errors)) {
@@ -479,12 +526,17 @@ function templ33t_handle_settings() {
 
 			} else {
 
+				// grab templ33t config
+				$templ33t = new Templ33t;
+				$config = $templ33t->parseTemplate($tfile);
+
+
 				// set up insert array
 				$i_arr = array(
 					'theme' => $_POST['templ33t_theme'],
 					'template' => $_POST['templ33t_template'],
-					'main_label' => $_POST['templ33t_main_label'],
-					'main_description' => array_key_exists('templ33t_main_description', $_POST) ? htmlspecialchars($_POST['templ33t_main_description'], ENT_QUOTES) : '',
+					'main_label' => $config['main'],
+					'main_description' => $config['description'],
 				);
 
 				// check for duplicates
@@ -497,6 +549,28 @@ function templ33t_handle_settings() {
 						$template_table_name,
 						$i_arr
 					);
+					
+					$tid = $wpdb->get_var('SELECT LAST_INSERT_ID() FROM '.$template_table_name.' LIMIT 1');
+
+					foreach($config['blocks'] as $key => $val) {
+
+						// set up insert array
+						$i_arr = array(
+							'theme' => $_POST['templ33t_theme'],
+							'template_id' => $tid,
+							'block_name' => $val['title'],
+							'block_slug' => $key,
+							'block_type' => $val['type'],
+							'block_description' => $val['description'],
+						);
+
+						// save block
+						$insert = $wpdb->insert(
+							$block_table_name,
+							$i_arr
+						);
+
+					}
 
 					// update map dev version
 					$t_dev = templ33t_get_option('templ33t_map_dev');
@@ -719,7 +793,11 @@ function templ33t_handle_settings() {
 							}
 
 							// add block to map
-							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = array('label' => $tmp['block_name'], 'description' => $tmp['block_description']);
+							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = array(
+								'type' => $tmp['block_type'],
+								'label' => $tmp['block_name'],
+								'description' => $tmp['block_description']
+							);
 
 						}
 					}
@@ -892,13 +970,13 @@ function templ33t_settings() {
 
 				<div>
 
-					<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_template_container&modal=true" class="thickbox">Add Template</a>
+					<a href="#TB_inline?width=400&height=180&inlineId=templ33t_new_template_container&modal=true" class="thickbox">Add Template</a>
 
 					<div id="templ33t_new_template_container" style="display: none; text-align: center;">
 						<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
 							<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
 
-							<h2>Add a Template File</h2>
+							<h2>Scan a Template File</h2>
 
 							<br/>
 
@@ -906,14 +984,6 @@ function templ33t_settings() {
 								<tr>
 									<td><label for="templ33t_template">Template File Name: </label></td>
 									<td><input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" /></td>
-								</tr>
-								<tr>
-									<td><label for="templ33t_main_label">Main Tab Label: </label></td>
-									<td><input type="text" class="templ33t_main_label" name="templ33t_main_label" value="" size="30" /></td>
-								</tr>
-								<tr>
-									<td valign="top"><label for="templ33t_main_description">Main Tab Description: </label></td>
-									<td><textarea class="templ33t_main_description" name="templ33t_main_description"></textarea></td>
 								</tr>
 								<tr>
 									<td colspan="2" align="center">
@@ -1081,7 +1151,7 @@ function templ33t_settings() {
  */
 function templ33t_handle_meta() {
 
-	global $templ33t_meta, $templ33t_templates, $templ33t_meta_fetched, $templ33t_render, $post, $wpdb;
+	global $templ33t_meta, $templ33t_templates, $templ33t_meta_fetched, $templ33t_plugins, $templ33t_render, $post, $wpdb;
 
 	if(!$templ33t_meta_fetched) {
 
@@ -1097,6 +1167,7 @@ function templ33t_handle_meta() {
 					$slug = str_replace('templ33t_', '', $val['meta_key']);
 					$bdata = array(
 						'id' => $val['meta_id'],
+						'type' => '',
 						'label' => '',
 						'value' => $val['meta_value']
 					);
@@ -1108,7 +1179,10 @@ function templ33t_handle_meta() {
 		// set default page filename
 		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = basename(get_page_template());
 
-		// check for template definition and create any non-existent blocks
+		// set up plugins array
+		$templ33t_plugins = array();
+
+		// check for template definition, create any non-existent blocks, init block type plugins
 		if(array_key_exists($post->page_template, $templ33t_templates) && !empty($templ33t_templates[$post->page_template]['blocks'])) {
 
 			// check for template blocks
@@ -1124,15 +1198,40 @@ function templ33t_handle_meta() {
 							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
 							$templ33t_meta[$slug] = array(
 								'id' => $meta_id[0],
+								'type' => $block['type'],
 								'label' => $block['label'],
 								'description' => $block['description'],
 								'value' => '',
 							);
 						}
 					} else {
+						$templ33t_meta[$slug]['type'] = $block['type'];
 						$templ33t_meta[$slug]['label'] = $block['label'];
 						$templ33t_meta[$slug]['description'] = $block['description'];
 					}
+				}
+
+				// init plugins
+				foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
+
+					$cname = 'Templ33t'.ucwords($block['type']);
+
+					if(!in_array($cname, $templ33t_plugins)) {
+						$templ33t_plugins[] = $cname;
+						include_once(TEMPL33T_ASSETS_DIR . 'plugs/'.$block['type'].'/templ33t_' . $block['type'] . '.php');
+						if($cname::$load_js)
+							wp_register_script($cname, TEMPL33T_ASSETS_URL . 'plugs/'.$block['type'].'/templ33t_'.$block['type'].'.js');
+					}
+					
+					$instance = new $cname();
+					$instance->slug = $slug;
+					$instance->label = $block['label'];
+					$instance->description = $block['description'];
+					$instance->id = $templ33t_meta[$slug]['id'];
+					$instance->value = $templ33t_meta[$slug]['value'];
+					
+					$templ33t_templates[$post->page_template]['blocks'][$slug]['instance'] = $instance;
+
 				}
 
 			}
@@ -1155,14 +1254,39 @@ function templ33t_handle_meta() {
 							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
 							$templ33t_meta[$slug] = array(
 								'id' => $meta_id[0],
+								'type' => $block['type'],
 								'label' => $block['label'],
 								'value' => '',
 							);
 						}
 					} else {
+						$templ33t_meta[$slug]['type'] = $block['type'];
 						$templ33t_meta[$slug]['label'] = $block['label'];
 						$templ33t_meta[$slug]['description'] = $block['description'];
 					}
+				}
+
+				// init plugins
+				foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
+
+					$cname = 'Templ33t'.ucwords($block['type']);
+
+					if(!in_array($cname, $templ33t_plugins)) {
+						$templ33t_plugins[] = $cname;
+						include_once(TEMPL33T_ASSETS_DIR . 'plugs/'.$block['type'].'/templ33t_' . $block['type'] . '.php');
+						if($cname::$load_js)
+							wp_register_script($cname, TEMPL33T_ASSETS_URL . 'plugs/'.$block['type'].'/templ33t_'.$block['type'].'.js');
+					}
+					
+					$instance = new $cname();
+					$instance->slug = $slug;
+					$instance->label = $block['label'];
+					$instance->description = $block['description'];
+					$instance->id = $templ33t_meta[$slug]['id'];
+					$instance->value = $templ33t_meta[$slug]['value'];
+
+					$templ33t_templates['ALL']['blocks'][$slug]['instance'] = $instance;
+
 				}
 			
 			}
@@ -1280,13 +1404,18 @@ function templ33t_styles() {
  */
 function templ33t_scripts() {
 
-	global $post;
+	global $templ33t_plugins, $post;
 
 	wp_enqueue_script('templ33t_scripts');
 
 	wp_localize_script('templ33t_scripts', 'TL33T_current', array('template' => $post->page_template));
 
 	templ33t_js_obj();
+
+	foreach($templ33t_plugins as $key => $val) {
+		if($val::$load_js)
+			wp_enqueue_script($val);
+	}
 
 }
 
@@ -1354,12 +1483,19 @@ function templ33t_elements() {
 		// set up item lists
 		$tabs = '';
 		$descs = '';
-
+		$editors = '';
+		print_r($templ33t_meta);
 		// grab template specific tabs
 		if(array_key_exists($post->page_template, $templ33t_templates)) {
 			foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
-				$tabs .= '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block['label'].'</a></li>';
-				$descs .= '<div class="templ33t_description templ33t_desc_'.$templ33t_meta[$slug]['id'].' templ33t_hidden"><p>'.$block['description'].'</p></div>';
+
+				$instance = $block['instance'];
+
+				$tabs .= '<li><a href="#" rel="'.$instance->id.'">'.$instance->label.'</a></li>';
+				$descs .= '<div class="templ33t_description templ33t_desc_'.$instance->id.' templ33t_hidden"><p>'.$instance->description.'</p></div>';
+				$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor">';
+				$editors .= $instance->display();
+				$editors .'</div>';
 			}
 		}
 
@@ -1368,6 +1504,13 @@ function templ33t_elements() {
 			foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
 				$tabs .= '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block['label'].'</a></li>';
 				$descs .= '<div class="templ33t_description templ33t_desc_'.$templ33t_meta[$slug]['id'].' templ33t_hidden"><p>'.$block['description'].'</p></div>';
+				$editors .= '<div id="templ33t_editor_'.$templ33t_meta[$slug]['id'].'" class="templ33t_editor">';
+				if($block['type'] == 'editor') {
+					$editors .= '<textarea rows="10" class="theEditor" cols="40" name="content" tabindex="2" id="content"></textarea>';
+				} else {
+					$editors .= '<p>THIS BLOCK IS A: '.$block['type'].'</p>';
+				}
+				$editors .'</div>';
 			}
 		}
 
@@ -1377,9 +1520,28 @@ function templ33t_elements() {
 		echo $tabs;
 		echo '</ul></div><div id="templ33t_descriptions" style="display: none;"><div class="templ33t_description templ33t_desc_default"><p>'.$main_desc.'</p></div>';
 		echo $descs;
+		echo '</div><div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
+		echo $editors;
 		echo '</div>';
 		
 	}
+
+}
+
+/**
+ * Intercepts media
+ */
+function templ33t_intercept_media($html = null) {
+
+	$out =  '<script type="text/javascript">' . "\n" .
+			'	/* <![CDATA[ */' . "\n" .
+			'	var win = window.dialogArguments || opener || parent || top;' . "\n" .
+			'	win.send_to_templ33t_field("' . addslashes($html) . '");' . "\n" .
+			'/* ]]> */' . "\n" .
+			'</script>' . "\n";
+
+	echo $out;
+	exit();
 
 }
 
