@@ -202,8 +202,8 @@ function send_to_templ33t_field(h) {
 	else { ed = tinyMCE.get('content');}
 	if ( typeof tinyMCE != 'undefined') {
 		ed.focus();
-		//if (tinymce.isIE)
-			//ed.selection.moveToBookmark(tinymce.EditorManager.activeEditor.windowManager.bookmark);
+		if (tinymce.isIE)
+			ed.selection.moveToBookmark(tinymce.EditorManager.activeEditor.windowManager.bookmark);
 		if ( h.indexOf('[caption') != -1 )
 			h = ed.plugins.wpeditimage._do_shcode(h);
 		ed.execCommand('mceInsertContent', false, h);

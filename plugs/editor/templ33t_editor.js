@@ -13,7 +13,24 @@ jQuery(document).ready(
 				}
 			);
 
+			jQuery('div.templ33t_editor #media-buttons a').click(
+				function(){
+
+					templ33t_editor_focus = tinyMCE.get(jQuery(this).parent().parent().parent().find('textarea').attr('id'));
+
+				}
+			);
+
+			jQuery('#postdivrich #media-buttons a').click(
+				function(){
+					
+					templ33t_editor_focus = null;
+
+				}
+			);
+
 		}
 
 	}
 );
+
