@@ -3,7 +3,7 @@
 class Templ33tVideo {
 
 	static $load_js = false;
-	static $custom_panel = false;
+	static $custom_panel = true;
 
 	var $slug;
 	var $label;
@@ -13,6 +13,12 @@ class Templ33tVideo {
 
 	function __construct() {
 		
+	}
+
+	function hasCustomPanel() {
+
+		return self::$custom_panel;
+
 	}
 
 	function display() {

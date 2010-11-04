@@ -147,33 +147,67 @@ function templ33t_hideCustomFields() {
 function templ33t_switchEditor() {
 
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
-	var ccontent = jQuery('#content_ifr').contents().find('body').html();
+	var tmode = jQuery('#content_ifr').length ? false : true;
+	var ccontent = tmode ? jQuery('textarea#content').text() : jQuery('#content_ifr').contents().find('body').html();
 	var nrel = jQuery(this).attr('rel');
 	var ncontent;
+	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
+	var tocustom;
+	if(jQuery(this).parent().index() > 0)
+		tocustom = TL33T_def[jQuery('select#page_template').val()].blocks[(jQuery(this).parent().index() - 1)].custom;
+	else
+		tocustom = false;
 
+	// store current tab value
 	if(crel == 'default') {
 		jQuery('div#templ33t_main_content').html(ccontent);
-	} else {
-		jQuery('.templ33t_val_'+crel).val(ccontent);
+	} else if(!fromcustom) {
+		jQuery('#templ33t_val_'+crel).val(ccontent);
 	}
 
+	// load new tab value
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
-		jQuery('#content_ifr').contents().find('body').html(ncontent);
-		jQuery('#editorcontainer textarea').text(ncontent);
+		if(tmode) {
+			jQuery('textarea#content').val(ncontent);
+		} else {
+			jQuery('textarea#content').val(ncontent);
+			jQuery('#content_ifr').contents().find('body').html(ncontent);
+		}
 	} else {
-		ncontent = jQuery('.templ33t_val_'+nrel).val();
-		jQuery('#content_ifr').contents().find('body').html(ncontent);
-		jQuery('#editorcontainer textarea').text(ncontent);
+		if(!tocustom) {
+			ncontent = jQuery('#templ33t_val_'+nrel).val();
+			if(tmode) {
+				jQuery('textarea#content').val(ncontent);
+			} else {
+				jQuery('textarea#content').val(ncontent);
+				jQuery('#content_ifr').contents().find('body').html(ncontent);
+			}
+		}
 	}
 
+	// hide all custom panels
+	jQuery('div.templ33t_editor').hide();
+
+	// set rel
 	jQuery('#postdivrich').attr('rel', nrel);
-	
+
 	jQuery('div#templ33t_control li.selected').removeClass('selected');
 	jQuery(this).parent().addClass('selected');
 
 	jQuery('div.templ33t_desc_'+crel).addClass('templ33t_hidden');
 	jQuery('div.templ33t_desc_'+nrel).removeClass('templ33t_hidden');
+
+	if(!tocustom) {
+
+		jQuery('#postdivrich').show();
+
+	} else {
+		
+		jQuery('#postdivrich').hide();
+		jQuery('div#templ33t_editor_'+nrel).show();
+
+	}
 
 	return false;
 

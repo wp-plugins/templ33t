@@ -1435,12 +1435,12 @@ function templ33t_js_obj() {
 
 		$arr = array();
 		foreach($templ33t_templates as $template => $config) {
-			$labels = array();
+			$blocks = array();
 			foreach($config['blocks'] as $key => $val) {
-				$labels[] = $val['label'];
+				$blocks[] = '{label: "'.$val['label'].'", custom: '.($val['instance']->hasCustomPanel() ? 'true' : 'false').'}';
 			}
 			$str = '"'.$template.'": {main: "'.htmlspecialchars($config['main'], ENT_QUOTES).'", blocks: ['
-				.(!empty($labels) ? '"'.implode('", "', $labels).'"' : '').']}';
+				.(!empty($blocks) ? implode(', ', $blocks) : '').']}';
 			$arr[] = $str;
 		}
 
@@ -1493,9 +1493,14 @@ function templ33t_elements() {
 
 				$tabs .= '<li><a href="#" rel="'.$instance->id.'">'.$instance->label.'</a></li>';
 				$descs .= '<div class="templ33t_description templ33t_desc_'.$instance->id.' templ33t_hidden"><p>'.$instance->description.'</p></div>';
-				$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor">';
-				$editors .= $instance->display();
-				$editors .'</div>';
+
+				if($instance->hasCustomPanel()) {
+					$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor" style="display: none;">';
+					$editors .= $instance->display();
+					$editors .= '</div>';
+				} else {
+					$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor templ33t_hidden"><input type="hidden" name="meta['.$instance->id.'][key]" value="templ33t_'.$instance->slug.'" /><textarea id="templ33t_val_'.$instance->id.'" name="meta['.$instance->id.'][value]">'.$instance->value.'</textarea></div>';
+				}
 			}
 		}
 

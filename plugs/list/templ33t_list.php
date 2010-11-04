@@ -3,7 +3,7 @@
 class Templ33tList {
 
 	static $load_js = false;
-	static $custom_panel = false;
+	static $custom_panel = true;
 
 	var $slug;
 	var $label;
@@ -12,6 +12,12 @@ class Templ33tList {
 	var $value;
 
 	function __construct() {
+
+	}
+
+	function hasCustomPanel() {
+
+		return self::$custom_panel;
 
 	}
 

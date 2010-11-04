@@ -3,7 +3,7 @@
 class Templ33tEditor {
 
 	static $load_js = true;
-	static $custom_panel = true;
+	static $custom_panel = false;
 
 	var $slug;
 	var $label;
@@ -15,26 +15,37 @@ class Templ33tEditor {
 
 		
 	}
+
+	function hasCustomPanel() {
+
+		return self::$custom_panel;
+
+	}
 	
 	function display() {
 
-
-		$str = '';
-
-		$str .= '
+		$str = '
 			<div class="editor-toolbar">
-				<div class="zerosize"><input accesskey="e" type="button" onclick="switchEditors.go(\'templ33t_editor_editor_'.$this->id.'\')"></div>
-					<a id="edButtonHTML" class="hide-if-no-js" onclick="switchEditors.go(\'templ33t_editor_editor_'.$this->id.'\', \'html\');">HTML</a>
-					<a id="edButtonPreview" class="active hide-if-no-js" onclick="switchEditors.go(\'templ33t_editor_editor_'.$this->id.'\', \'tinymce\');">Visual</a>
+				<div class="zerosize"><input accesskey="e" type="button" onclick="templ33tSwitchEditors(\''.$this->id.'\', null)"></div>
+					<a id="edButtonHTML'.$this->id.'" class="hide-if-no-js" onclick="templ33tSwitchEditors(\''.$this->id.'\', \'html\');">HTML</a>
+					<a id="edButtonPreview'.$this->id.'" class="active hide-if-no-js" onclick="templ33tSwitchEditors(\''.$this->id.'\', \'tinymce\');">Visual</a>
 				<div id="media-buttons" class="hide-if-no-js">';
 		
 		ob_start();
 		media_buttons();
 		$str .= ob_get_clean();
-		
+
+		$str .= '
+			<div id="quicktags" class="templ33t_editor_quicktags_'.$this->id.'">
+			<script type="text/javascript">templ33tEdToolbar(\''.$this->id.'\');</script>
+			</div>
+		';
+
+
 		$str .= '		</div>
 			</div>
-			<textarea rows="10" id="templ33t_editor_editor_'.$this->id.'" class="templ33t_editor_editor" cols="40" name="meta['.$this->id.'][value]" tabindex="2" id=""></textarea>
+			<input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_'.$this->slug.'" />
+			<textarea rows="10" id="templ33t_editor_editor_'.$this->id.'" class="templ33t_editor_editor" cols="40" name="meta['.$this->id.'][value]" tabindex="2" id="">'.$this->value.'</textarea>
 		';
 		
 		return $str;
