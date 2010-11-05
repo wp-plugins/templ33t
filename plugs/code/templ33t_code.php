@@ -22,9 +22,9 @@ class Templ33tCode {
 	}
 
 	function display() {
-
-		return '<p>THIS IS A CODE EDITOR</p>';
-
+		
+		return '<input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_'.$this->slug.'"><textarea name="meta['.$this->id.'][value]">'.$this->value.'</textarea>';
+		
 	}
 
 }

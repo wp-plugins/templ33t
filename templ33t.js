@@ -169,18 +169,18 @@ function templ33t_switchEditor() {
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
 		if(tmode) {
-			jQuery('textarea#content').val(ncontent);
+			jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
 		} else {
-			jQuery('textarea#content').val(ncontent);
+			jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
 			jQuery('#content_ifr').contents().find('body').html(ncontent);
 		}
 	} else {
 		if(!tocustom) {
 			ncontent = jQuery('#templ33t_val_'+nrel).val();
 			if(tmode) {
-				jQuery('textarea#content').val(ncontent);
+				jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
 			} else {
-				jQuery('textarea#content').val(ncontent);
+				jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
 				jQuery('#content_ifr').contents().find('body').html(ncontent);
 			}
 		}
