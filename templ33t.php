@@ -1408,8 +1408,6 @@ function templ33t_scripts() {
 
 	wp_enqueue_script('templ33t_scripts');
 
-	wp_localize_script('templ33t_scripts', 'TL33T_current', array('template' => $post->page_template));
-
 	templ33t_js_obj();
 
 	foreach($templ33t_plugins as $key => $val) {
@@ -1426,9 +1424,12 @@ function templ33t_scripts() {
  */
 function templ33t_js_obj() {
 
-	global $templ33t_templates;
+	global $templ33t_templates, $templ33t_plugins, $post;
 
-	echo '<script type="text/javascript"> ';
+	echo '<script type="text/javascript">
+		/* <![CDATA[ */
+		var TL33T_current = { template: "'.$post->page_template.'" };
+		';
 
 	// output js template map
 	if(!empty($templ33t_templates)) {
@@ -1437,7 +1438,21 @@ function templ33t_js_obj() {
 		foreach($templ33t_templates as $template => $config) {
 			$blocks = array();
 			foreach($config['blocks'] as $key => $val) {
-				$blocks[] = '{label: "'.$val['label'].'", custom: '.($val['instance']->hasCustomPanel() ? 'true' : 'false').'}';
+
+				// create instance if non existent
+				$cname = null;
+				if(!array_key_exists('instance', $val)) {
+					$cname = 'Templ33t'.ucwords($val['type']);
+					if(!in_array($cname, $templ33t_plugins)) {
+						$templ33t_plugins[] = $cname;
+						include_once(TEMPL33T_ASSETS_DIR . 'plugs/'.$val['type'].'/templ33t_' . $val['type'] . '.php');
+						if($post->page_template == $template && $cname::$load_js)
+							wp_register_script($cname, TEMPL33T_ASSETS_URL . 'plugs/'.$val['type'].'/templ33t_'.$val['type'].'.js');
+					}
+				}
+
+				$blocks[] = '{label: "'.$val['label'].'", custom: '.(!empty($cname) ? ($cname::$custom_panel ? 'true' : 'false') : ($val['instance']->hasCustomPanel() ? 'true' : 'false')).'}';
+				
 			}
 			$str = '"'.$template.'": {main: "'.htmlspecialchars($config['main'], ENT_QUOTES).'", blocks: ['
 				.(!empty($blocks) ? implode(', ', $blocks) : '').']}';
@@ -1453,7 +1468,9 @@ function templ33t_js_obj() {
 
 	}
 
-	echo '</script>';
+	echo '
+		/* ]]> */
+		</script>';
 
 }
 
