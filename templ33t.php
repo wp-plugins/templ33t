@@ -530,13 +530,11 @@ function templ33t_handle_settings() {
 				$templ33t = new Templ33t;
 				$config = $templ33t->parseTemplate($tfile);
 
-
 				// set up insert array
 				$i_arr = array(
 					'theme' => $_POST['templ33t_theme'],
 					'template' => $_POST['templ33t_template'],
-					'main_label' => $config['main'],
-					'main_description' => $config['description'],
+					'config' => serialize($config),
 				);
 
 				// check for duplicates
@@ -549,7 +547,7 @@ function templ33t_handle_settings() {
 						$template_table_name,
 						$i_arr
 					);
-					
+					/*
 					$tid = $wpdb->get_var('SELECT LAST_INSERT_ID() FROM '.$template_table_name.' LIMIT 1');
 
 					foreach($config['blocks'] as $key => $val) {
@@ -571,7 +569,7 @@ function templ33t_handle_settings() {
 						);
 
 					}
-
+					*/
 					// update map dev version
 					$t_dev = templ33t_get_option('templ33t_map_dev');
 					$t_dev++;
@@ -759,9 +757,8 @@ function templ33t_handle_settings() {
 
 				//if($pub < $dev) {
 
-					$template_sql = 'SELECT a.*, b.template, b.main_label, b.main_description
-						FROM `'.$block_table_name.'` as a
-						LEFT JOIN `'.$template_table_name.'` as b ON (a.template_id = b.templ33t_template_id)';
+
+					$template_sql = 'SELECT `theme`, `template`, `config` FROM `'.$template_table_name.'`';
 
 					// grab templates from the database
 					$templates = $wpdb->get_results($template_sql, ARRAY_A);
@@ -771,11 +768,12 @@ function templ33t_handle_settings() {
 					// map templates and blocks
 					if(!empty($templates)) {
 						foreach($templates as $tmp) {
-
+							
 							// add theme to map
 							if(!array_key_exists($tmp['theme'], $templ33t_map))
 								$templ33t_map[$tmp['theme']] = array();
 
+							/*
 							// fill out default data for theme-wide blocks
 							if(empty($tmp['template'])) {
 								$tmp['template'] = 'ALL';
@@ -798,6 +796,10 @@ function templ33t_handle_settings() {
 								'label' => $tmp['block_name'],
 								'description' => $tmp['block_description']
 							);
+							*/
+
+							// add template
+							$templ33t_map[$tmp['theme']][$tmp['template']] = unserialize($tmp['config']);
 
 						}
 					}
@@ -880,6 +882,7 @@ function templ33t_settings() {
 		$theme_selected = get_template();
 	}
 
+	/*
 	// grab templates for selected theme
 	$templates = $wpdb->get_results(
 		'SELECT `templ33t_template_id`, `template`, `main_label`, `main_description`
@@ -912,7 +915,25 @@ function templ33t_settings() {
 
 		}
 	}
+	*/
 
+	// grab templates for selected theme
+	$templates = $wpdb->get_results(
+		'SELECT `templ33t_template_id`, `template`, `config`
+		FROM `'.$templates_table_name.'`
+		WHERE `theme` = "'.$theme_selected.'"',
+		ARRAY_A
+	);
+
+	// unserialize template config
+	if(!empty($templates)) {
+		foreach($templates as $key => $val) {
+			$templates[$key]['config'] = unserialize($val['config']);
+		}
+	}
+
+	//die(print_r($templates, true));
+	
 	// parse error message
 	$error = null;
 	if(isset($_GET['error'])) {
@@ -1002,6 +1023,7 @@ function templ33t_settings() {
 				<hr/>
 
 				<ul>
+					<?php /*
 					<li class="templ33t_all_box">
 						<div class="templ33t_right">
 
@@ -1039,6 +1061,7 @@ function templ33t_settings() {
 							</div>
 							
 						</div>
+
 						<h2>Theme Wide / All Templates</h2>
 						<hr/>
 						<?php if(array_key_exists('ALL', $block_map) && !empty($block_map['ALL'])) { ?>
@@ -1056,12 +1079,15 @@ function templ33t_settings() {
 						<p>No Content Blocks</p>
 						<?php } ?>
 					</li>
+					*/ ?>
+
+					
 					<?php if(!empty($templates)) { foreach($templates as $tkey => $tval) { ?>
 					<li class="templ33t_template_box">
 						<div class="templ33t_right">
 
 
-
+							<!--
 							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_block_container_<?php echo $tval['templ33t_template_id']; ?>&modal=true" class="thickbox">Add Content Block</a>
 
 							<div id="templ33t_new_block_container_<?php echo $tval['templ33t_template_id']; ?>" style="display: none; text-align: center;">
@@ -1093,24 +1119,44 @@ function templ33t_settings() {
 
 								</form>
 							</div>
+							-->
 
-
+							<a href="<?php echo $templ33t_settings_url; ?>&t_action=rescan&tid=<?php echo $tval['templ33t_template_id']; ?>">Rescan Template Configuration</a>
 
 						</div>
 						<h2><?php echo $tval['template']; ?></h2>
 						<hr/>
+
+						<h4>Blocks</h4>
+
 						<ul>
 							<li>
-								<strong><?php echo $tval['main_label']; ?></strong> - main content label
+								<strong><?php echo $tval['config']['main']; ?></strong> - main content label
 								<hr/>
-								<p><?php echo $tval['main_description'] ? $tval['main_description'] : 'No Description'; ?></p>
+								<p><?php echo $tval['config']['description'] ? $tval['config']['description'] : 'No Description'; ?></p>
 							</li>
-							<?php if(array_key_exists($tval['templ33t_template_id'], $block_map) && !empty($block_map[$tval['templ33t_template_id']])) { foreach($block_map[$tval['templ33t_template_id']] as $bkey => $bval) { ?>
+							<?php if(!empty($tval['config']['blocks'])) { foreach($tval['config']['blocks'] as $bkey => $bval) { ?>
 							<li>
-								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
-								<strong><?php echo $bval['block_name']; ?></strong> (<?php echo $bval['block_slug']; ?>)<br/>
+								<div class="templ33t_right">
+									Type: <?php echo $bval['type']; ?>
+								</div>
+								<!-- <a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php //echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a> -->
+								<strong><?php echo $bval['label']; ?></strong> (<?php echo $bkey; ?>)<br/>
 								<hr/>
-								<p><?php echo $bval['block_description'] ? $bval['block_description'] : 'No Description'; ?></p>
+								<p><?php echo $bval['description'] ? $bval['description'] : 'No Description'; ?></p>
+							</li>
+							<?php } } ?>
+						</ul>
+						<h4>Options</h4>
+						<ul>
+							<?php if(!empty($tval['config']['options'])) { foreach($tval['config']['options'] as $okey => $oval) { ?>
+							<li>
+								<div class="templ33t_right">
+									Type: <?php echo $oval['type']; ?>
+								</div>
+								<strong><?php echo $oval['label']; ?></strong> (<?php echo $okey; ?>)<br/>
+								<hr/>
+								<p><?php echo $oval['description'] ? $oval['description'] : 'No Description'; ?></p>
 							</li>
 							<?php } } ?>
 						</ul>
@@ -1433,13 +1479,15 @@ function templ33t_js_obj() {
 
 	// output js template map
 	if(!empty($templ33t_templates)) {
-
+		
 		$arr = array();
 		foreach($templ33t_templates as $template => $config) {
+			
 			$blocks = array();
+
 			foreach($config['blocks'] as $key => $val) {
 
-				// create instance if non existent
+				// include plugin class if non-existent
 				$cname = null;
 				if(!array_key_exists('instance', $val)) {
 					$cname = 'Templ33t'.ucwords($val['type']);
@@ -1454,6 +1502,12 @@ function templ33t_js_obj() {
 				$blocks[] = '{label: "'.$val['label'].'", custom: '.(!empty($cname) ? ($cname::$custom_panel ? 'true' : 'false') : ($val['instance']->hasCustomPanel() ? 'true' : 'false')).'}';
 				
 			}
+
+			// add settings block
+			if(!empty($config['options'])) {
+				$blocks[] = '{label: "Settings", custom: true}';
+			}
+
 			$str = '"'.$template.'": {main: "'.htmlspecialchars($config['main'], ENT_QUOTES).'", blocks: ['
 				.(!empty($blocks) ? implode(', ', $blocks) : '').']}';
 			$arr[] = $str;
@@ -1491,19 +1545,24 @@ function templ33t_elements() {
 		// grab main label
 		if(array_key_exists($post->page_template, $templ33t_templates)) {
 			$main_label = $templ33t_templates[$post->page_template]['main'];
-			$main_desc = $templ33t_templates[$post->page_template]['main_description'];
+			$main_desc = $templ33t_templates[$post->page_template]['description'];
 		} else {
 			$main_label = $templ33t_templates['ALL']['main'];
-			$main_desc = $templ33t_templates['ALL']['main_description'];
+			$main_desc = $templ33t_templates['ALL']['description'];
 		}
 
 		// set up item lists
 		$tabs = '';
 		$descs = '';
 		$editors = '';
-		print_r($templ33t_meta);
+
 		// grab template specific tabs
 		if(array_key_exists($post->page_template, $templ33t_templates)) {
+
+			// add default tab
+			$tabs .= '<li id="templ33t_default" class="selected"><a href="#" rel="default">'.$main_label.'</a><div id="templ33t_main_content"></div></li>';
+			$descs .= '<div class="templ33t_description templ33t_desc_default"><p>'.$main_desc.'</p></div>';
+
 			foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
 
 				$instance = $block['instance'];
@@ -1519,6 +1578,7 @@ function templ33t_elements() {
 					$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor templ33t_hidden"><input type="hidden" name="meta['.$instance->id.'][key]" value="templ33t_'.$instance->slug.'" /><textarea id="templ33t_val_'.$instance->id.'" name="meta['.$instance->id.'][value]">'.$instance->value.'</textarea></div>';
 				}
 			}
+
 		}
 
 		// grab theme-wide tabs
@@ -1536,11 +1596,27 @@ function templ33t_elements() {
 			}
 		}
 
+		// add settings tab if exists
+		if(array_key_exists($post->page_template, $templ33t_templates) && !empty($templ33t_templates[$post->page_template]['options'])) {
+			
+			$tabs .= '<li class="templ33t_settings"><a href="#" rel="settings">Settings</a></li>';
+			$descs .= '<div class="templ33t_description templ33t_desc_settings templ33t_hidden"><p>These are the settings available for this template.</p></div>';
+			$editors .= '<div id="templ33t_editor_settings" class="templ33t_editor" style="display: none;">';
+			foreach($templ33t_templates[$post->page_template]['options'] as $key => $val) {
+				switch($val['type']) {
+					case 'percent':
+						$editors .= $val['label'].': <input type="text" name="templ33t_setting['.$val['slug'].']" />%<br/>';
+						break;
+				}
+			}
+			$editors .= '</div>';
+
+		}
+
 		// output tab bar & descriptions
 		echo '<div id="templ33t_control" style="display: none;"><ul>';
-		echo '<li id="templ33t_default" class="selected"><a href="" rel="default">'.$main_label.'</a><div id="templ33t_main_content"></div></li>';
 		echo $tabs;
-		echo '</ul></div><div id="templ33t_descriptions" style="display: none;"><div class="templ33t_description templ33t_desc_default"><p>'.$main_desc.'</p></div>';
+		echo '</ul></div><div id="templ33t_descriptions" style="display: none;">';
 		echo $descs;
 		echo '</div><div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
 		echo $editors;

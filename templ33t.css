@@ -51,6 +51,10 @@ div#templ33t_control ul li {
 	border-radius: 4px 4px 0px 0px;
 }
 
+div#templ33t_control ul li.templ33t_settings {
+	float: right;
+}
+
 div#templ33t_control ul li a {
 	display: block;
 	height: 26px;
@@ -180,6 +184,10 @@ div.templ33t_blocks {
 div.templ33t_blocks div div {
 	margin: 0px 0px 12px 0px;
 	text-align: center;
+}
+
+div.templ33t_blocks div div.templ33t_right {
+	margin: 0px;
 }
 
 div.templ33t_blocks div input[type=text] {

@@ -85,29 +85,66 @@ class Templ33t {
 		// catch invalid file
 		if(empty($template) || !file_exists($template)) return false;
 		$template_data = implode( '', file( $template ));
-
-		// grab options config string from file
-		$options = '';
-		if ( preg_match( '|Templ33t Areas:(.*)$|mi', $template_data, $options ) )
-			$options = _cleanup_header_comment($options[1]);
-
 		
-
 		// parse retrieved data
-		$config = $this->parseConfig($blocks, $descriptions);
-		$options = $this->parseOptions($options);
-
-		// set options
-		$blocks['options'] = $options;
-
+		$config = $this->parseConfig($template_data);
+		$config['options'] = $this->parseOptions($template_data);
+		
 		// return template configuration
-		return $blocks;
+		return $config;
 
 	}
 
 	function parseOptions($template_str = null) {
 
+		// grab options config string from file
+		$data = '';
+		if ( preg_match( '|Templ33t Options:(.*)$|mi', $template_str, $data ) )
+			$data = _cleanup_header_comment($data[1]);
 
+		if(empty($data)) return array();
+
+		$data = explode(',', $data);
+		$options = array();
+
+		foreach($data as $key => $val) {
+
+			$title = trim(chop($val));
+			$area = array();
+
+			// check for attributes
+			if(preg_match('/\[(.+)\]$/i', $title, $attrstr)) {
+
+				$title = trim(chop(substr($title, 0, (strlen($title) - (strlen($attrstr[1])+2)))));
+				$type = $attrstr[1];
+
+				if(strpos($type, '=') !== false) {
+					$pieces = explode('=', $type);
+					$type = $pieces[0];
+					$config = $pieces[1];
+				} else {
+					$config = null;
+				}
+
+			} else {
+
+				$type = 'text';
+				$config = null;
+
+			}
+
+			$slug = $this->slug($title);
+
+			$options[$slug] = array(
+				'label' => $title,
+				'slug' => $slug,
+				'type' => $type,
+				'config' => $config
+			);
+
+		}
+
+		return $options;
 
 	}
 
@@ -151,7 +188,7 @@ class Templ33t {
 				$slug = Templ33t::slug($title);
 
 				foreach($attributes as $attr) {
-					if(in_array($attr, self::$reserved_attributes)) {
+					if(in_array($attr, $this->plugin_attributes)) {
 						if($attr == 'main') {
 							$config['main'] = $title;
 							$config['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
@@ -160,7 +197,14 @@ class Templ33t {
 							$area['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
 						}
 					} else {
-						$area['type'] = $attr;
+						if(strpos($attr, '=') !== false) {
+							$pieces = explode('=', $attr);
+							$area['type'] = $prices[0];
+							$area['config'] = $prices[1];
+						} else {
+							$area['type'] = $attr;
+							$area['config'] = null;
+						}
 						$area['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
 					}
 				}
@@ -172,11 +216,12 @@ class Templ33t {
 
 			}
 
-			$area['title'] = $title;
+			$area['label'] = $title;
+			$area['slug'] = $slug;
 
 			if($config['main'] != $title) {
 
-				$config['blocks'][$slug] = array_merge(self::$area_defaults, $area);
+				$config['blocks'][$slug] = array_merge($this->area_defaults, $area);
 			}
 
 		}
