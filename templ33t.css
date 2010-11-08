@@ -75,8 +75,12 @@ div#templ33t_descriptions {
 div.templ33t_description {
 	background: #FFF;
 	border-bottom: 1px solid #C0C0C0;
-	color: #909090;
+	color: #808080;
 	margin-bottom: 6px;
+}
+
+p.templ33t_description {
+	color: #808080;
 }
 
 div.templ33t_description p {
@@ -86,6 +90,16 @@ div.templ33t_description p {
 
 div#templ33t_main_content {
 	display: none;
+}
+
+div.templ33t_editor {
+	margin-top: 9px;
+}
+
+div.templ33t_editor textarea {
+	width: 100%;
+	height: 181px;
+	padding: 9px;
 }
 
 div#templ33t_publish {

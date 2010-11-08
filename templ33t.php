@@ -1601,15 +1601,15 @@ function templ33t_elements() {
 			
 			$tabs .= '<li class="templ33t_settings"><a href="#" rel="settings">Settings</a></li>';
 			$descs .= '<div class="templ33t_description templ33t_desc_settings templ33t_hidden"><p>These are the settings available for this template.</p></div>';
-			$editors .= '<div id="templ33t_editor_settings" class="templ33t_editor" style="display: none;">';
+			$editors .= '<div id="templ33t_editor_settings" class="templ33t_editor postbox" style="display: none;"><div class="inside"><p class="templ33t_description">These are the settings available for this page.</p><table border="0">';
 			foreach($templ33t_templates[$post->page_template]['options'] as $key => $val) {
 				switch($val['type']) {
 					case 'percent':
-						$editors .= $val['label'].': <input type="text" name="templ33t_setting['.$val['slug'].']" />%<br/>';
+						$editors .= '<tr><td>'.$val['label'].': </td><td><input type="text" name="templ33t_setting['.$val['slug'].']" value="'.$val['config'].'" size="2" />%</tr>';
 						break;
 				}
 			}
-			$editors .= '</div>';
+			$editors .= '</table></div></div>';
 
 		}
 

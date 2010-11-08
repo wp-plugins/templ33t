@@ -29,6 +29,7 @@
 */
 
 var ctemp = 0;
+var ctmode = 'set';
 
 jQuery(document).ready(
 	function() {
@@ -37,7 +38,10 @@ jQuery(document).ready(
 
 		// save current template index
 		ctemp = jQuery('select#page_template').attr('selectedIndex');
-		
+
+		// set current mode
+		ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
+
 		// add event listener to template select
 		jQuery('select#page_template').change(templ33t_switchTemplate);
 
@@ -52,6 +56,8 @@ jQuery(document).ready(
 
 			// add rel to editor
 			jQuery('#postdivrich').attr('rel', 'default');
+
+			if(ctmode) templ33t_switchMode('html');
 
 			// add tab event listeners
 			jQuery('div#templ33t_control a').click(templ33t_switchEditor);
@@ -146,10 +152,10 @@ function templ33t_hideCustomFields() {
 
 function templ33t_switchEditor() {
 
+	var ntmode = getUserSetting('editor') == 'tinymce' ? false : true;
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
-	var tmode = jQuery('#content_ifr').length ? false : true;
-	var ccontent = tmode ? jQuery('textarea#content').text() : jQuery('#content_ifr').contents().find('body').html();
 	var nrel = jQuery(this).attr('rel');
+	var ccontent = ntmode ? jQuery('textarea#content').val() : jQuery('#content_ifr').contents().find('body').html();
 	var ncontent;
 	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
 	var tocustom;
@@ -165,24 +171,19 @@ function templ33t_switchEditor() {
 		jQuery('#templ33t_val_'+crel).val(ccontent);
 	}
 
+	// if mode has been switched, process content
+	if(ntmode != ctmode) templ33t_switchMode(null);
+
 	// load new tab value
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
-		if(tmode) {
-			jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
-		} else {
-			jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
-			jQuery('#content_ifr').contents().find('body').html(ncontent);
-		}
+		jQuery('textarea#content').val(ncontent);
+		if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
 	} else {
 		if(!tocustom) {
 			ncontent = jQuery('#templ33t_val_'+nrel).val();
-			if(tmode) {
-				jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
-			} else {
-				jQuery('textarea#content').val(switchEditors._wp_Nop(ncontent));
-				jQuery('#content_ifr').contents().find('body').html(ncontent);
-			}
+			jQuery('textarea#content').val(ncontent);
+			if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
 		}
 	}
 
@@ -201,10 +202,12 @@ function templ33t_switchEditor() {
 	if(!tocustom) {
 
 		jQuery('#postdivrich').show();
+		jQuery('#templ33t_descriptions').show();
 
 	} else {
 		
 		jQuery('#postdivrich').hide();
+		jQuery('#templ33t_descriptions').hide();
 		jQuery('div#templ33t_editor_'+nrel).show();
 
 	}
@@ -213,12 +216,69 @@ function templ33t_switchEditor() {
 
 }
 
+function templ33t_switchMode(switchTo) {
+
+	if(ctmode == 'set')
+		ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
+
+	jQuery('div#templ33t_control ul li').each(
+		function() {
+
+			var crel = null;
+			var cval = null;
+			var elem = jQuery(this);
+
+			if(!elem.hasClass('selected') && !elem.hasClass('templ33t_settings')) {
+
+				crel = jQuery('a:first', jQuery(this)).attr('rel');
+
+				if(crel == 'default') {
+
+					cval = jQuery('div#templ33t_main_content').html();
+					if(cval) {
+						if(switchTo == 'html' || !ctmode) {
+							jQuery('div#templ33t_main_content').html(switchEditors._wp_Nop(cval));
+							//alert('no_p: '+crel+' - '+cval);
+						} else {
+							jQuery('div#templ33t_main_content').html(switchEditors.wpautop(cval));
+							//alert('auto_p: '+crel+' - '+cval);
+						}
+					}
+
+				} else {
+
+					if(!TL33T_def[jQuery('select#page_template').val()].blocks[(jQuery(this).index() - 1)].custom) {
+
+						cval = jQuery('#templ33t_val_'+crel).val();
+						if(cval) {
+							if(switchTo == 'html' || !ctmode) {
+								jQuery('#templ33t_val_'+crel).val(switchEditors._wp_Nop(cval));
+								//alert('no_p: '+crel+' - '+cval);
+							} else {
+								jQuery('#templ33t_val_'+crel).val(switchEditors.wpautop(cval));
+								//alert('auto_p: '+crel+' - '+cval);
+							}
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+	);
+
+	ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
+
+}
+
 function templ33t_cleanup() {
 
 	if(jQuery('div#templ33t_control').length) {
 
 		// force tinymcs visual mode
-		jQuery('a#edButtonPreview').click();
+		//jQuery('a#edButtonPreview').click();
 
 		// set to default tab
 		jQuery('li#templ33t_default a').click();
@@ -233,7 +293,7 @@ function send_to_templ33t_field(h) {
 	
 	if ( templ33t_editor_focus ) ed = templ33t_editor_focus;
 	else if ( typeof tinyMCE == "undefined" ) ed = document.getElementById('content');
-	else { ed = tinyMCE.get('content');}
+	else {ed = tinyMCE.get('content');}
 	if ( typeof tinyMCE != 'undefined') {
 		ed.focus();
 		if (tinymce.isIE)
