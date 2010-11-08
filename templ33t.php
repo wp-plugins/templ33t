@@ -106,6 +106,11 @@ $templ33t_tab_pages = array('page.php', 'page-new.php', 'post.php', 'post-new.ph
 $templ33t_templates = array();
 
 /**
+ * Array of templ33t related page options
+ */
+$templ33t_options = array();
+
+/**
  * Array of templ33t related custom fields (set by templ33t_handle_meta)
  */
 $templ33t_meta = array();
@@ -1197,7 +1202,7 @@ function templ33t_settings() {
  */
 function templ33t_handle_meta() {
 
-	global $templ33t_meta, $templ33t_templates, $templ33t_meta_fetched, $templ33t_plugins, $templ33t_render, $post, $wpdb;
+	global $templ33t_meta, $templ33t_options, $templ33t_templates, $templ33t_meta_fetched, $templ33t_plugins, $templ33t_render, $post, $wpdb;
 
 	if(!$templ33t_meta_fetched) {
 
@@ -1209,7 +1214,16 @@ function templ33t_handle_meta() {
 		if(!empty($meta)) {
 			// filter out unrelated
 			foreach($meta as $key => $val) {
-				if(strpos($val['meta_key'], 'templ33t_') !== false) {
+				if(strpos($val['meta_key'], 'templ33t_option_') !== false) {
+					$slug = str_replace('templ33t_option_', '', $val['meta_key']);
+					$odata = array(
+						'id' => $val['meta_id'],
+						'type' => '',
+						'label' => '',
+						'value' => $val['meta_value']
+					);
+					$templ33t_options[$slug] = $odata;
+				} elseif(strpos($val['meta_key'], 'templ33t_') !== false) {
 					$slug = str_replace('templ33t_', '', $val['meta_key']);
 					$bdata = array(
 						'id' => $val['meta_id'],
@@ -1229,7 +1243,37 @@ function templ33t_handle_meta() {
 		$templ33t_plugins = array();
 
 		// check for template definition, create any non-existent blocks, init block type plugins
-		if(array_key_exists($post->page_template, $templ33t_templates) && !empty($templ33t_templates[$post->page_template]['blocks'])) {
+		if(array_key_exists($post->page_template, $templ33t_templates)) {
+
+			// check for template options
+			if(!empty($templ33t_templates[$post->page_template]['options'])) {
+
+				// flag
+				$templ33t_render = true;
+
+				// add missing custom fields
+				foreach($templ33t_templates[$post->page_template]['options'] as $slug => $option) {
+					if(!array_key_exists($slug, $templ33t_options)) {
+						if(add_post_meta($post->ID, 'templ33t_option_'.$slug, '', true)) {
+							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
+							$templ33t_options[$slug] = array(
+								'id' => $meta_id[0],
+								'type' => $option['type'],
+								'label' => $option['label'],
+								'description' => $option['description'],
+								'value' => '',
+								'config' => $option['description']
+							);
+						}
+					} else {
+						$templ33t_option[$slug]['type'] = $option['type'];
+						$templ33t_option[$slug]['config'] = $option['config'];
+						$templ33t_option[$slug]['label'] = $option['label'];
+						$templ33t_option[$slug]['description'] = $option['description'];
+					}
+				}
+
+			}
 
 			// check for template blocks
 			if(!empty($templ33t_templates[$post->page_template]['blocks'])) {
@@ -1285,6 +1329,7 @@ function templ33t_handle_meta() {
 		}
 		
 		// check for theme-wide definition and create any non-existent blocks
+		/*
 		if(array_key_exists('ALL', $templ33t_templates) && !empty($templ33t_templates['ALL']['blocks'])) {
 			
 			// check for template blocks
@@ -1338,6 +1383,7 @@ function templ33t_handle_meta() {
 			}
 
 		}
+		*/
 
 		if(!$templ33t_render) {
 
@@ -1538,7 +1584,7 @@ function templ33t_js_obj() {
  */
 function templ33t_elements() {
 
-	global $templ33t_templates, $templ33t_meta, $templ33t_render, $post;
+	global $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
 
 	if($templ33t_render && !empty($templ33t_meta)) {
 
@@ -1605,7 +1651,8 @@ function templ33t_elements() {
 			foreach($templ33t_templates[$post->page_template]['options'] as $key => $val) {
 				switch($val['type']) {
 					case 'percent':
-						$editors .= '<tr><td>'.$val['label'].': </td><td><input type="text" name="templ33t_setting['.$val['slug'].']" value="'.$val['config'].'" size="2" />%</tr>';
+						$editors .= '<tr><td>'.$val['label'].': </td><td>';
+						$editors .= '<input type="hidden" name="meta['.$templ33t_options[$key]['id'].'][key]" value="templ33t_option_'.$key.'"><input type="text" name="meta['.$templ33t_options[$key]['id'].'][value]" value="'.$templ33t_options[$key]['value'].'" size="2" />%';
 						break;
 				}
 			}
