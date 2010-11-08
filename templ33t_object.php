@@ -20,12 +20,14 @@ class Templ33t {
 		'description' => '',
 		'optional' => false,
 		'bindable' => false,
+		'searchable' => false,
 	);
 
 	var $plugin_attributes = array(
 		'main',
 		'optional',
 		'bindable',
+		'searchable',
 	);
 	
 	function __construct() {

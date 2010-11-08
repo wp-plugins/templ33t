@@ -1,8 +1,8 @@
 <?php
 
-interface templ33t_option {
+interface Templ33tOption {
 
-	public function displayOptionLine();
+	public function displayOption();
 
 }
 

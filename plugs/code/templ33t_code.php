@@ -1,32 +1,24 @@
 <?php
 
-class Templ33tCode {
-
-	static $load_js = false;
+class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
+	
 	static $custom_panel = true;
-
-	var $slug;
-	var $label;
-	var $description;
-	var $id;
-	var $value;
 
 	function __construct() {
 
 	}
 
-	function hasCustomPanel() {
+	function init() {
 
-		return self::$custom_panel;
+		
 
 	}
 
-	function display() {
+	function displayPanel() {
 
 		$str = '<div class="postbox"><div class="inside">';
-		$str .= '<p class="templ33t_description">'.$this->description.'</p>';
+		//$str .= '<p class="templ33t_description">Enter your code below. It can be added to your page by using the shortcode <strong>['.$this->slug.']</strong> in your editor.</p>';
 		$str .= '<input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_'.$this->slug.'"><textarea name="meta['.$this->id.'][value]">'.$this->value.'</textarea>';
-
 		$str .= '</div></div>';
 
 		return $str;

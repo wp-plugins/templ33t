@@ -1,6 +1,6 @@
 <?php
 
-class Templ33tList {
+class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	static $load_js = false;
 	static $custom_panel = true;
@@ -21,7 +21,7 @@ class Templ33tList {
 
 	}
 
-	function display() {
+	function displayPanel() {
 
 		return '<p>THIS IS A LIST EDITOR</p>';
 

@@ -1,6 +1,6 @@
 <?php
 
-interface templ33t_tab {
+interface Templ33tTab {
 
 	public function displayPanel();
 

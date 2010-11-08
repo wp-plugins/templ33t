@@ -73,9 +73,13 @@ define ('TEMPL33T_ASSETS_URL', $wp_content_url.'/plugins/templ33t/');
 define ('TEMPL33T_ASSETS_DIR', $wp_content_dir.'/plugins/templ33t/');
 
 /**
- * require templ33t object
+ * Require templ33t objects & interfaces
  */
 require_once(TEMPL33T_ASSETS_DIR . 'templ33t_object.php');
+require_once(TEMPL33T_ASSETS_DIR . 'plugs/templ33t_plugin_handler.php');
+require_once(TEMPL33T_ASSETS_DIR . 'plugs/templ33t_plugin.php');
+require_once(TEMPL33T_ASSETS_DIR . 'plugs/templ33t_tab_interface.php');
+require_once(TEMPL33T_ASSETS_DIR . 'plugs/templ33t_option_interface.php');
 
 /**
  * Database version
@@ -152,6 +156,8 @@ $templ33t_errors = array(
 	'noblock' => 'Invalid block.',
 	'nopub' => 'The most recent configuration has already been published.',
 	'noaction' => 'Invalid action.',
+	'nochange' => 'No configuration changes detected.',
+	'noconfig' => 'No Templ33t configuration detected for this template. The cached configuration can be removed.',
 );
 
 /**
@@ -693,6 +699,70 @@ function templ33t_handle_settings() {
 
 		switch($_GET['t_action']) {
 
+			// rescan template config
+			case 'rescan':
+
+				// grab template from db
+				$temp = $wpdb->get_row('SELECT * FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = "'.htmlspecialchars($_GET['tid'], ENT_QUOTES).'"', ARRAY_A);
+
+				if(!empty($temp)) {
+
+					$tfile = $wp_content_dir . '/themes/' . $temp['theme'] . '/' . $temp['template'];
+
+					if(file_exists($tfile)) {
+
+						// grab templ33t config
+						$templ33t = new Templ33t;
+						$config = $templ33t->parseTemplate($tfile);
+
+						if(!empty($config)) {
+
+							if(unserialize($temp['config']) != $config) {
+
+								// save changes
+								$wpdb->update($template_table_name, array('config' => serialize($config)), array('templ33t_template_id' => $temp['templ33t_template_id']));
+
+								// update map dev version
+								$t_dev = templ33t_get_option('templ33t_map_dev');
+								$t_dev++;
+								templ33t_update_option('templ33t_map_dev', $t_dev);
+
+								// return to settings page
+								$redirect = $templ33t_settings_url.'&theme='.$temp['theme'];
+								wp_redirect($redirect);
+
+							} else {
+
+								// return to settings page
+								$redirect = $templ33t_settings_url.'&theme='.$temp['theme'].'&error=nochange';
+								wp_redirect($redirect);
+
+							}
+
+						} else {
+
+							// return to settings page
+							$redirect = $templ33t_settings_url.'&theme='.$temp['theme'].'&error=noconfig';
+							wp_redirect($redirect);
+
+						}
+
+					} else {
+
+						// return error if non-existent
+						wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=notemp');
+
+					}
+
+				} else {
+
+					// return error if non-existent
+					wp_redirect($templ33t_settings_url.'&theme='.$_GET['theme'].'&error=notemp');
+
+				}
+
+				break;
+
 			// delete template
 			case 'deltemp':
 
@@ -955,7 +1025,7 @@ function templ33t_settings() {
 
 	?>
 
-	<h2>Templ33t Block Settings</h2>
+	<h2>Templ33t Configuration</h2>
 
 	<?php if($pub < $dev) { ?>
 	<div id="templ33t_publish">
@@ -1301,19 +1371,17 @@ function templ33t_handle_meta() {
 					}
 				}
 
-				// init plugins
+				// init block plugins
 				foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
 
-					$cname = 'Templ33t'.ucwords($block['type']);
+					// create config array
+					// instantiate plugin
+					// pass configuration
+					// init the plugin (which will add any shortcode actions)
 
-					if(!in_array($cname, $templ33t_plugins)) {
-						$templ33t_plugins[] = $cname;
-						include_once(TEMPL33T_ASSETS_DIR . 'plugs/'.$block['type'].'/templ33t_' . $block['type'] . '.php');
-						if($cname::$load_js)
-							wp_register_script($cname, TEMPL33T_ASSETS_URL . 'plugs/'.$block['type'].'/templ33t_'.$block['type'].'.js');
-					}
+
+					$instance = Templ33tPluginHandler::instantiate($block['type']);
 					
-					$instance = new $cname();
 					$instance->slug = $slug;
 					$instance->label = $block['label'];
 					$instance->description = $block['description'];
@@ -1533,19 +1601,10 @@ function templ33t_js_obj() {
 
 			foreach($config['blocks'] as $key => $val) {
 
-				// include plugin class if non-existent
-				$cname = null;
-				if(!array_key_exists('instance', $val)) {
-					$cname = 'Templ33t'.ucwords($val['type']);
-					if(!in_array($cname, $templ33t_plugins)) {
-						$templ33t_plugins[] = $cname;
-						include_once(TEMPL33T_ASSETS_DIR . 'plugs/'.$val['type'].'/templ33t_' . $val['type'] . '.php');
-						if($post->page_template == $template && $cname::$load_js)
-							wp_register_script($cname, TEMPL33T_ASSETS_URL . 'plugs/'.$val['type'].'/templ33t_'.$val['type'].'.js');
-					}
-				}
-
-				$blocks[] = '{label: "'.$val['label'].'", custom: '.(!empty($cname) ? ($cname::$custom_panel ? 'true' : 'false') : ($val['instance']->hasCustomPanel() ? 'true' : 'false')).'}';
+				// grab class name, load unloaded classes
+				$cname = Templ33tPluginHandler::load($val['type']);
+				
+				$blocks[] = '{label: "'.$val['label'].'", custom: '.(!empty($cname) ? ($cname::$custom_panel ? 'true' : 'false') : 'false').'}';
 				
 			}
 
@@ -1611,14 +1670,15 @@ function templ33t_elements() {
 
 			foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
 
+				$cname = Templ33tPluginHandler::load($block['type']);
 				$instance = $block['instance'];
 
 				$tabs .= '<li><a href="#" rel="'.$instance->id.'">'.$instance->label.'</a></li>';
 				$descs .= '<div class="templ33t_description templ33t_desc_'.$instance->id.' templ33t_hidden"><p>'.$instance->description.'</p></div>';
 
-				if($instance->hasCustomPanel()) {
+				if($cname::$custom_panel) {
 					$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor" style="display: none;">';
-					$editors .= $instance->display();
+					$editors .= $instance->displayPanel();
 					$editors .= '</div>';
 				} else {
 					$editors .= '<div id="templ33t_editor_'.$instance->id.'" class="templ33t_editor templ33t_hidden"><input type="hidden" name="meta['.$instance->id.'][key]" value="templ33t_'.$instance->slug.'" /><textarea id="templ33t_val_'.$instance->id.'" name="meta['.$instance->id.'][value]">'.$instance->value.'</textarea></div>';

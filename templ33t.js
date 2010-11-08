@@ -120,33 +120,7 @@ function templ33t_placeControl() {
 
 function templ33t_hideCustomFields() {
 
-	var erel;
-
-	jQuery('div#templ33t_control a').each(
-		function() {
-
-			erel = jQuery(this).attr('rel');
-
-			if(erel != 'default') {
-
-				if(jQuery('tr#meta-'+erel).length){
-
-					//jQuery('tr#meta-'+erel+' textarea').addClass('templ33t_val_'+erel);
-					//jQuery('tr#meta-'+erel).addClass('templ33t_cf').hide();
-
-					jQuery('tr#meta-'+erel).remove();
-
-				} else {
-
-					//jQuery(this).after('<input type="hidden" class="templ33t_val_'+erel+'" name="meta['+erel+'][value]" value="" />');
-					
-				}
-
-			}
-				
-			
-		}
-	);
+	jQuery('div#postcustomstuff table#list-table tr[id|="meta"]').has('input[value^="templ33t_"]').remove();
 
 }
 
@@ -193,21 +167,23 @@ function templ33t_switchEditor() {
 	// set rel
 	jQuery('#postdivrich').attr('rel', nrel);
 
+	// mark selected
 	jQuery('div#templ33t_control li.selected').removeClass('selected');
 	jQuery(this).parent().addClass('selected');
 
+	// show description
 	jQuery('div.templ33t_desc_'+crel).addClass('templ33t_hidden');
 	jQuery('div.templ33t_desc_'+nrel).removeClass('templ33t_hidden');
 
 	if(!tocustom) {
 
 		jQuery('#postdivrich').show();
-		jQuery('#templ33t_descriptions').show();
+		//jQuery('#templ33t_descriptions').show();
 
 	} else {
 		
 		jQuery('#postdivrich').hide();
-		jQuery('#templ33t_descriptions').hide();
+		//jQuery('#templ33t_descriptions').hide();
 		jQuery('div#templ33t_editor_'+nrel).show();
 
 	}

@@ -1,0 +1,64 @@
+<?php
+
+class Templ33tPluginHandler {
+
+	static $loaded = array();
+
+	function __construct() {
+
+
+
+	}
+
+	static function load($cname = null) {
+
+		if(!empty($cname)) {
+
+			if(!array_key_exists($cname, self::$loaded)) {
+
+				$class = 'Templ33t'.ucwords($cname);
+				$cpath = TEMPL33T_ASSETS_DIR . 'plugs/' . $cname . '/templ33t_' . $cname . '.php';
+				require_once($cpath);
+
+				self::$loaded[$cname] = $class;
+
+				return $class;
+
+			} else {
+
+				return self::$loaded[$cname];
+
+			}
+
+		} else {
+
+			return false;
+
+		}
+
+	}
+
+	static function instantiate($cname = null, $config = null) {
+
+		if(!empty($cname) && $class = self::load($cname)) {
+
+			if(!empty($config)) {
+
+				$n = new $class();
+				$n->configure($config);
+
+				return $n;
+
+			} else {
+
+				return new $class();
+
+			}
+
+		}
+
+	}
+
+}
+
+?>

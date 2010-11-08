@@ -7,20 +7,24 @@ abstract class Templ33tPlugin {
 	var $label;
 	var $description;
 	var $value;
+	var $default;
+	var $bindable;
+	var $searchable;
+	var $config;
 
-	static $load_js;
-	static $print_js;
-	static $custom_panel;
+	static $load_js = false;
+	static $print_js = false;
+	static $custom_panel = false;
 
-	function __construct() {
+	public function configure($config = null) {
 
 		
 
 	}
 
-	function hasCustomPanel() {
+	public function init() {
 
-		return self::$custom_panel;
+		
 
 	}
 

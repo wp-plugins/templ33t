@@ -1,6 +1,6 @@
 <?php
 
-class Templ33tVideo {
+class Templ33tVideo extends Templ33tPlugin implements Templ33tTab {
 
 	static $load_js = false;
 	static $custom_panel = true;
@@ -15,13 +15,7 @@ class Templ33tVideo {
 		
 	}
 
-	function hasCustomPanel() {
-
-		return self::$custom_panel;
-
-	}
-
-	function display() {
+	function displayPanel() {
 
 		return '<p>THIS IS A VIDEO EDITOR</p>';
 
