@@ -1464,7 +1464,7 @@ function templ33t_option_save($content = null) {
  */
 function templ33t_add_comment($content = null) {
 
-	global $templ33t, $templ33t_templates;
+	global $templ33t, $templ33t_templates, $wpdb, $post;
 
 	if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
 

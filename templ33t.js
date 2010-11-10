@@ -124,17 +124,18 @@ function templ33t_hideCustomFields() {
 
 }
 
-function templ33t_switchEditor() {
+function templ33t_switchEditor(prel) {
 
 	var ntmode = getUserSetting('editor') == 'tinymce' ? false : true;
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
-	var nrel = jQuery(this).attr('rel');
+	var nobj = typeof(prel) == 'string' ? jQuery('div#templ33t_control li a[rel="'+prel+'"]') : jQuery(this);
+	var nrel = nobj.attr('rel');
 	var ccontent = ntmode ? jQuery('textarea#content').val() : jQuery('#content_ifr').contents().find('body').html();
 	var ncontent;
 	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
 	var tocustom;
-	if(jQuery(this).parent().index() > 0)
-		tocustom = TL33T_def[jQuery('select#page_template').val()].blocks[(jQuery(this).parent().index() - 1)].custom;
+	if(nobj.parent().index() > 0)
+		tocustom = TL33T_def[jQuery('select#page_template').val()].blocks[(nobj.parent().index() - 1)].custom;
 	else
 		tocustom = false;
 
@@ -169,7 +170,7 @@ function templ33t_switchEditor() {
 
 	// mark selected
 	jQuery('div#templ33t_control li.selected').removeClass('selected');
-	jQuery(this).parent().addClass('selected');
+	nobj.parent().addClass('selected');
 
 	// show description
 	jQuery('div.templ33t_desc_'+crel).addClass('templ33t_hidden');
@@ -246,6 +247,17 @@ function templ33t_switchMode(switchTo) {
 	);
 
 	ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
+
+}
+
+function templ33t_append(scode) {
+	
+	if(!ctmode) {
+		jQuery('textarea#content').val(jQuery('textarea#content').val()+"<p>"+scode+"</p>");
+		jQuery('#content_ifr').contents().find('body').append("<p>"+scode+"</p>");
+	} else {
+		jQuery('textarea#content').val(jQuery('textarea#content').val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>"));
+	}
 
 }
 
