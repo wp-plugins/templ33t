@@ -351,9 +351,10 @@ function templ33t_init() {
 		add_action('admin_print_styles', 'templ33t_styles', 1);
 		add_action('admin_print_scripts', 'templ33t_scripts', 1);
 		add_filter('the_editor_content', 'templ33t_strip_comment', 1);
-		add_filter('content_save_pre', 'templ33t_option_save', 9);
 		add_filter('content_save_pre', 'templ33t_add_comment', 10);
 		add_action('edit_page_form', 'templ33t_elements', 1);
+
+		if(!empty($_POST)) templ33t_option_save();
 
 		// create new page with forced template if from_template passed
 		if(in_array(basename($_SERVER['PHP_SELF']), array('page-new.php', 'post-new.php')) && array_key_exists('from_template', $_GET)) {
@@ -1408,12 +1409,7 @@ function templ33t_handle_meta() {
 function templ33t_option_save($content = null) {
 
 	global $templ33t;
-	echo '<pre>';
-	print_r($templ33t);
-	print_r($_POST);
-	echo '</pre>';
-
-
+	
 	if(array_key_exists($_POST['page_template'], $templ33t->map) && array_key_exists('templ33t_meta', $_POST)) {
 
 		foreach($_POST['templ33t_meta'] as $slug => $data) {
@@ -1421,7 +1417,34 @@ function templ33t_option_save($content = null) {
 			// handle blocks
 			if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['blocks'])) {
 
+				$block = $templ33t->map[$_POST['page_template']]['blocks'][$slug];
+				$block['slug'] = $slug;
+				$block['id'] = $data['id'];
+				$block['value'] = $data['value'];
 
+				$instance = Templ33tPluginHandler::instantiate($block['type'], $block);
+				$instance->handlePost();
+				$_POST['meta'][$instance->id] = array(
+					'key' => 'templ33t_'.$instance->slug,
+					'value' => $instance->value,
+				);
+				
+			}
+
+			// handle options
+			if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['options'])) {
+
+				$option = $templ33t->map[$_POST['page_template']]['options'][$slug];
+				$option['slug'] = $slug;
+				$option['id'] = $data['id'];
+				$option['value'] = $data['value'];
+
+				$instance = Templ33tPluginHandler::instantiate($option['type'], $option);
+				$instance->handlePost();
+				$_POST['meta'][$instance->id] = array(
+					'key' => 'templ33t_option_'.$instance->slug,
+					'value' => $instance->value,
+				);
 
 			}
 
@@ -1429,20 +1452,7 @@ function templ33t_option_save($content = null) {
 
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-	die(print_r($content, true));
+	return $content;
 
 }
 
@@ -1774,6 +1784,16 @@ function templ33t_block($block = null, $before = null, $after = null) {
 
 	if(array_key_exists($block, $templ33t->block_objects)) {
 		echo apply_filters('the_content', $before.$templ33t->block_objects[$block]->value.$after);
+	}
+
+}
+
+function templ33t_option($option = null) {
+
+	global $templ33t;
+
+	if(array_key_exists($option, $templ33t->option_objects)) {
+		return $templ33t->option_objects[$option]->value;
 	}
 
 }

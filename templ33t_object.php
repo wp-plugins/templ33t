@@ -17,6 +17,7 @@ class Templ33t {
 		'slug' => '',
 		'type' => 'editor',
 		'description' => '',
+		'config' => '',
 		'optional' => false,
 		'bindable' => false,
 		'searchable' => false,
@@ -193,7 +194,7 @@ class Templ33t {
 					'label' => $title,
 					'slug' => $slug,
 					'type' => $type,
-					'config' => $config
+					'config' => $config,
 				)
 			);
 

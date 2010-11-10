@@ -93,21 +93,23 @@ abstract class Templ33tPlugin {
 
 				}
 
+				$this->parseConfig();
+
 			} else {
 
-				$this->_config($config);
+				$this->parseConfig($config);
 
 			}
 
 		} else {
 
-			$this->_config();
+			$this->parseConfig();
 
 		}
 
 	}
 
-	private function _config($config = null) {
+	public function parseConfig($config = null) {
 
 		if(!empty($config)) $this->config = $config;
 
