@@ -42,18 +42,14 @@ class Templ33tPluginHandler {
 
 		if(!empty($cname) && $class = self::load($cname)) {
 
-			if(!empty($config)) {
+			$n = new $class();
+			if(!empty($config)) $n->configure($config);
 
-				$n = new $class();
-				$n->configure($config);
+			return $n;
 
-				return $n;
+		} else {
 
-			} else {
-
-				return new $class();
-
-			}
+			return false;
 
 		}
 

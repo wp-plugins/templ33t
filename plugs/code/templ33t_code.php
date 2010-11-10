@@ -10,7 +10,8 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 
 	function init() {
 
-		
+		if($this->bindable)
+			add_shortcode($this->slug, array(&$this, 'handleShortcode'));
 
 	}
 
@@ -23,6 +24,12 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 
 		return $str;
 		
+	}
+
+	function handleShortcode() {
+
+		return $this->value;
+
 	}
 
 }

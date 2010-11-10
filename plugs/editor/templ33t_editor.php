@@ -1,27 +1,22 @@
 <?php
 
-class Templ33tEditor {
+class Templ33tEditor extends Templ33tPlugin {
 
-	static $load_js = true;
-	static $custom_panel = false;
-
+	var $id;
+	var $value;
 	var $slug;
 	var $label;
 	var $description;
-	var $id;
-	var $value;
+
+	static $load_js = true;
+	static $custom_panel = false;
 
 	function __construct() {
 
 		
 	}
 
-	function hasCustomPanel() {
-
-		return self::$custom_panel;
-
-	}
-	
+	/*
 	function display() {
 
 		$str = '
@@ -51,20 +46,8 @@ class Templ33tEditor {
 		return $str;
 
 	}
-
-	/*
-	function display() {
-
-
-		ob_start();
-		the_editor($this->value);
-		$editor = ob_get_clean();
-
-		$editor = preg_replace('/(\<script.*\>.*\<\/script\>)/mi', '', $editor);
-		
-		return $editor;
-	}
 	*/
+
 }
 
 ?>

@@ -13,9 +13,8 @@ class Templ33t {
 	static $assets_url;
 	static $assets_dir;
 
-	var $use_site_option;
-
-	var $area_defaults = array(
+	var $config_defaults = array(
+		'slug' => '',
 		'type' => 'editor',
 		'description' => '',
 		'optional' => false,
@@ -29,12 +28,35 @@ class Templ33t {
 		'bindable',
 		'searchable',
 	);
+
+	var $active = true;
+	var $render = false;
+
+	var $use_site_option;
+
+	var $map = array();
+	var $meta = array();
+	var $block_objects = array();
+	var $option_objects = array();
 	
 	function __construct() {
 
+		// generate paths
 		if(empty(self::$wp_content_url)) $this->fillPaths();
 
+		// check existence of site options
 		$this->use_site_option = function_exists('add_site_option');
+
+		// grab theme name
+		$theme = get_template();
+
+		// get theme map
+		$map = unserialize($this->getOption('templ33t_map'));
+		if(array_key_exists($theme, $map)) {
+			$this->map = $map[$theme];
+		} else {
+			$this->active = false;
+		}
 
 	}
 
@@ -60,6 +82,34 @@ class Templ33t {
 			self::$assets_url = self::$wp_content_url.'/plugins/templ33t/';
 			self::$assets_dir = self::$wp_content_dir.'/plugins/templ33t/';
 		}
+
+	}
+
+	function getOption($key) {
+		
+		if($this->use_site_option) return get_site_option($key);
+		else return get_option($key);
+
+	}
+
+	function addOption($key, $val) {
+
+		if($this->use_site_option) return add_site_option($key, $val);
+		else return add_option($key, $val);
+
+	}
+
+	function updateOption($key, $val) {
+
+		if($this->use_site_option) return update_site_option($key, $val);
+		else return update_option($key, $val);
+
+	}
+
+	function deleteOption($key) {
+
+		if($this->use_site_option) return delete_site_option($key);
+		else return delete_option($key);
 
 	}
 
@@ -137,11 +187,14 @@ class Templ33t {
 
 			$slug = $this->slug($title);
 
-			$options[$slug] = array(
-				'label' => $title,
-				'slug' => $slug,
-				'type' => $type,
-				'config' => $config
+			$options[$slug] = array_merge(
+				$this->config_defaults,
+				array(
+					'label' => $title,
+					'slug' => $slug,
+					'type' => $type,
+					'config' => $config
+				)
 			);
 
 		}
@@ -223,7 +276,7 @@ class Templ33t {
 
 			if($config['main'] != $title) {
 
-				$config['blocks'][$slug] = array_merge($this->area_defaults, $area);
+				$config['blocks'][$slug] = array_merge($this->config_defaults, $area);
 			}
 
 		}
@@ -257,6 +310,107 @@ class Templ33t {
 		$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $key)))));
 
 		return $slug;
+
+	}
+
+	public function prepareMeta() {
+
+		global $wpdb, $post;
+
+		if(!$this->active || !empty($this->meta)) return;
+
+		// cleanse default page name
+		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = basename(get_page_template());
+
+		if(array_key_exists($post->page_template, $this->map)) {
+
+			// grab meta
+			$all_meta = $wpdb->get_results(
+				$wpdb->prepare('SELECT meta_key, meta_value, meta_id, post_id FROM '.$wpdb->postmeta.' WHERE post_id = %d', $post->ID),
+				ARRAY_A
+			);
+
+			// filter out unrelated
+			foreach($all_meta as $key => $val) {
+				if(strpos($val['meta_key'], 'templ33t_option_') !== false) {
+					$slug = str_replace('templ33t_option_', '', $val['meta_key']);
+					$this->meta[$slug] = array_merge($this->config_defaults, array('id' => $val['meta_id'], 'value' => $val['meta_value']));
+				} elseif(strpos($val['meta_key'], 'templ33t_') !== false) {
+					$slug = str_replace('templ33t_', '', $val['meta_key']);
+					$this->meta[$slug] = array_merge($this->config_defaults, array('id' => $val['meta_id'], 'value' => $val['meta_value']));
+				}
+			}
+
+			// prepare option meta
+			if(!empty($this->map[$post->page_template]['options'])) {
+
+				foreach($this->map[$post->page_template]['options'] as $slug => $opt) {
+
+					// create any non-existent custom fields
+					if(!array_key_exists($slug, $this->meta)) {
+
+						if(add_post_meta($post->ID, 'templ33t_option_'.$slug, '', true)) {
+							$opt['id'] = $wpdb->insert_id;
+							$opt['value'] = '';
+						}
+						$this->meta[$slug] = array_merge($this->config_defaults, $opt);
+
+					// add meta ID and value to existing custom fields
+					} else {
+
+						$this->meta[$slug] = array_merge($this->meta[$slug], $opt);
+
+					}
+
+					// instantiate plugin
+					$option_handler = Templ33tPluginHandler::instantiate($opt['type'], $this->meta[$slug]);
+
+					// init plugin
+					$option_handler->init();
+
+					// store object
+					$this->option_objects[$slug] = $option_handler;
+					
+				}
+
+			}
+
+			// prepare block meta
+			if(!empty($this->map[$post->page_template]['blocks'])) {
+
+				foreach($this->map[$post->page_template]['blocks'] as $slug => $block) {
+
+					// create any non-existent custom fields
+					if(!array_key_exists($slug, $this->meta)) {
+
+						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
+							$block['id'] = $wpdb->insert_id;
+						}
+						$this->meta[$slug] = array_merge($this->config_defaults, $opt);
+
+					// add meta ID and value to existing custom fields
+					} else {
+
+						$this->meta[$slug] = array_merge($this->meta[$slug], $block);
+
+					}
+
+					// instantiate plugin
+					$block_handler = Templ33tPluginHandler::instantiate($block['type'], $this->meta[$slug]);
+
+					// init plugin
+					$block_handler->init();
+
+					// store object
+					$this->block_objects[$slug] = $block_handler;
+					
+				}
+
+			}
+
+			if(!empty($this->option_objects) || !empty($this->block_objects)) $this->render = true;
+
+		}
 
 	}
 
