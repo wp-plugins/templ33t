@@ -3,6 +3,8 @@
 jQuery(document).ready(
 	function() {
 
+		jQuery('div#templ33t_control ul li a').click(templ33tSwitchTab);
+
 		jQuery('form#templ33t_new_template').submit(
 			function() {
 
@@ -81,3 +83,13 @@ jQuery(document).ready(
 		
 	}
 );
+
+function templ33tSwitchTab() {
+
+	jQuery('li.templ33t_template_box').hide();
+	jQuery('div#templ33t_control ul li').removeClass('selected');
+
+	jQuery('li.templ33t_template_box[rel="'+jQuery(this).attr('rel')+'"]').show();
+	jQuery(this).parent().addClass('selected');
+	
+}

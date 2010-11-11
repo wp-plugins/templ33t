@@ -68,8 +68,6 @@ abstract class Templ33tPlugin {
 	 */
 	var $type;
 	
-	static $load_js = false;
-	static $print_js = false;
 	static $custom_panel = false;
 	static $custom_post = false;
 

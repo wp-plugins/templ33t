@@ -7,8 +7,7 @@ class Templ33tEditor extends Templ33tPlugin {
 	var $slug;
 	var $label;
 	var $description;
-
-	static $load_js = true;
+	
 	static $custom_panel = false;
 
 	function __construct() {

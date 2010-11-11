@@ -129,7 +129,26 @@ class Templ33t {
 
 	function parseTheme($theme = null) {
 
+		$tdir = self::$wp_content_dir . '/themes/' . $theme . '/';
 
+		$files = scandir($tdir);
+
+		$ignore = array('.', '..', 'style.css', 'header.php', 'footer.php', 'comments.php');
+
+		$templates = array();
+
+		foreach($files as $tfile) {
+
+			if(!in_array($tfile, $ignore) && !is_dir($tfile) && strpos($tfile, '.php')) {
+
+				if($conf = $this->parseTemplate($tdir.$tfile))
+					$templates[$tfile] = $conf;
+
+			}
+
+		}
+
+		return $templates;
 
 	}
 
@@ -141,10 +160,29 @@ class Templ33t {
 		
 		// parse retrieved data
 		$config = $this->parseConfig($template_data);
-		$config['options'] = $this->parseOptions($template_data);
-		
-		// return template configuration
-		return $config;
+		$options = $this->parseOptions($template_data);
+
+
+		if(!empty($config) || !empty($options)) {
+
+			$config = array_merge(
+				array(
+					'main' => 'Page Content',
+					'description' => '',
+					'blocks' => array(),
+					'options' => array(),
+				),
+				$config,
+				$options
+			);
+
+			return $config;
+
+		} else {
+
+			return false;
+
+		}
 
 	}
 
@@ -171,8 +209,8 @@ class Templ33t {
 				$title = trim(chop(substr($title, 0, (strlen($title) - (strlen($attrstr[1])+2)))));
 				$type = $attrstr[1];
 
-				if(strpos($type, '=') !== false) {
-					$pieces = explode('=', $type);
+				if(strpos($type, '?') !== false) {
+					$pieces = explode('?', $type);
 					$type = $pieces[0];
 					$config = $pieces[1];
 				} else {
@@ -200,7 +238,7 @@ class Templ33t {
 
 		}
 
-		return $options;
+		return array('options' => $options);
 
 	}
 
@@ -253,8 +291,8 @@ class Templ33t {
 							$area['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
 						}
 					} else {
-						if(strpos($attr, '=') !== false) {
-							$pieces = explode('=', $attr);
+						if(strpos($attr, '?') !== false) {
+							$pieces = explode('?', $attr);
 							$area['type'] = $prices[0];
 							$area['config'] = $prices[1];
 						} else {

@@ -1,9 +1,10 @@
 
+/*
 jQuery(document).ready(
 	function() {
 
 		if(jQuery('div#templ33t_control').length) {
-			/*
+			
 			jQuery('textarea.templ33t_editor_editor').each(
 				function() {
 					jQuery(this).addClass('mceEditor');
@@ -29,13 +30,13 @@ jQuery(document).ready(
 
 				}
 			);
-			*/
 		}
 
 	}
 );
 
 function templ33tEdToolbar(mid) {
+	alert('testing 1');
 	var elem_str = '<div id="ed_toolbar">';
 	for (var i = 0; i < edButtons.length; i++) {
 		elem_str += templ33tEdShowButton(edButtons[i], i);
@@ -49,6 +50,7 @@ function templ33tEdToolbar(mid) {
 }
 
 function templ33tEdShowButton(button, i) {
+	alert('testing 2');
 	if (button.id == 'ed_img') {
 		return '<input type="button" id="' + button.id + '" accesskey="' + button.access + '" class="ed_button" onclick="edInsertImage(edCanvas);" value="' + button.display + '" />';
 	}
@@ -62,6 +64,8 @@ function templ33tEdShowButton(button, i) {
 
 function templ33tSwitchEditors(mid, mode) {
 
+	alert('testing 3');
+
 	var oldCanvas = edCanvas;
 
 	edCanvas = document.getElementById('templ33t_editor_editor_'+mid);
@@ -71,3 +75,4 @@ function templ33tSwitchEditors(mid, mode) {
 	edCanvas = oldCanvas;
 
 }
+*/

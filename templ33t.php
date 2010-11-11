@@ -152,10 +152,12 @@ $templ33t_errors = array(
 	'duptemp' => 'This template has already been added.',
 	'dupblock' => 'This block already exists.',
 	'notemp' => 'This template file does not exist in the chosen theme.',
+	'notheme' => 'No theme chosen.',
 	'noblock' => 'Invalid block.',
 	'nopub' => 'The most recent configuration has already been published.',
 	'noaction' => 'Invalid action.',
 	'nochange' => 'No configuration changes detected.',
+	'nothemeconfig' => 'No Templ33t configuration detected for this theme. The cached configuration can be removed.',
 	'noconfig' => 'No Templ33t configuration detected for this template. The cached configuration can be removed.',
 );
 
@@ -632,6 +634,78 @@ function templ33t_handle_settings() {
 
 		switch($_GET['t_action']) {
 
+			// scan theme templates for configurations
+			case 'scan':
+
+				if(!empty($_GET['theme'])) {
+
+					$theme = htmlspecialchars($_GET['theme'], ENT_QUOTES);
+
+					// get old config
+					$compare = array();
+					$old = $wpdb->get_results('SELECT * FROM `'.$template_table_name.'` WHERE `theme` = "'.$theme.'"', ARRAY_A);
+					foreach($old as $key => $val) {
+						$compare[$val['template']] = unserialize($val['config']);
+					}
+
+					// get templates
+					$templates = $templ33t->parseTheme($theme);
+
+					if($compare != $templates) {
+
+						// delete previous records
+						$wpdb->query('DELETE FROM `'.$template_table_name.'` WHERE `theme` = "'.$theme.'"');
+
+						// update map dev version
+						$t_dev = $templ33t->getOption('templ33t_map_dev');
+						$t_dev++;
+						$templ33t->updateOption('templ33t_map_dev', $t_dev);
+
+						if(!empty($templates)) {
+
+							// insert new data
+							foreach($templates as $key => $val) {
+								$wpdb->insert(
+									$template_table_name,
+									array(
+										'theme' => $theme,
+										'template' => $key,
+										'config' => serialize($val)
+									)
+								);
+							}
+
+							// return to settings page
+							$redirect = $templ33t_settings_url.'&theme='.$theme;
+							wp_redirect($redirect);
+
+						} else {
+
+							// return to settings page
+							$redirect = $templ33t_settings_url.'&theme='.$theme.'&error=nothemeconfig';
+							wp_redirect($redirect);
+
+						}
+
+					} else {
+
+						// return to settings page
+						$redirect = $templ33t_settings_url.'&theme='.$theme.'&error=nochange';
+						wp_redirect($redirect);
+
+					}
+
+				} else {
+
+					// return to settings page
+					$redirect = $templ33t_settings_url.'&error=notheme';
+					wp_redirect($redirect);
+
+				}
+
+
+				break;
+
 			// rescan template config
 			case 'rescan':
 
@@ -998,7 +1072,8 @@ function templ33t_settings() {
 
 				<div>
 
-					<a href="#TB_inline?width=400&height=180&inlineId=templ33t_new_template_container&modal=true" class="thickbox">Add Template</a>
+					<a href="#TB_inline?width=400&height=180&inlineId=templ33t_new_template_container&modal=true" class="thickbox">Add Template</a> |
+					<a href="<?php echo $templ33t_settings_url; ?>&t_action=scan&theme=<?php echo $theme_selected; ?>">Scan All Templates</a>
 
 					<div id="templ33t_new_template_container" style="display: none; text-align: center;">
 						<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
@@ -1028,6 +1103,19 @@ function templ33t_settings() {
 				</div>
 
 				<hr/>
+
+
+				<!-- template navigation -->
+				<?php if(!empty($templates)) { ?>
+				<div id="templ33t_control">
+					<ul>
+						<?php $x = 0; foreach($templates as $tkey => $tval) { ?>
+						<li<?php if($x == 0) { ?> class="selected"<?php } ?>><a href="#" rel="<?php echo $tval['templ33t_template_id']; ?>"><?php echo $tval['template']; ?></a></li>
+						<?php $x++; } ?>
+					</ul>
+				</div>
+				<?php } ?>
+
 
 				<ul>
 					<?php /*
@@ -1088,9 +1176,14 @@ function templ33t_settings() {
 					</li>
 					*/ ?>
 
+
+
+
+
+
 					
-					<?php if(!empty($templates)) { foreach($templates as $tkey => $tval) { ?>
-					<li class="templ33t_template_box">
+					<?php if(!empty($templates)) { $x = 0; foreach($templates as $tkey => $tval) { ?>
+					<li class="templ33t_template_box" rel="<?php echo $tval['templ33t_template_id']; ?>" <?php if($x > 0) { ?> style="display: none;"<?php } ?>>
 						<div class="templ33t_right">
 
 
@@ -1173,7 +1266,7 @@ function templ33t_settings() {
 						</p>
 						<div class="templ33t_clear_right"></div>
 					</li>
-					<?php } } ?>
+					<?php $x++; } } ?>
 				</ul>
 				
 				

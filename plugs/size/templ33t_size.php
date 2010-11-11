@@ -17,7 +17,8 @@ class Templ33tSize extends Templ33tPlugin implements Templ33tOption {
 		parent::parseConfig($config);
 
 		if(!empty($this->config)) {
-			$this->default = $this->config;
+			parse_str($this->config, $config);
+			if(array_key_exists('default', $config)) $this->default = $config['default'];
 		}
 
 	}
