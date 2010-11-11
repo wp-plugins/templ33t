@@ -1202,6 +1202,7 @@ function templ33t_settings() {
  * @global string $table_prefix
  * @global object $wpdb
  */
+/*
 function templ33t_handle_meta() {
 
 	global $templ33t, $templ33t_meta, $templ33t_options, $templ33t_templates, $templ33t_meta_fetched, $templ33t_plugins, $templ33t_render, $post, $wpdb;
@@ -1339,61 +1340,6 @@ function templ33t_handle_meta() {
 		}
 		
 		// check for theme-wide definition and create any non-existent blocks
-		/*
-		if(array_key_exists('ALL', $templ33t_templates) && !empty($templ33t_templates['ALL']['blocks'])) {
-			
-			// check for template blocks
-			if(!empty($templ33t_templates['ALL']['blocks'])) {
-			
-				// flag
-				$templ33t_render = true;
-
-				// add missing custom fields
-				foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
-					if(!array_key_exists($slug, $templ33t_meta)) {
-						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
-							$meta_id = $wpdb->get_col('SELECT LAST_INSERT_ID() as lid FROM `'.$wpdb->prefix.'postmeta` LIMIT 1');
-							$templ33t_meta[$slug] = array(
-								'id' => $meta_id[0],
-								'type' => $block['type'],
-								'label' => $block['label'],
-								'value' => '',
-							);
-						}
-					} else {
-						$templ33t_meta[$slug]['type'] = $block['type'];
-						$templ33t_meta[$slug]['label'] = $block['label'];
-						$templ33t_meta[$slug]['description'] = $block['description'];
-					}
-				}
-
-				// init plugins
-				foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
-
-					$cname = 'Templ33t'.ucwords($block['type']);
-
-					if(!in_array($cname, $templ33t_plugins)) {
-						$templ33t_plugins[] = $cname;
-						include_once(TEMPL33T_ASSETS_DIR . 'plugs/'.$block['type'].'/templ33t_' . $block['type'] . '.php');
-						if($cname::$load_js)
-							wp_register_script($cname, TEMPL33T_ASSETS_URL . 'plugs/'.$block['type'].'/templ33t_'.$block['type'].'.js');
-					}
-					
-					$instance = new $cname();
-					$instance->slug = $slug;
-					$instance->label = $block['label'];
-					$instance->description = $block['description'];
-					$instance->id = $templ33t_meta[$slug]['id'];
-					$instance->value = $templ33t_meta[$slug]['value'];
-
-					$templ33t_templates['ALL']['blocks'][$slug]['instance'] = $instance;
-
-				}
-			
-			}
-
-		}
-		*/
 
 		if(!$templ33t_render) {
 
@@ -1405,6 +1351,7 @@ function templ33t_handle_meta() {
 	}
 
 }
+*/
 
 function templ33t_option_save() {
 
@@ -1814,25 +1761,18 @@ function templ33t_block($block = null, $before = null, $after = null) {
 
 	global $templ33t, $templ33t_available, $templ33t_meta, $post;
 
-	// grab custom fields
 	/*
-	if(empty($templ33t_available)) {
-		$templ33t_available = get_post_custom($post->ID);
-	}
-	if(!is_array($templ33t_available)) $templ33t_available = array();
-
-	// output block if exists
-	if(array_key_exists('templ33t_'.$block, $templ33t_available)) {
-		if(is_array($templ33t_available['templ33t_'.$block]))
-			echo apply_filters('the_content', $before.$templ33t_available['templ33t_'.$block][0].$after);
-		else
-			echo apply_filters('the_content', $before.$templ33t_available['templ33t_'.$block].$after);
-	}
-	*/
-
 	if(array_key_exists($block, $templ33t->block_objects)) {
 		echo apply_filters('the_content', $before.$templ33t->block_objects[$block]->value.$after);
 	}
+	*/
+
+	$value = array_key_exists($block, $templ33t->block_objects) ? $templ33t->block_objects[$block]->value : '';
+
+	if(!empty($value) || $templ33t->block_objects[$block]->optional) {
+		echo apply_filters('the_content', $before.$templ33t->block_objects[$block]->value.$after);
+	}
+	
 
 }
 
