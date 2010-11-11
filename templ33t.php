@@ -1406,7 +1406,7 @@ function templ33t_handle_meta() {
 
 }
 
-function templ33t_option_save($content = null) {
+function templ33t_option_save() {
 
 	global $templ33t;
 	
@@ -1428,6 +1428,8 @@ function templ33t_option_save($content = null) {
 					'key' => 'templ33t_'.$instance->slug,
 					'value' => $instance->value,
 				);
+
+				$templ33t->block_objects[$slug] = $instance;
 				
 			}
 
@@ -1446,13 +1448,13 @@ function templ33t_option_save($content = null) {
 					'value' => $instance->value,
 				);
 
+				$templ33t->option_objects[$slug] = $instance;
+
 			}
 
 		}
 
 	}
-
-	return $content;
 
 }
 
@@ -1472,6 +1474,7 @@ function templ33t_add_comment($content = null) {
 		$template = array_key_exists('page_template', $_POST) && !empty($_POST['page_template']) ? $_POST['page_template'] : basename(get_page_template());
 		if($template == 'default') $template = basename(get_page_template());
 
+		/*
 		$blocks = array();
 
 		// grab template blocks
@@ -1501,6 +1504,51 @@ function templ33t_add_comment($content = null) {
 
 			$content .= '  '.$append;
 
+		}
+		*/
+
+		// grab searchable block slugs
+		$searchable = array();
+		if(array_key_exists($template, $templ33t->map)) {
+			foreach($templ33t->map[$template]['blocks'] as $slug => $block) {
+				if($block['searchable']) $searchable[] = $slug;
+			}
+		}
+
+		if(!empty($searchable)) {
+
+			// grab meta ids
+			$metadata = array();
+			foreach($_POST['meta'] as $key => $data) {
+				$metadata[$data['key']] = array('id' => $key, 'value' => $data['value']);
+			}
+
+			// strip existing comment
+			$content = templ33t_strip_comment($content);
+
+			// generate apend string
+			$append = '<!-- TEMPL33T[ ';
+			foreach($searchable as $slug) {
+
+				if(!array_key_exists($slug, $templ33t->block_objects)) {
+
+					$block = $templ33t->map[$template]['blocks'][$slug];
+					$block['slug'] = $slug;
+					$block['id'] = $metadata['templ33t_'.$slug]['id'];
+					$block['value'] = $metadata['templ33t_'.$slug]['value'];
+
+					$templ33t->block_objects[$slug] = Templ33tPluginHandler::instantiate($block['type'], $block);
+
+				}
+				
+				//$append .= '  ::' . $slug . ':: ' . preg_replace('/(<!--.+?-->)/mi', '', preg_replace('/([\r\n]+)/mi', ' ', $templ33t->block_objects[$slug]->value));
+				$append .= '  ::' . $slug . ':: ' . strip_tags(nl2br($templ33t->block_objects[$slug]->value));
+
+			}
+			$append .= ' ]END_TEMPL33T -->';
+
+			$content .= '  '.$append;
+			
 		}
 
 	}

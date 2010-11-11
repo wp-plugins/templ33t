@@ -351,7 +351,8 @@ class Templ33t {
 					if(!array_key_exists($slug, $this->meta)) {
 
 						if(add_post_meta($post->ID, 'templ33t_option_'.$slug, '', true)) {
-							$opt['id'] = $wpdb->insert_id;
+							//$opt['id'] = $wpdb->insert_id; // not consistent
+							$opt['id'] = $wpdb->get_var('SELECT LAST_INSERT_ID() as '.$slug.'_option_id FROM `'.$wpdb->prefix.'postmeta`');
 							$opt['value'] = '';
 						}
 						$this->meta[$slug] = array_merge($this->config_defaults, $opt);
@@ -385,9 +386,11 @@ class Templ33t {
 					if(!array_key_exists($slug, $this->meta)) {
 
 						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
-							$block['id'] = $wpdb->insert_id;
+							//$block['id'] = $wpdb->insert_id; // not consistent
+							$block['id'] = $wpdb->get_var('SELECT LAST_INSERT_ID() as '.$slug.'_id FROM `'.$wpdb->prefix.'postmeta`');
+							$block['value'] = '';
 						}
-						$this->meta[$slug] = array_merge($this->config_defaults, $opt);
+						$this->meta[$slug] = array_merge($this->config_defaults, $block);
 
 					// add meta ID and value to existing custom fields
 					} else {
@@ -408,6 +411,8 @@ class Templ33t {
 				}
 
 			}
+
+			print_r($this->meta);
 
 			if(!empty($this->option_objects) || !empty($this->block_objects)) $this->render = true;
 
