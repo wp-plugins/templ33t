@@ -195,46 +195,66 @@ class Templ33t {
 
 		if(empty($data)) return array();
 
-		$data = explode(',', $data);
 		$options = array();
 
-		foreach($data as $key => $val) {
+		$matches = array();
+		preg_match('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),*/i', $data, $matches);
 
-			$title = trim(chop($val));
-			$area = array();
+		if(!empty($matches[1])) {
 
-			// check for attributes
-			if(preg_match('/\[(.+)\]$/i', $title, $attrstr)) {
+			foreach($matches[1] as $key => $val) {
 
-				$title = trim(chop(substr($title, 0, (strlen($title) - (strlen($attrstr[1])+2)))));
-				$type = $attrstr[1];
+				/*
+				$title = trim(chop($val));
+				$area = array();
 
-				if(strpos($type, '?') !== false) {
-					$pieces = explode('?', $type);
-					$type = $pieces[0];
-					$config = $pieces[1];
+				// check for attributes
+				if(preg_match('/\[(.+)\]$/i', $title, $attrstr)) {
+
+					$title = trim(chop(substr($title, 0, (strlen($title) - (strlen($attrstr[1])+2)))));
+					$type = $attrstr[1];
+
+					if(strpos($type, '?') !== false) {
+						$pieces = explode('?', $type);
+						$type = $pieces[0];
+						$config = $pieces[1];
+					} else {
+						$config = null;
+					}
+
 				} else {
+
+					$type = 'text';
 					$config = null;
+
+				}
+				*/
+
+
+				$opt = array('label' => $matches[2][$key]);
+
+				if(!empty($matches[3][$key])) {
+
+					if(strpos($matches[3][$key], '?') !== false) {
+						list($opt['type'], $opt['config']) = explode('?', $matches[3][$key]);
+					} else {
+						$opt['type'] = $matches[3][$key];
+					}
+
+				} else {
+
+					$opt['type'] = 'text';
+
 				}
 
-			} else {
+				$opt['slug'] = $this->slug($opt['label']);
 
-				$type = 'text';
-				$config = null;
+				$options[$opt['slug']] = array_merge(
+					$this->config_defaults,
+					$opt
+				);
 
 			}
-
-			$slug = $this->slug($title);
-
-			$options[$slug] = array_merge(
-				$this->config_defaults,
-				array(
-					'label' => $title,
-					'slug' => $slug,
-					'type' => $type,
-					'config' => $config,
-				)
-			);
 
 		}
 
