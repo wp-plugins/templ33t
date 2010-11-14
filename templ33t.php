@@ -1635,7 +1635,26 @@ function templ33t_content_filter($content = null) {
  * Enqueue Templ33t stylesheet
  */
 function templ33t_styles() {
+	
+	global $templ33t;
+
 	wp_enqueue_style('templ33t_styles');
+
+	// get option css
+	foreach($templ33t->option_objects as $key => $val) {
+		$cname = Templ33tPluginHandler::load($val->type);
+		if($cname::$load_styles) echo $val->styles();
+	}
+
+	// get block css
+	foreach($templ33t->block_objects as $key => $val) {
+		$cname = Templ33tPluginHandler::load($val->type);
+
+		//echo $cname.' - '.$cname::$load_styles."\n";
+
+		if($cname::$load_styles) echo $val->styles();
+	}
+
 }
 
 /**

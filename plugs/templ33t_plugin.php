@@ -70,7 +70,10 @@ abstract class Templ33tPlugin {
 	
 	static $custom_panel = false;
 	static $custom_post = false;
-
+	static $load_js = false;
+	static $load_styles = false;
+	static $res_loaded = false;
+	
 	public function __set($key, $val) {
 		return $val;
 	}
@@ -119,6 +122,14 @@ abstract class Templ33tPlugin {
 
 	public function handlePost() {
 		
+	}
+
+	public function js() {
+
+	}
+
+	public function styles() {
+
 	}
 
 }

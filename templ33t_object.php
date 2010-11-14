@@ -195,50 +195,33 @@ class Templ33t {
 
 		if(empty($data)) return array();
 
-		$options = array();
-
+		// grab option string
 		$matches = array();
-		preg_match('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),*/i', $data, $matches);
+		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),*/i', $data, $matches);
 
+		$options = array();
+		
 		if(!empty($matches[1])) {
+
+			// grab description strings
+			$descriptions = array();
+			if(preg_match_all('|Templ33t Description (.*\:.*)$|mi', $template_str, $descriptions))
+				$descriptions = $this->parseDescriptions($descriptions[1]);
 
 			foreach($matches[1] as $key => $val) {
 
-				/*
-				$title = trim(chop($val));
-				$area = array();
-
-				// check for attributes
-				if(preg_match('/\[(.+)\]$/i', $title, $attrstr)) {
-
-					$title = trim(chop(substr($title, 0, (strlen($title) - (strlen($attrstr[1])+2)))));
-					$type = $attrstr[1];
-
-					if(strpos($type, '?') !== false) {
-						$pieces = explode('?', $type);
-						$type = $pieces[0];
-						$config = $pieces[1];
-					} else {
-						$config = null;
-					}
-
-				} else {
-
-					$type = 'text';
-					$config = null;
-
-				}
-				*/
-
-
-				$opt = array('label' => $matches[2][$key]);
+				$opt = array('label' => $matches[2][$key], 'slug' => $this->slug($matches[2][$key]));
+				$opt['description'] = array_key_exists($opt['slug'], $descriptions) ? $descriptions[$opt['slug']] : '';
 
 				if(!empty($matches[3][$key])) {
 
-					if(strpos($matches[3][$key], '?') !== false) {
-						list($opt['type'], $opt['config']) = explode('?', $matches[3][$key]);
+					$cstr = trim(chop($matches[3][$key]));
+					$cstr = trim(chop(substr($cstr, 1, (strlen($cstr) - 2))));
+					
+					if(strpos($cstr, '?') !== false) {
+						list($opt['type'], $opt['config']) = explode('?', $cstr);
 					} else {
-						$opt['type'] = $matches[3][$key];
+						$opt['type'] = $cstr;
 					}
 
 				} else {
@@ -246,8 +229,6 @@ class Templ33t {
 					$opt['type'] = 'text';
 
 				}
-
-				$opt['slug'] = $this->slug($opt['label']);
 
 				$options[$opt['slug']] = array_merge(
 					$this->config_defaults,
@@ -265,79 +246,74 @@ class Templ33t {
 	function parseConfig($template_str = null) {
 
 		// grab block config string from file
-		$blocks = '';
-		if ( preg_match( '|Templ33t Blocks:(.*)$|mi', $template_str, $blocks ) )
-			$blocks = _cleanup_header_comment($blocks[1]);
+		$blockstr = '';
+		if ( preg_match( '|Templ33t Blocks:(.*)$|mi', $template_str, $blockstr ) )
+			$blockstr = _cleanup_header_comment($blockstr[1]);
 
 		// catch empty configuration (not a templ33t template)
-		if(empty($blocks)) return array();
-
-		// grab description data
-		$descriptions = array();
-		if(preg_match_all('|Templ33t Description (.*\:.*)$|mi', $template_str, $descriptions))
-			$descriptions = $descriptions[1];
+		if(empty($blockstr)) return array();
 
 		// set up config array
-		$blocks = explode(',', $blocks);
 		$config = array(
 			'main' => 'Page Content',
 			'description' => '',
 			'blocks' => array(),
+			'options' => array(),
 		);
 
-		if(!empty($descriptions))
-			$descriptions = $this->parseDescriptions($descriptions);
+		$matches = array();
+		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),*/i', $blockstr, $matches);
 
-		foreach($blocks as $key => $val) {
+		if(!empty($matches[1])) {
 
-			$title = trim(chop($val));
-			$area = array();
+			// grab description data
+			$descriptions = array();
+			if(preg_match_all('|Templ33t Description (.*\:.*)$|mi', $template_str, $descriptions))
+				$descriptions = $this->parseDescriptions($descriptions[1]);
 
-			// check for attributes
-			if(preg_match('/\[(.+)\]$/i', $val, $attrstr)) {
+			foreach($matches[1] as $key => $val) {
+
+				$block = array('label' => $matches[2][$key], 'slug' => $this->slug($matches[2][$key]));
+				$block['description'] = array_key_exists($block['slug'], $descriptions) ? $descriptions[$block['slug']] : '';
 				
-				$attributes = explode('|', $attrstr[1]);
+				if(!empty($matches[3][$key])) {
 
-				$title = trim(chop(substr($title, 0, (strlen($title) - (strlen($attrstr[1])+2)))));
-				$slug = Templ33t::slug($title);
+					$cstr = trim(chop($matches[3][$key]));
+					$cstr = trim(chop(substr($cstr, 1, (strlen($cstr) - 2))));
 
-				foreach($attributes as $attr) {
-					if(in_array($attr, $this->plugin_attributes)) {
-						if($attr == 'main') {
-							$config['main'] = $title;
-							$config['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
-						} else {
-							$area[$attr] = true;
-							$area['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
+					$attributes = explode('|', $cstr);
+
+					foreach($attributes as $akey => $aval) {
+
+						if($aval == 'main') {
+							$config['main'] = $block['label'];
+							$config['description'] = array_key_exists($block['slug'], $descriptions) ? $descriptions[$block['slug']] : '';
+							break;
 						}
-					} else {
-						if(strpos($attr, '?') !== false) {
-							$pieces = explode('?', $attr);
-							$area['type'] = $prices[0];
-							$area['config'] = $prices[1];
+
+						if(strpos($aval, '?') !== false) {
+							list($block['type'], $block['config']) = explode('?', $aval);
 						} else {
-							$area['type'] = $attr;
-							$area['config'] = null;
+							if(in_array($aval, $this->plugin_attributes)) {
+								$block[$aval] = true;
+							} else {
+								$block['type'] = $aval;
+							}
 						}
-						$area['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
+
 					}
+
+					if($aval == 'main') continue;
+
 				}
 
-			} else {
-
-				$slug = Templ33t::slug($title);
-				$area['description'] = array_key_exists($slug, $descriptions) ? $descriptions[$slug] : '';
+				$config['blocks'][$block['slug']] = array_merge(
+					$this->config_defaults,
+					$block
+				);
 
 			}
-
-			$area['label'] = $title;
-			$area['slug'] = $slug;
-
-			if($config['main'] != $title) {
-
-				$config['blocks'][$slug] = array_merge($this->config_defaults, $area);
-			}
-
+			
 		}
 
 		//die(print_r($config, true));
