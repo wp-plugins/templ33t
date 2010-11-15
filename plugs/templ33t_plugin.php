@@ -71,6 +71,7 @@ abstract class Templ33tPlugin {
 	static $custom_panel = false;
 	static $custom_post = false;
 	static $load_js = false;
+	static $dependencies = array();
 	static $load_styles = false;
 	static $res_loaded = false;
 	
@@ -124,11 +125,11 @@ abstract class Templ33tPlugin {
 		
 	}
 
-	public function js() {
-
+	public function js($return = false, $wrap = true) {
+		
 	}
 
-	public function styles() {
+	public function styles($return = false) {
 
 	}
 

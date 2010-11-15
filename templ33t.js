@@ -255,8 +255,10 @@ function templ33t_append(scode) {
 	if(!ctmode) {
 		jQuery('textarea#content').val(jQuery('textarea#content').val()+"<p>"+scode+"</p>");
 		jQuery('#content_ifr').contents().find('body').append("<p>"+scode+"</p>");
+		jQuery('#content_ifr').attr('scrollTop', jQuery('#content_ifr').attr('scrollHeight'));
 	} else {
 		jQuery('textarea#content').val(jQuery('textarea#content').val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>"));
+		jQuery('textarea#content').attr('scrollTop', jQuery('textarea#content').attr('scrollHeight'));
 	}
 
 }

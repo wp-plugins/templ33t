@@ -10,13 +10,19 @@ class Templ33tPluginHandler {
 
 	}
 
+	static function classify($pname = null) {
+
+		return !empty($pname) ? 'Templ33t'.ucwords($pname) : false;
+
+	}
+
 	static function load($cname = null) {
 
 		if(!empty($cname)) {
 
 			if(!array_key_exists($cname, self::$loaded)) {
 
-				$class = 'Templ33t'.ucwords($cname);
+				$class = self::classify($cname);
 				$cpath = TEMPL33T_ASSETS_DIR . 'plugs/' . $cname . '/templ33t_' . $cname . '.php';
 				require_once($cpath);
 

@@ -350,8 +350,8 @@ function templ33t_init() {
 		// add hooks
 		//add_action('posts_selection', 'templ33t_handle_meta', 1);
 		add_action('posts_selection', array(&$templ33t, 'prepareMeta'), 1);
-		add_action('admin_print_styles', 'templ33t_styles', 1);
-		add_action('admin_print_scripts', 'templ33t_scripts', 1);
+		add_action('admin_print_styles', 'templ33t_styles', 10);
+		add_action('admin_print_scripts', 'templ33t_scripts', 10);
 		add_filter('the_editor_content', 'templ33t_strip_comment', 1);
 		add_filter('content_save_pre', 'templ33t_add_comment', 10);
 		add_action('edit_page_form', 'templ33t_elements', 1);
@@ -1449,46 +1449,113 @@ function templ33t_handle_meta() {
 function templ33t_option_save() {
 
 	global $templ33t;
-	
-	if(array_key_exists($_POST['page_template'], $templ33t->map) && array_key_exists('templ33t_meta', $_POST)) {
 
-		foreach($_POST['templ33t_meta'] as $slug => $data) {
+	if(array_key_exists($_POST['page_template'], $templ33t->map)) {
 
-			// handle blocks
-			if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['blocks'])) {
+		if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
 
-				$block = $templ33t->map[$_POST['page_template']]['blocks'][$slug];
-				$block['slug'] = $slug;
-				$block['id'] = $data['id'];
-				$block['value'] = $data['value'];
+			foreach($_POST['meta'] as $id => $data) {
 
-				$instance = Templ33tPluginHandler::instantiate($block['type'], $block);
-				$instance->handlePost();
-				$_POST['meta'][$instance->id] = array(
-					'key' => 'templ33t_'.$instance->slug,
-					'value' => $instance->value,
-				);
+				$slug = str_replace('templ33t_', '', str_replace('templ33t_option_', '', $data['key']));
 
-				$templ33t->block_objects[$slug] = $instance;
-				
+				// handle blocks
+				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['blocks'])) {
+
+					$block = $templ33t->map[$_POST['page_template']]['blocks'][$slug];
+					$block['slug'] = $slug;
+					$block['id'] = $id;
+					$block['value'] = $data['value'];
+
+					$cname = Templ33tPluginHandler::load($block['type']);
+
+					if($cname::$custom_post) {
+
+						$instance = Templ33tPluginHandler::instantiate($block['type'], $block);
+
+						$instance->handlePost();
+
+						$_POST['meta'][$instance->id] = array(
+							'key' => 'templ33t_'.$instance->slug,
+							'value' => $instance->value,
+						);
+
+						$templ33t->block_objects[$slug] = $instance;
+
+					}
+				}
+
+				// handle options
+				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['options'])) {
+
+					$option = $templ33t->map[$_POST['page_template']]['options'][$slug];
+					$option['slug'] = $slug;
+					$option['id'] = $id;
+					$option['value'] = $data['value'];
+
+					$cname = Templ33tPluginHandler::load($option['type']);
+
+					if($cname::$custom_post) {
+
+						$instance = Templ33tPluginHandler::instantiate($option['type'], $option);
+
+						$instance->handlePost();
+
+						$_POST['meta'][$instance->id] = array(
+							'key' => 'templ33t_option_'.$instance->slug,
+							'value' => $instance->value,
+						);
+
+						$templ33t->option_objects[$slug] = $instance;
+
+					}
+
+				}
+
 			}
 
-			// handle options
-			if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['options'])) {
+		}
 
-				$option = $templ33t->map[$_POST['page_template']]['options'][$slug];
-				$option['slug'] = $slug;
-				$option['id'] = $data['id'];
-				$option['value'] = $data['value'];
+		if(array_key_exists('templ33t_meta', $_POST)) {
 
-				$instance = Templ33tPluginHandler::instantiate($option['type'], $option);
-				$instance->handlePost();
-				$_POST['meta'][$instance->id] = array(
-					'key' => 'templ33t_option_'.$instance->slug,
-					'value' => $instance->value,
-				);
+			foreach($_POST['templ33t_meta'] as $slug => $data) {
 
-				$templ33t->option_objects[$slug] = $instance;
+				// handle blocks
+				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['blocks'])) {
+
+					$block = $templ33t->map[$_POST['page_template']]['blocks'][$slug];
+					$block['slug'] = $slug;
+					$block['id'] = $data['id'];
+					$block['value'] = $data['value'];
+
+					$instance = Templ33tPluginHandler::instantiate($block['type'], $block);
+					$instance->handlePost();
+					$_POST['meta'][$instance->id] = array(
+						'key' => 'templ33t_'.$instance->slug,
+						'value' => $instance->value,
+					);
+
+					$templ33t->block_objects[$slug] = $instance;
+
+				}
+
+				// handle options
+				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['options'])) {
+
+					$option = $templ33t->map[$_POST['page_template']]['options'][$slug];
+					$option['slug'] = $slug;
+					$option['id'] = $data['id'];
+					$option['value'] = $data['value'];
+
+					$instance = Templ33tPluginHandler::instantiate($option['type'], $option);
+					$instance->handlePost();
+					$_POST['meta'][$instance->id] = array(
+						'key' => 'templ33t_option_'.$instance->slug,
+						'value' => $instance->value,
+					);
+
+					$templ33t->option_objects[$slug] = $instance;
+
+				}
 
 			}
 
@@ -1643,16 +1710,13 @@ function templ33t_styles() {
 	// get option css
 	foreach($templ33t->option_objects as $key => $val) {
 		$cname = Templ33tPluginHandler::load($val->type);
-		if($cname::$load_styles) echo $val->styles();
+		if($cname::$load_styles) $val->styles();
 	}
 
 	// get block css
 	foreach($templ33t->block_objects as $key => $val) {
 		$cname = Templ33tPluginHandler::load($val->type);
-
-		//echo $cname.' - '.$cname::$load_styles."\n";
-
-		if($cname::$load_styles) echo $val->styles();
+		if($cname::$load_styles) $val->styles();
 	}
 
 }
@@ -1669,9 +1733,43 @@ function templ33t_scripts() {
 
 	templ33t_js_obj();
 
-	foreach($templ33t_plugins as $key => $val) {
-		if($val::$load_js)
-			wp_enqueue_script($val);
+	$load = array();
+	$dependencies = array();
+
+	// get option js
+	foreach($templ33t->option_objects as $key => $val) {
+		$cname = Templ33tPluginHandler::classify($val->type);
+		if($cname::$load_js) {
+			$load[] = $val->type;
+			if(!empty($cname::$dependencies)) {
+				foreach($cname::$dependencies as $d) {
+					$dependencies[$c] = $c;
+				}
+			}
+		}
+	}
+
+	// get block js
+	foreach($templ33t->block_objects as $key => $val) {
+		$cname = Templ33tPluginHandler::classify($val->type);
+		if($cname::$load_js) {
+			$load[] = $val->type;
+			if(!empty($cname::$dependencies)) {
+				foreach($cname::$dependencies as $d) {
+					$dependencies[$d] = $d;
+				}
+			}
+		}
+	}
+
+
+	// enqueue plugin scripts
+	if(!empty($load)) {
+		wp_enqueue_script('templ33t_plug_scripts', Templ33t::$assets_url . 'templ33t_scripts.php?load=' . implode(',', $load), $dependencies);
+	} elseif(!empty($dependencies)) {
+		foreach($dependencies as $d) {
+			wp_enqueue_script($d);
+		}
 	}
 
 }

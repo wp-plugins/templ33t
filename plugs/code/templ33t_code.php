@@ -24,9 +24,9 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 		
 		if($this->bindable) {
 			$str .= '<p class="templ33t_description">';
-			$links = array('<a href="javascript:void(0);" onclick="templ33t_switchEditor(\'default\'); templ33t_append(\'['.$this->slug.']\');">'.$templ33t->map[$post->page_template]['main'].'</a>');
+			$links = array('<a href="#" onclick="templ33t_switchEditor(\'default\'); templ33t_append(\'['.$this->slug.']\'); return false;">'.$templ33t->map[$post->page_template]['main'].'</a>');
 			foreach($templ33t->block_objects as $slug => $block) {
-				if($block->type == 'editor') $links[] = '<a href="javascript:void(0);" onclick="templ33t_switchEditor(\''.$block->id.'\'); templ33t_append(\'['.$this->slug.']\');">'.$block->label.'</a>';
+				if($block->type == 'editor') $links[] = '<a href="#" onclick="templ33t_switchEditor(\''.$block->id.'\'); templ33t_append(\'['.$this->slug.']\'); return false;">'.$block->label.'</a>';
 			}
 			if(!empty($links)) $str .= 'Add to '.implode(' | ', $links) . ' -OR- ';
 			$str .= 'Use this element with the <strong>['.$this->slug.']</strong> shortcode in your editor.</p>';
