@@ -1707,6 +1707,7 @@ function templ33t_styles() {
 
 	wp_enqueue_style('templ33t_styles');
 
+	/*
 	// get option css
 	foreach($templ33t->option_objects as $key => $val) {
 		$cname = Templ33tPluginHandler::load($val->type);
@@ -1717,6 +1718,27 @@ function templ33t_styles() {
 	foreach($templ33t->block_objects as $key => $val) {
 		$cname = Templ33tPluginHandler::load($val->type);
 		if($cname::$load_styles) $val->styles();
+	}
+	*/
+
+	$load = array();
+
+	// get option styles
+	foreach($templ33t->option_objects as $key => $val) {
+		$cname = Templ33tPluginHandler::classify($val->type);
+		if($cname::$load_style) $load[] = $val->type;
+	}
+
+	// get block styles
+	foreach($templ33t->block_objects as $key => $val) {
+		$cname = Templ33tPluginHandler::classify($val->type);
+		if($cname::$load_style) $load[] = $val->type;
+	}
+
+
+	// enqueue plugin scripts
+	if(!empty($load)) {
+		wp_enqueue_style('templ33t_plug_styles', Templ33t::$assets_url . 'templ33t_styles.php?load=' . implode(',', $load));
 	}
 
 }

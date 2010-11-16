@@ -6,7 +6,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	static $custom_post = true;
 
-	static $load_styles = true;
+	static $load_style = true;
 	
 	static $load_js = true;
 
@@ -170,7 +170,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	}
 
-	function styles($return = false, $wrap = true) {
+	function style($return = false, $wrap = true) {
 
 		if($return) ob_start();
 

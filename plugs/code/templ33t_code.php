@@ -4,6 +4,12 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 	
 	static $custom_panel = true;
 
+	static $load_js = true;
+
+	static $dependencies = array('jquery');
+
+	var $class = null;
+
 	function __construct() {
 
 	}
@@ -12,6 +18,23 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 
 		if($this->bindable)
 			add_shortcode($this->slug, array(&$this, 'handleShortcode'));
+
+	}
+
+	function parseConfig($config = null) {
+
+		parent::parseConfig($config);
+
+		if(!empty($this->config)) {
+
+			$carr = array();
+			parse_str($this->config, $carr);
+
+			foreach($carr as $key => $val) {
+				$this->$key = $val;
+			}
+
+		}
 
 	}
 

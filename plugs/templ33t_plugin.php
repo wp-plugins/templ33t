@@ -72,7 +72,7 @@ abstract class Templ33tPlugin {
 	static $custom_post = false;
 	static $load_js = false;
 	static $dependencies = array();
-	static $load_styles = false;
+	static $load_style = false;
 	static $res_loaded = false;
 	
 	public function __set($key, $val) {
@@ -129,8 +129,8 @@ abstract class Templ33tPlugin {
 		
 	}
 
-	public function styles($return = false) {
-
+	public function style($return = false, $wrap = false) {
+		
 	}
 
 }
