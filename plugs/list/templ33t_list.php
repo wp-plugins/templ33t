@@ -16,7 +16,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	var $element = 'ul';
 	
-	var $renderAs = 'textarea';
+	var $renderAs = 'text';
 
 	function __construct() {
 
@@ -66,7 +66,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 		$str .= '<input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_'.$this->slug.'" /><ul id="templ33t_list_'.$this->id.'" class="templ33t_list">';
 		if(empty($this->value)) $this->value[] = '';
 		foreach($this->value as $key => $val) {
-			$str .= '<li><div class="handle"> ... <a href="#" onclick="templ33t_delListItem(this); return false;">[x]</a></div>';
+			$str .= '<li><div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'.Templ33t::$assets_url.'img/delete.jpg"></a></div>';
 			switch($this->renderAs) {
 				case 'textarea':
 					$str .= '<textarea name="meta['.$this->id.'][value][]">'.$val.'</textarea>';
@@ -142,6 +142,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	function js($return = false, $wrap = true) {
 
 		//wp_enqueue_script('jquery-ui-sortable');
+		global $templ33t;
 
 		if($return) ob_start();
 
@@ -157,7 +158,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 				if(!ltype) ltype = 'text';
 
-				str += '<div class="handle"> ... <a href="#" onclick="templ33t_delListItem(this);">[x]</a></div>';
+				str += '<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'+TL33T_current.assets+'img/delete.jpg"></a></div>';
 
 				switch(ltype) {
 					case 'textarea':
@@ -208,24 +209,45 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	function style($return = false, $wrap = true) {
 
+		global $templ33t;
+
 		if($return) ob_start();
 
 		if($wrap) { ?>
 		<style type="text/css">
 		<?php } ?>
-			ul.templ33t_list, ul.templ33t_list li { list-style: none; }
+			ul.templ33t_list, ul.templ33t_list li { position: relative; list-style: none; }
 			ul.templ33t_list li div.handle {
-				-webkit-border-radius: 4px;
-				-moz-border-radius: 4px;
-				-khtml-border-radius: 4px;
-				border-radius: 4px;
-				background: #dfdfdf url("../../../wp-admin/images/gray-grad.png") repeat-x left top;
+				position: absolute;
+				top: -1px;
+				bottom: -1px;
+				left: -2px;
+				width: 15px;
+				-webkit-border-radius: 4px 0px 0px 4px;
+				-moz-border-radius: 4px 0px 0px 4px;
+				-khtml-border-radius: 4px 0px 0px 4px;
+				border-radius: 4px 0px 0px 4px;
+				background: #dfdfdf url(img/handle.jpg) no-repeat top center;
 				text-align: center;
 				cursor: pointer;
 			}
+			ul.templ33t_list li div.actions {
+				position: absolute;
+				top: -1px;
+				right: -2px;
+				bottom: -1px;
+				width: 15px;
+				padding: 3px 2px;
+				-webkit-border-radius: 0px 4px 4px 0px;
+				-moz-border-radius: 0px 4px 4px 0px;
+				-khtml-border-radius: 0px 4px 4px 0px;
+				border-radius: 0px 4px 4px 0px;
+				background: #dfdfdf;
+				text-align: center;
+			}
 			ul.templ33t_list li div.handle a { float: right; color: #F00000; text-decoration: none; }
-			ul.templ33t_list li input[type=text] { display: block; width: 100%; }
-			ul.templ33t_list li textarea { display: block; height: auto; }
+			ul.templ33t_list li input[type=text] { display: block; width: 100%; padding: 4px 20px; }
+			ul.templ33t_list li textarea { display: block; height: auto; padding: 4px 20px; }
 		<?php if($wrap) { ?>
 		</style>
 		<?php }

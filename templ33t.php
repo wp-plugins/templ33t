@@ -1816,7 +1816,7 @@ function templ33t_js_obj() {
 
 	echo '<script type="text/javascript">
 		/* <![CDATA[ */
-		var TL33T_current = { template: "'.$post->page_template.'" };
+		var TL33T_current = { template: "'.$post->page_template.'", assets: "'.Templ33t::$assets_url.'" };
 		';
 
 	// output js template map
