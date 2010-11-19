@@ -1450,7 +1450,7 @@ function templ33t_option_save() {
 
 	global $templ33t;
 
-	if(array_key_exists($_POST['page_template'], $templ33t->map)) {
+	if(array_key_exists($_POST['templ33t_template'], $templ33t->map)) {
 
 		if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
 
@@ -1459,9 +1459,9 @@ function templ33t_option_save() {
 				$slug = str_replace('templ33t_', '', str_replace('templ33t_option_', '', $data['key']));
 
 				// handle blocks
-				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['blocks'])) {
+				if(array_key_exists($slug, $templ33t->map[$_POST['templ33t_template']]['blocks'])) {
 
-					$block = $templ33t->map[$_POST['page_template']]['blocks'][$slug];
+					$block = $templ33t->map[$_POST['templ33t_template']]['blocks'][$slug];
 					$block['slug'] = $slug;
 					$block['id'] = $id;
 					$block['value'] = $data['value'];
@@ -1485,9 +1485,9 @@ function templ33t_option_save() {
 				}
 
 				// handle options
-				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['options'])) {
+				if(array_key_exists($slug, $templ33t->map[$_POST['templ33t_template']]['options'])) {
 
-					$option = $templ33t->map[$_POST['page_template']]['options'][$slug];
+					$option = $templ33t->map[$_POST['templ33t_template']]['options'][$slug];
 					$option['slug'] = $slug;
 					$option['id'] = $id;
 					$option['value'] = $data['value'];
@@ -1520,9 +1520,9 @@ function templ33t_option_save() {
 			foreach($_POST['templ33t_meta'] as $slug => $data) {
 
 				// handle blocks
-				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['blocks'])) {
+				if(array_key_exists($slug, $templ33t->map[$_POST['templ33t_template']]['blocks'])) {
 
-					$block = $templ33t->map[$_POST['page_template']]['blocks'][$slug];
+					$block = $templ33t->map[$_POST['templ33t_template']]['blocks'][$slug];
 					$block['slug'] = $slug;
 					$block['id'] = $data['id'];
 					$block['value'] = $data['value'];
@@ -1539,9 +1539,9 @@ function templ33t_option_save() {
 				}
 
 				// handle options
-				if(array_key_exists($slug, $templ33t->map[$_POST['page_template']]['options'])) {
+				if(array_key_exists($slug, $templ33t->map[$_POST['templ33t_template']]['options'])) {
 
-					$option = $templ33t->map[$_POST['page_template']]['options'][$slug];
+					$option = $templ33t->map[$_POST['templ33t_template']]['options'][$slug];
 					$option['slug'] = $slug;
 					$option['id'] = $data['id'];
 					$option['value'] = $data['value'];
@@ -1751,10 +1751,19 @@ function templ33t_scripts() {
 
 	global $templ33t, $templ33t_plugins, $post;
 
+	// disable auto-save
+	if($templ33t->render) {
+		wp_deregister_script('autosave');
+		echo '<!-- autosave disabled by templ33t: '.basename(__FILE__).' - '.__FUNCTION__.'() -->';
+	}
+
+	// enqueue templ33t script file
 	wp_enqueue_script('templ33t_scripts');
 
+	// output templ33t js data
 	templ33t_js_obj();
 
+	
 	$load = array();
 	$dependencies = array();
 
@@ -1864,6 +1873,9 @@ function templ33t_elements() {
 
 	global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
 
+	// keep track of selected template
+	echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
+
 	if($templ33t->render) {
 
 		// grab main label
@@ -1956,8 +1968,11 @@ function templ33t_elements() {
 		echo '</div><div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
 		echo $editors;
 		echo '</div>';
-		
+
+	// make sure current template is known in case of switch
 	}
+
+
 
 }
 

@@ -71,7 +71,7 @@ class Templ33tSize extends Templ33tPlugin implements Templ33tOption {
 
 	function handlePost() {
 
-		if(array_key_exists($this->slug, $_POST['templ33t_meta'])) {
+		if(array_key_exists('templ33t_meta', $_POST) && array_key_exists($this->slug, $_POST['templ33t_meta'])) {
 
 			$this->size_type = $_POST['templ33t_meta'][$this->slug]['size_type'];
 			$this->value .= $this->size_type;
