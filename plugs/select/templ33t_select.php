@@ -51,6 +51,12 @@ class Templ33tSelect extends Templ33tPlugin implements Templ33tTab, Templ33tOpti
 
 	}
 
+	function output($ret = false) {
+
+		
+
+	}
+
 	function displayOption() {
 
 		$str = '<tr><td>'.$this->label.'</td><td><input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_option_'.$this->slug.'" />';
@@ -95,6 +101,12 @@ class Templ33tSelect extends Templ33tPlugin implements Templ33tTab, Templ33tOpti
 	function genRadio() {
 
 
+
+	}
+
+	function getValue() {
+
+		return $this->value;
 
 	}
 

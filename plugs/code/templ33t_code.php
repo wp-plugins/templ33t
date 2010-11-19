@@ -4,8 +4,6 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 	
 	static $custom_panel = true;
 
-	static $load_js = true;
-
 	static $dependencies = array('jquery');
 
 	var $class = null;
@@ -64,6 +62,13 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 	function handleShortcode() {
 
 		return $this->value;
+
+	}
+
+	function output($ret = false) {
+
+		if($ret) return $this->value();
+		else echo $this->value();
 
 	}
 

@@ -13,6 +13,8 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	static $dependencies = array('jquery-ui-sortable');
 
 	var $class = null;
+
+	var $element = 'ul';
 	
 	var $renderAs = 'textarea';
 
@@ -21,6 +23,9 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	}
 
 	function init() {
+
+		if($this->bindable)
+			add_shortcode($this->slug, array(&$this, 'handleShortcode'));
 
 		$this->parseValue();
 
@@ -75,7 +80,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 		}
 		//$str .= '<li><input type="text" name="meta['.$this->id.'][value][]" value="" /></li>';
 		$str .= '</ul>';
-		$str .= '<div class="templ33t_right"><input type="button" value="Add Item" onclick="templ33t_addListItem(\'templ33t_list_'.$this->id.'\', \''.$this->renderAs.'\')" /></div>';
+		$str .= '<div class="templ33t_right"><input type="button" value="Add Item" onclick="templ33t_addListItem(\''.$this->id.'\', \''.$this->renderAs.'\')" /></div>';
 		$str .= '<div class="templ33t_clear"></div>';
 
 		if($this->bindable) {
@@ -94,12 +99,43 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	}
 
 	function handlePost() {
-
+		
 		if(is_array($this->value)) {
 			foreach($this->value as $key => $val) {
 				if(empty($val)) unset($this->value[$key]);
 			}
 		}
+
+	}
+
+	function output($ret = false) {
+
+		$this->parseValue();
+
+		$str = '';
+		
+		if(!empty($this->value)) {
+
+			$str .= '<'.$this->element.' class="'.$this->class.'">';
+			foreach($this->value as $val) {
+				$str .= '<li>'.$val.'</li>';
+			}
+			$str .= '</'.$this->element.'>';
+
+			if($ret) return $str;
+			else echo $str;
+
+		} else {
+
+			return false;
+
+		}
+
+	}
+
+	function handleShortcode() {
+
+		return $this->output(true);
 
 	}
 
@@ -115,8 +151,8 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 		
 			function templ33t_addListItem(lid, ltype) {
 
-				var list = jQuery('#'+lid);
-
+				var list = jQuery('#templ33t_list_'+lid);
+				
 				var str = '<li>';
 
 				if(!ltype) ltype = 'text';
@@ -125,11 +161,11 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 				switch(ltype) {
 					case 'textarea':
-						str += '<textarea name="meta['+list.parent().parent().attr('rel')+'][value][]"></textarea>';
+						str += '<textarea name="meta['+lid+'][value][]"></textarea>';
 						break;
 					case 'text':
 					default:
-						str += '<input type="text" name="meta['+list.parent().parent().attr('rel')+'][value][]" />';
+						str += '<input type="text" name="meta['+lid+'][value][]" />';
 						break;
 				}
 

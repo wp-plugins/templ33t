@@ -1903,7 +1903,10 @@ function templ33t_elements() {
 
 				if($cname::$custom_panel) {
 					$editors .= '<div id="templ33t_editor_'.$block->id.'" class="templ33t_editor" style="display: none;">';
-					$editors .= $block->displayPanel();
+					if($block instanceOf Templ33tTab)
+						$editors .= $block->displayPanel();
+					else
+						$editors .= '<div id="templ33t_editor_'.$block->id.'" class="templ33t_editor templ33t_hidden"><input type="hidden" name="meta['.$block->id.'][key]" value="templ33t_'.$block->slug.'" /><textarea id="templ33t_val_'.$block->id.'" name="meta['.$block->id.'][value]">'.$block->value.'</textarea></div>';
 					$editors .= '</div>';
 				} else {
 					$editors .= '<div id="templ33t_editor_'.$block->id.'" class="templ33t_editor templ33t_hidden"><input type="hidden" name="meta['.$block->id.'][key]" value="templ33t_'.$block->slug.'" /><textarea id="templ33t_val_'.$block->id.'" name="meta['.$block->id.'][value]">'.$block->value.'</textarea></div>';
@@ -1936,15 +1939,10 @@ function templ33t_elements() {
 			$descs .= '<div class="templ33t_description templ33t_desc_settings templ33t_hidden"><p>These are the settings available for this template.</p></div>';
 			$editors .= '<div id="templ33t_editor_settings" class="templ33t_editor postbox" style="display: none;"><div class="inside"><p class="templ33t_description">These are the settings available for this page.</p><table border="0">';
 			foreach($templ33t->option_objects as $slug => $option) {
-				/*
-				switch($val['type']) {
-					case 'percent':
-						$editors .= '<tr><td>'.$val['label'].': </td><td>';
-						$editors .= '<input type="hidden" name="meta['.$templ33t_options[$key]['id'].'][key]" value="templ33t_option_'.$key.'"><input type="text" name="meta['.$templ33t_options[$key]['id'].'][value]" value="'.$templ33t_options[$key]['value'].'" size="2" />%';
-						break;
-				}
-				*/
-				$editors .= $option->displayOption();
+				if($option instanceOf Templ33tOption)
+					$editors .= $option->displayOption();
+				else
+					$editors .= '<tr><td>'.$option->label.'</td><td><input type="hidden" name="meta['.$option->id.'][key]" value="templ33t_option_'.$option->slug.'" /><input type="text" name="meta['.$option->id.'][value]" value="'.$option->value.'" /></td></tr>';
 			}
 			$editors .= '</table></div></div>';
 
@@ -1999,10 +1997,10 @@ function templ33t_block($block = null, $before = null, $after = null) {
 	}
 	*/
 
-	$value = array_key_exists($block, $templ33t->block_objects) ? $templ33t->block_objects[$block]->value : '';
+	$value = array_key_exists($block, $templ33t->block_objects) ? ($templ33t->block_objects[$block] instanceOf Templ33tTab ? $templ33t->block_objects[$block]->output(true) : $templ33t->block_objects[$block]->value) : '';
 
 	if(!empty($value) || $templ33t->block_objects[$block]->optional) {
-		echo apply_filters('the_content', $before.$templ33t->block_objects[$block]->value.$after);
+		echo apply_filters('the_content', $before.$value.$after);
 	}
 	
 
@@ -2013,7 +2011,7 @@ function templ33t_option($option = null) {
 	global $templ33t;
 
 	if(array_key_exists($option, $templ33t->option_objects)) {
-		return $templ33t->option_objects[$option]->value;
+		return $templ33t->option_objects[$option] instanceOf Templ33tOption ? $templ33t->option_objects[$option]->getValue() : $templ33t->option_objects[$option]->value;
 	}
 
 }

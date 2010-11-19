@@ -14,9 +14,21 @@ class Templ33tCheckbox extends Templ33tPlugin implements Templ33tTab, Templ33tOp
 
 	}
 
+	function output($ret = false) {
+
+
+
+	}
+
 	function displayOption() {
 
 
+
+	}
+
+	function getValue() {
+
+		
 
 	}
 

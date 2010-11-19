@@ -21,6 +21,12 @@ class Templ33tVideo extends Templ33tPlugin implements Templ33tTab {
 
 	}
 
+	function output($ret = false) {
+
+
+
+	}
+
 }
 
 ?>

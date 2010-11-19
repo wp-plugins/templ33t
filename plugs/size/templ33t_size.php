@@ -63,6 +63,12 @@ class Templ33tSize extends Templ33tPlugin implements Templ33tOption {
 
 	}
 
+	function getValue() {
+
+		return $this->value;
+
+	}
+
 	function handlePost() {
 
 		if(array_key_exists($this->slug, $_POST['templ33t_meta'])) {

@@ -316,8 +316,6 @@ class Templ33t {
 			
 		}
 
-		//die(print_r($config, true));
-
 		return $config;
 
 	}
