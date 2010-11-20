@@ -18,6 +18,7 @@ class Templ33t {
 		'type' => 'editor',
 		'description' => '',
 		'config' => '',
+		'group' => null,
 		'optional' => false,
 		'bindable' => false,
 		'searchable' => false,
@@ -28,6 +29,7 @@ class Templ33t {
 		'optional',
 		'bindable',
 		'searchable',
+		'group',
 	);
 
 	var $active = true;
@@ -39,6 +41,7 @@ class Templ33t {
 	var $meta = array();
 	var $block_objects = array();
 	var $option_objects = array();
+	var $groups = array();
 	
 	function __construct() {
 

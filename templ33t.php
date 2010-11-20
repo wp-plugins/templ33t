@@ -197,7 +197,7 @@ add_action('wp', array(&$templ33t, 'prepareMeta'), 1);
 function templ33t_install() {
 
 	global $templ33t, $wpdb;
-die('INSTALL');
+	
 	$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
 	$template_table_name = $the_prefix . "templ33t_templates";
 	$block_table_name = $the_prefix . "templ33t_blocks";
@@ -260,7 +260,7 @@ die('INSTALL');
 function templ33t_uninstall() {
 
 	global $templ33t, $wpdb;
-die('UNINSTALL');
+	
 	// make sure uninstall only happens from last site
 	$uninstall = true;
 
