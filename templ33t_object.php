@@ -12,6 +12,7 @@ class Templ33t {
 	static $wpmu_plugin_dir;
 	static $assets_url;
 	static $assets_dir;
+	static $settings_url;
 
 	var $config_defaults = array(
 		'slug' => '',
@@ -42,6 +43,7 @@ class Templ33t {
 	var $block_objects = array();
 	var $option_objects = array();
 	var $groups = array();
+	var $menu_parent = null;
 	
 	function __construct() {
 
@@ -56,7 +58,7 @@ class Templ33t {
 
 		// get theme map
 		$map = unserialize($this->getOption('templ33t_map'));
-		if(array_key_exists($theme, $map)) {
+		if(is_array($map) && array_key_exists($theme, $map)) {
 			$this->map = $map[$theme];
 		} else {
 			$this->active = false;
@@ -87,6 +89,106 @@ class Templ33t {
 			self::$assets_dir = self::$wp_content_dir.'/plugins/templ33t/';
 		}
 
+	}
+	
+	function install() {
+		
+		global $wpdb;
+		
+		$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
+		$template_table_name = $the_prefix . "templ33t_templates";
+		$block_table_name = $the_prefix . "templ33t_blocks";
+
+		if($wpdb->get_var("SHOW TABLES LIKE '$template_table_name'") != $template_table_name) {
+
+			$sql = 'CREATE TABLE `'.$template_table_name.'` (
+				`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
+				`theme` varchar(50) DEFAULT NULL,
+				`template` varchar(255) DEFAULT NULL,
+				`config` text NULL,
+				PRIMARY KEY  (`templ33t_template_id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
+
+			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+			dbDelta($sql);
+
+			$this->addOption('templ33t_db_version', Templ33t::$db_version);
+			$this->addOption('templ33t_map_pub', 0);
+			$this->addOption('templ33t_map_dev', 0);
+			$this->addOption('templ33t_map', serialize(array()));
+			if($this->multiSite()) $this->addOption('templ33t_blogs', 1);
+
+		} elseif($this->multiSite()) {
+
+			$count = $this->getOption('templ33t_blogs');
+			$count++;
+			$this->updateOption('templ33t_blogs', $count);
+
+		}
+		
+	}
+	
+	function uninstall() {
+		
+		global $wpdb;
+		
+		// make sure uninstall only happens from last site
+		$uninstall = true;
+
+		if($this->multiSite()) {
+			$count = $this->getOption('templ33t_blogs');
+			if(($count - 1) > 0) $uninstall = false;
+			$count--;
+			$this->updateOption('templ33t_blogs', $count);
+		}
+
+		if($uninstall) {
+
+			// set table names
+			$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
+			$template_table_name = $the_prefix . "templ33t_templates";
+			$block_table_name = $the_prefix . "templ33t_blocks";
+
+			// drop blocks table
+			$sql_blocks = 'DROP TABLE IF EXISTS `'.$block_table_name.'`;';
+			$wpdb->query($sql_blocks);
+
+			// drop templates table
+			$sql_templates = 'DROP TABLE IF EXISTS `'.$template_table_name.'`;';
+			$wpdb->query($sql_templates);
+
+			// remove db version option
+			$this->deleteOption('templ33t_db_version');
+			$this->deleteOption('templ33t_map_pub');
+			$this->deleteOption('templ33t_map_dev');
+			$this->deleteOption('templ33t_map');
+			if($this->multiSite()) $this->deleteOption('templ33t_blogs');
+
+		}
+		
+	}
+	
+	function menu() {
+		
+		global $wp_version;
+
+		// set menu parent and settings url
+		if($this->multiSite()) {
+			if($wp_version < '3.0.0')
+				$this->menu_parent = 'wpmu-admin.php';
+			elseif($wp_version < '3.2.0')
+				$this->menu_parent = 'ms-admin.php';
+			else
+				$this->menu_parent = 'settings.php';
+			self::$settings_url = $this->menu_parent.'?page=templ33t_settings';
+		} else {
+			$this->menu_parent = 'options-general.php';
+			self::$settings_url = $this->menu_parent.'?page=templ33t_settings';
+		}
+
+		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', 'templ33t_settings');
+		
 	}
 
 	function getOption($key) {

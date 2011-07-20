@@ -173,16 +173,20 @@ $templeet_menu_parent;
 $templ33t_settings_url;
 
 // add install hook
-register_activation_hook(__FILE__, 'templ33t_install');
+//register_activation_hook(__FILE__, 'templ33t_install');
+register_activation_hook(__FILE__, array($templ33t, 'install'));
 
 // add uninstall hook
-register_deactivation_hook(__FILE__, 'templ33t_uninstall');
+register_deactivation_hook(__FILE__, array($templ33t, 'uninstall'));
 
 // initialize plugin
 add_action('admin_init', 'templ33t_init', 1);
 
 // add settings page
-add_action('admin_menu', 'templ33t_menu');
+if($wp_version < '3.1.0')
+	add_action('admin_menu', array($templ33t, 'menu'));
+else
+	add_action('network_admin_menu', array($templ33t, 'menu'));
 
 // add content filter for search results
 add_filter('the_content', 'templ33t_content_filter', 1);
@@ -194,14 +198,17 @@ add_action('wp', array(&$templ33t, 'prepareMeta'), 1);
 /**
  * Create options and tables
  */
+/*
 function templ33t_install() {
 
 	global $templ33t, $wpdb;
 	
+	if(empty($templ33t)) $templ33t = new Templ33t;
+	
 	$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
 	$template_table_name = $the_prefix . "templ33t_templates";
 	$block_table_name = $the_prefix . "templ33t_blocks";
-
+	
 	if($wpdb->get_var("SHOW TABLES LIKE '$template_table_name'") != $template_table_name) {
 
 		$sql = 'CREATE TABLE `'.$template_table_name.'` (
@@ -230,33 +237,14 @@ function templ33t_install() {
 
 	}
 
-	/*
-	$installed_version = get_option( "templ33t_db_version" );
-
-	if($installed_version != $templ33t_db_version) {
-
-		$sql = 'CREATE TABLE `'.$template_table_name.'` (
-			`templ33t_template_id` int(11) NOT NULL AUTO_INCREMENT,
-			`theme` varchar(50) DEFAULT NULL,
-			`template` varchar(255) DEFAULT NULL,
-			`config` text NULL,
-			PRIMARY KEY  (`templ33t_template_id`)
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1;';
-
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-		dbDelta($sql);
-
-		templ33t_update_option('templ33t_db_version', $templ33t_db_version);
-
-	}
-	*/
 }
+*/
 
 /**
  * Remove plugin options and tables
  * @global object $wpdb
  */
+/*
 function templ33t_uninstall() {
 
 	global $templ33t, $wpdb;
@@ -296,16 +284,18 @@ function templ33t_uninstall() {
 	}
 
 }
+*/
 
 /**
  * Add templ33t menu item
  */
+/*
 function templ33t_menu() {
 
 	global $templ33t, $templ33t_menu_parent, $templ33t_settings_url, $wp_version;
 	
 	// set menu parent and settings url
-	if(function_exists('is_multisite') && is_multisite()) {
+	if($templ33t->multiSite()) {
 		if($wp_version{0} < 3)
 			$templ33t_menu_parent = 'wpmu-admin.php';
 		else
@@ -319,6 +309,7 @@ function templ33t_menu() {
 	add_submenu_page($templ33t_menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', 'templ33t_settings');
 
 }
+*/
 
 /**
  * Loads theme-specific configuration file, records available templates and
