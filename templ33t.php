@@ -174,25 +174,25 @@ $templ33t_settings_url;
 
 // add install hook
 //register_activation_hook(__FILE__, 'templ33t_install');
-register_activation_hook(__FILE__, array($templ33t, 'install'));
+//register_activation_hook(__FILE__, array($templ33t, 'install'));
 
 // add uninstall hook
-register_deactivation_hook(__FILE__, array($templ33t, 'uninstall'));
+//register_deactivation_hook(__FILE__, array($templ33t, 'uninstall'));
 
 // initialize plugin
-add_action('admin_init', 'templ33t_init', 1);
+//add_action('admin_init', 'templ33t_init', 1);
 
 // add settings page
-if($wp_version < '3.1.0')
-	add_action('admin_menu', array($templ33t, 'menu'));
-else
-	add_action('network_admin_menu', array($templ33t, 'menu'));
+//if($wp_version < '3.1.0')
+//	add_action('admin_menu', array($templ33t, 'menu'));
+//else
+//	add_action('network_admin_menu', array($templ33t, 'menu'));
 
 // add content filter for search results
-add_filter('the_content', 'templ33t_content_filter', 1);
+//add_filter('the_content', 'templ33t_content_filter', 1);
 
 // prepare meta for page view
-add_action('wp', array(&$templ33t, 'prepareMeta'), 1);
+//add_action('wp', array(&$templ33t, 'prepareMeta'), 1);
 
 
 /**
@@ -319,6 +319,7 @@ function templ33t_menu() {
  * @global SimpleXMLElement $templ33t_xml
  * @global array $templ33t_templates
  */
+/*
 function templ33t_init() {
 
 	global $templ33t, $templ33t_multisite, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_tab_pages, $templ33t_templates, $user_ID, $wpdb, $wp_version;
@@ -409,11 +410,13 @@ function templ33t_init() {
 	}
 
 }
+*/
 
 /**
  * Catch and act upon settings post & actions
  * @global object $wpdb
  */
+/*
 function templ33t_handle_settings() {
 
 	global $templ33t, $templ33t_menu_parent, $templ33t_settings_url, $wpdb, $wp_content_dir;
@@ -484,29 +487,29 @@ function templ33t_handle_settings() {
 					);
 
 
-					/*
-					$tid = $wpdb->get_var('SELECT LAST_INSERT_ID() FROM '.$template_table_name.' LIMIT 1');
-
-					foreach($config['blocks'] as $key => $val) {
-
-						// set up insert array
-						$i_arr = array(
-							'theme' => $_POST['templ33t_theme'],
-							'template_id' => $tid,
-							'block_name' => $val['title'],
-							'block_slug' => $key,
-							'block_type' => $val['type'],
-							'block_description' => $val['description'],
-						);
-
-						// save block
-						$insert = $wpdb->insert(
-							$block_table_name,
-							$i_arr
-						);
-
-					}
-					*/
+					
+//					$tid = $wpdb->get_var('SELECT LAST_INSERT_ID() FROM '.$template_table_name.' LIMIT 1');
+//
+//					foreach($config['blocks'] as $key => $val) {
+//
+//						// set up insert array
+//						$i_arr = array(
+//							'theme' => $_POST['templ33t_theme'],
+//							'template_id' => $tid,
+//							'block_name' => $val['title'],
+//							'block_slug' => $key,
+//							'block_type' => $val['type'],
+//							'block_description' => $val['description'],
+//						);
+//
+//						// save block
+//						$insert = $wpdb->insert(
+//							$block_table_name,
+//							$i_arr
+//						);
+//
+//					}
+					
 					// update map dev version
 					$t_dev = $templ33t->getOption('templ33t_map_dev');
 					$t_dev++;
@@ -845,30 +848,30 @@ function templ33t_handle_settings() {
 							if(!array_key_exists($tmp['theme'], $templ33t_map))
 								$templ33t_map[$tmp['theme']] = array();
 
-							/*
+							
 							// fill out default data for theme-wide blocks
-							if(empty($tmp['template'])) {
-								$tmp['template'] = 'ALL';
-								$tmp['main_label'] = 'Main Content';
-								$tmp['main_description'] = '';
-							}
-
-							// add template to map
-							if(!array_key_exists($tmp['template'], $templ33t_map[$tmp['theme']])) {
-								$templ33t_map[$tmp['theme']][$tmp['template']] = array(
-									'main' => $tmp['main_label'],
-									'main_description' => $tmp['main_description'],
-									'blocks' => array()
-								);
-							}
-
-							// add block to map
-							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = array(
-								'type' => $tmp['block_type'],
-								'label' => $tmp['block_name'],
-								'description' => $tmp['block_description']
-							);
-							*/
+//							if(empty($tmp['template'])) {
+//								$tmp['template'] = 'ALL';
+//								$tmp['main_label'] = 'Main Content';
+//								$tmp['main_description'] = '';
+//							}
+//
+//							// add template to map
+//							if(!array_key_exists($tmp['template'], $templ33t_map[$tmp['theme']])) {
+//								$templ33t_map[$tmp['theme']][$tmp['template']] = array(
+//									'main' => $tmp['main_label'],
+//									'main_description' => $tmp['main_description'],
+//									'blocks' => array()
+//								);
+//							}
+//
+//							// add block to map
+//							$templ33t_map[$tmp['theme']][$tmp['template']]['blocks'][$tmp['block_slug']] = array(
+//								'type' => $tmp['block_type'],
+//								'label' => $tmp['block_name'],
+//								'description' => $tmp['block_description']
+//							);
+							
 
 							// add template
 							$templ33t_map[$tmp['theme']][$tmp['template']] = unserialize($tmp['config']);
@@ -900,20 +903,24 @@ function templ33t_handle_settings() {
 	}
 
 }
+*/
 
 /**
  * Enqueue css for settings page
  */
+/*
 function templ33t_settings_styles() {
 
 	wp_enqueue_style('templ33t_styles');
 	wp_enqueue_style('thickbox');
 
 }
+*/
 
 /**
  * Enqueue js for settings page
  */
+/*
 function templ33t_settings_scripts() {
 
 	wp_deregister_script('jquery');
@@ -922,12 +929,14 @@ function templ33t_settings_scripts() {
 	wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 }
+*/
 
 /**
  * Output Templ33t settings page.
  * @global object $wpdb
  * @global array $templ33t_errors
  */
+/*
 function templ33t_settings() {
 
 	global $templ33t, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_errors, $wpdb;
@@ -954,40 +963,40 @@ function templ33t_settings() {
 		$theme_selected = get_template();
 	}
 
-	/*
+	
 	// grab templates for selected theme
-	$templates = $wpdb->get_results(
-		'SELECT `templ33t_template_id`, `template`, `main_label`, `main_description`
-		FROM `'.$templates_table_name.'`
-		WHERE `theme` = "'.$theme_selected.'"',
-		ARRAY_A
-	);
-
-	// grab blocks for theme
-	$blocks = $wpdb->get_results(
-		'SELECT *
-		FROM `'.$blocks_table_name.'`
-		WHERE `theme` = "'.$theme_selected.'"
-		ORDER BY `block_name`',
-		ARRAY_A
-	);
-
-	// map blocks to templates
-	$block_map = array();
-	if(!empty($blocks)) {
-		foreach($blocks as $key => $val) {
-
-			if(empty($val['template_id'])) $val['template_id'] = 'ALL';
-
-			if(!array_key_exists($val['template_id'], $block_map)) {
-				$block_map[$val['template_id']] = array($val['templ33t_block_id'] => $val);
-			} else {
-				$block_map[$val['template_id']][$val['templ33t_block_id']] = $val;
-			}
-
-		}
-	}
-	*/
+//	$templates = $wpdb->get_results(
+//		'SELECT `templ33t_template_id`, `template`, `main_label`, `main_description`
+//		FROM `'.$templates_table_name.'`
+//		WHERE `theme` = "'.$theme_selected.'"',
+//		ARRAY_A
+//	);
+//
+//	// grab blocks for theme
+//	$blocks = $wpdb->get_results(
+//		'SELECT *
+//		FROM `'.$blocks_table_name.'`
+//		WHERE `theme` = "'.$theme_selected.'"
+//		ORDER BY `block_name`',
+//		ARRAY_A
+//	);
+//
+//	// map blocks to templates
+//	$block_map = array();
+//	if(!empty($blocks)) {
+//		foreach($blocks as $key => $val) {
+//
+//			if(empty($val['template_id'])) $val['template_id'] = 'ALL';
+//
+//			if(!array_key_exists($val['template_id'], $block_map)) {
+//				$block_map[$val['template_id']] = array($val['templ33t_block_id'] => $val);
+//			} else {
+//				$block_map[$val['template_id']][$val['templ33t_block_id']] = $val;
+//			}
+//
+//		}
+//	}
+	
 
 	// grab templates for selected theme
 	$templates = $wpdb->get_results(
@@ -1109,63 +1118,63 @@ function templ33t_settings() {
 
 
 				<ul>
-					<?php /*
-					<li class="templ33t_all_box">
-						<div class="templ33t_right">
-
-
-							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_all_block_container&modal=true" class="thickbox">Add Content Block</a>
-
-							<div id="templ33t_all_block_container" style="display: none; text-align: center;">
-								<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
-									<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-									<input type="hidden" name="templ33t_template" value="ALL" />
-
-									<h2>Add a Theme-Wide Content Block</h2>
-
-									<p>This content block will be available to all templates within this theme.</p>
-
-									<table border="0" width="100%">
-										<tr>
-											<td><label for="templ33t_main_label">Content Block Label: </label></td>
-											<td><input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" /></td>
-										</tr>
-										<tr>
-											<td valign="top"><label for="templ33t_block_description">Content Block Description: </label></td>
-											<td><textarea class="templ33t_block_description" name="templ33t_block_description"></textarea></td>
-										</tr>
-										<tr>
-											<td colspan="2" align="center">
-												<br/>
-												<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-												<input type="submit" name="templ33t_new_block" value="Add Block" />
-											</td>
-										</tr>
-									</table>
-
-								</form>
-							</div>
-							
-						</div>
-
-						<h2>Theme Wide / All Templates</h2>
-						<hr/>
-						<?php if(array_key_exists('ALL', $block_map) && !empty($block_map['ALL'])) { ?>
-						<ul>
-							<?php foreach($block_map['ALL'] as $bkey => $bval) { ?>
-							<li>
-								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
-								<strong><?php echo $bval['block_name']; ?></strong> (<?php echo $bval['block_slug']; ?>)<br/>
-								<hr/>
-								<p><?php echo $bval['block_description'] ? $bval['block_description'] : 'No Description'; ?></p>
-							</li>
-							<?php } ?>
-						</ul>
-						<?php } else { ?>
-						<p>No Content Blocks</p>
-						<?php } ?>
-					</li>
-					*/ ?>
+					<?php
+//					<li class="templ33t_all_box">
+//						<div class="templ33t_right">
+//
+//
+//							<a href="#TB_inline?width=400&height=220&inlineId=templ33t_all_block_container&modal=true" class="thickbox">Add Content Block</a>
+//
+//							<div id="templ33t_all_block_container" style="display: none; text-align: center;">
+//								<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
+//									<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
+//									<input type="hidden" name="templ33t_template" value="ALL" />
+//
+//									<h2>Add a Theme-Wide Content Block</h2>
+//
+//									<p>This content block will be available to all templates within this theme.</p>
+//
+//									<table border="0" width="100%">
+//										<tr>
+//											<td><label for="templ33t_main_label">Content Block Label: </label></td>
+//											<td><input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" /></td>
+//										</tr>
+//										<tr>
+//											<td valign="top"><label for="templ33t_block_description">Content Block Description: </label></td>
+//											<td><textarea class="templ33t_block_description" name="templ33t_block_description"></textarea></td>
+//										</tr>
+//										<tr>
+//											<td colspan="2" align="center">
+//												<br/>
+//												<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+//												<input type="submit" name="templ33t_new_block" value="Add Block" />
+//											</td>
+//										</tr>
+//									</table>
+//
+//								</form>
+//							</div>
+//							
+//						</div>
+//
+//						<h2>Theme Wide / All Templates</h2>
+//						<hr/>
+//						<?php if(array_key_exists('ALL', $block_map) && !empty($block_map['ALL'])) { ?>
+//						<ul>
+//							<?php foreach($block_map['ALL'] as $bkey => $bval) { ?>
+//							<li>
+//								<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
+//								<strong><?php echo $bval['block_name']; ?></strong> (<?php echo $bval['block_slug']; ?>)<br/>
+//								<hr/>
+//								<p><?php echo $bval['block_description'] ? $bval['block_description'] : 'No Description'; ?></p>
+//							</li>
+//							<?php } ?>
+//						</ul>
+//						<?php } else { ?>
+//						<p>No Content Blocks</p>
+//						<?php } ?>
+//					</li>
+					?>
 
 
 
@@ -1274,6 +1283,7 @@ function templ33t_settings() {
 	<?php
 
 }
+*/
 
 /**
  * Grabs post custom fields, records templ33t related fields and adds any
@@ -1437,6 +1447,7 @@ function templ33t_handle_meta() {
 }
 */
 
+/*
 function templ33t_option_save() {
 
 	global $templ33t;
@@ -1555,6 +1566,7 @@ function templ33t_option_save() {
 	}
 
 }
+*/
 
 /**
  * Append templ33t field content to main content in comment form for searchability.
@@ -1562,6 +1574,7 @@ function templ33t_option_save() {
  * @param string $content
  * @return string
  */
+/*
 function templ33t_add_comment($content = null) {
 
 	global $templ33t, $templ33t_templates, $wpdb, $post;
@@ -1572,38 +1585,38 @@ function templ33t_add_comment($content = null) {
 		$template = array_key_exists('page_template', $_POST) && !empty($_POST['page_template']) ? $_POST['page_template'] : basename(get_page_template());
 		if($template == 'default') $template = basename(get_page_template());
 
-		/*
-		$blocks = array();
-
-		// grab template blocks
-		if(array_key_exists($template, $templ33t_templates)) {
-			foreach($templ33t_templates[$template]['blocks'] as $key => $val) {
-				$blocks[] = 'templ33t_'.$key;
-			}
-		}
-
-		// grab theme-wide blocks
-		if(array_key_exists('ALL', $templ33t_templates)) {
-			foreach($templ33t_templates['ALL']['blocks'] as $key => $val) {
-				$blocks[] = 'templ33t_'.$key;
-			}
-		}
-
-		// append custom block data to content in TEMPL33T comment
-		if(!empty($blocks)) {
-
-			$append = '<!-- TEMPL33T[ ';
-			foreach($_POST['meta'] as $key => $val) {
-				if(in_array($val['key'], $blocks)) {
-					$append .= '  ::' . $val['key'] . ':: ' . preg_replace('/(<!--.+?-->)/mi', '', preg_replace('/([\r\n]+)/mi', ' ', $val['value']));
-				}
-			}
-			$append .= ' ]END_TEMPL33T -->';
-
-			$content .= '  '.$append;
-
-		}
-		*/
+		
+//		$blocks = array();
+//
+//		// grab template blocks
+//		if(array_key_exists($template, $templ33t_templates)) {
+//			foreach($templ33t_templates[$template]['blocks'] as $key => $val) {
+//				$blocks[] = 'templ33t_'.$key;
+//			}
+//		}
+//
+//		// grab theme-wide blocks
+//		if(array_key_exists('ALL', $templ33t_templates)) {
+//			foreach($templ33t_templates['ALL']['blocks'] as $key => $val) {
+//				$blocks[] = 'templ33t_'.$key;
+//			}
+//		}
+//
+//		// append custom block data to content in TEMPL33T comment
+//		if(!empty($blocks)) {
+//
+//			$append = '<!-- TEMPL33T[ ';
+//			foreach($_POST['meta'] as $key => $val) {
+//				if(in_array($val['key'], $blocks)) {
+//					$append .= '  ::' . $val['key'] . ':: ' . preg_replace('/(<!--.+?-->)/mi', '', preg_replace('/([\r\n]+)/mi', ' ', $val['value']));
+//				}
+//			}
+//			$append .= ' ]END_TEMPL33T -->';
+//
+//			$content .= '  '.$append;
+//
+//		}
+		
 
 		// grab searchable block slugs
 		$searchable = array();
@@ -1654,12 +1667,14 @@ function templ33t_add_comment($content = null) {
 	return $content;
 
 }
+*/
 
 /**
  * Remove templ33t field comment from end of page content before editing.
  * @param string $content
  * @return string
  */
+/*
 function templ33t_strip_comment($content = null) {
 
 	$content = preg_replace('/(<!--\ TEMPL33T\[.+?\]END\_TEMPL33T\ -->)/mi', '', $content);
@@ -1667,12 +1682,14 @@ function templ33t_strip_comment($content = null) {
 	return $content;
 
 }
+*/
 
 /**
  * Transform templ33t fields comment into appended text for search results
  * @param string $content
  * @return string
  */
+/*
 function templ33t_content_filter($content = null) {
 
 	if(is_search()) {
@@ -1688,29 +1705,31 @@ function templ33t_content_filter($content = null) {
 	return $content;
 
 }
+*/
 
 /**
  * Enqueue Templ33t stylesheet
  */
+/*
 function templ33t_styles() {
 	
 	global $templ33t;
 
 	wp_enqueue_style('templ33t_styles');
 
-	/*
-	// get option css
-	foreach($templ33t->option_objects as $key => $val) {
-		$cname = Templ33tPluginHandler::load($val->type);
-		if($cname::$load_styles) $val->styles();
-	}
-
-	// get block css
-	foreach($templ33t->block_objects as $key => $val) {
-		$cname = Templ33tPluginHandler::load($val->type);
-		if($cname::$load_styles) $val->styles();
-	}
-	*/
+	
+//	// get option css
+//	foreach($templ33t->option_objects as $key => $val) {
+//		$cname = Templ33tPluginHandler::load($val->type);
+//		if($cname::$load_styles) $val->styles();
+//	}
+//
+//	// get block css
+//	foreach($templ33t->block_objects as $key => $val) {
+//		$cname = Templ33tPluginHandler::load($val->type);
+//		if($cname::$load_styles) $val->styles();
+//	}
+	
 
 	$load = array();
 
@@ -1733,11 +1752,13 @@ function templ33t_styles() {
 	}
 
 }
+*/
 
 /**
  * Enqueue Templ33t tab scripts and generate js tab map object
  * @global object $post
  */
+/*
 function templ33t_scripts() {
 
 	global $templ33t, $templ33t_plugins, $post;
@@ -1795,18 +1816,20 @@ function templ33t_scripts() {
 	}
 
 }
+*/
 
 /**
  * Outputs templ33t javascript template map object.
  *
  * @global array $templ33t_templates
  */
+/*
 function templ33t_js_obj() {
 
 	global $templ33t, $templ33t_templates, $templ33t_plugins, $post;
 
 	echo '<script type="text/javascript">
-		/* <![CDATA[ */
+		
 		var TL33T_current = { template: "'.$post->page_template.'", assets: "'.Templ33t::$assets_url.'" };
 		';
 
@@ -1847,10 +1870,11 @@ function templ33t_js_obj() {
 	}
 
 	echo '
-		/* ]]> */
+		
 		</script>';
 
 }
+*/
 
 /**
  * Adds the tab bar to the edit page.
@@ -1860,6 +1884,7 @@ function templ33t_js_obj() {
  * @global boolean $templ33t_render
  * @global object $post
  */
+/*
 function templ33t_elements() {
 
 	global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
@@ -1918,22 +1943,22 @@ function templ33t_elements() {
 			}
 		}
 
-		/*
-		// grab theme-wide tabs
-		if(array_key_exists('ALL', $templ33t_templates)) {
-			foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
-				$tabs .= '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block['label'].'</a></li>';
-				$descs .= '<div class="templ33t_description templ33t_desc_'.$templ33t_meta[$slug]['id'].' templ33t_hidden"><p>'.$block['description'].'</p></div>';
-				$editors .= '<div id="templ33t_editor_'.$templ33t_meta[$slug]['id'].'" class="templ33t_editor">';
-				if($block['type'] == 'editor') {
-					$editors .= '<textarea rows="10" class="theEditor" cols="40" name="content" tabindex="2" id="content"></textarea>';
-				} else {
-					$editors .= '<p>THIS BLOCK IS A: '.$block['type'].'</p>';
-				}
-				$editors .'</div>';
-			}
-		}
-		*/
+		
+//		// grab theme-wide tabs
+//		if(array_key_exists('ALL', $templ33t_templates)) {
+//			foreach($templ33t_templates['ALL']['blocks'] as $slug => $block) {
+//				$tabs .= '<li><a href="#" rel="'.$templ33t_meta[$slug]['id'].'">'.$block['label'].'</a></li>';
+//				$descs .= '<div class="templ33t_description templ33t_desc_'.$templ33t_meta[$slug]['id'].' templ33t_hidden"><p>'.$block['description'].'</p></div>';
+//				$editors .= '<div id="templ33t_editor_'.$templ33t_meta[$slug]['id'].'" class="templ33t_editor">';
+//				if($block['type'] == 'editor') {
+//					$editors .= '<textarea rows="10" class="theEditor" cols="40" name="content" tabindex="2" id="content"></textarea>';
+//				} else {
+//					$editors .= '<p>THIS BLOCK IS A: '.$block['type'].'</p>';
+//				}
+//				$editors .'</div>';
+//			}
+//		}
+		
 
 		// add settings tab if exists
 		if(!empty($templ33t->option_objects)) {
@@ -1966,6 +1991,7 @@ function templ33t_elements() {
 
 
 }
+*/
 
 /**
  * Intercepts media
