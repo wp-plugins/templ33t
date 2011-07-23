@@ -1652,7 +1652,7 @@ class Templ33t {
 
 		} elseif(is_page()) {
 
-			$content = templ33t_strip_comment($content);
+			$content = $this->strip_comment($content);
 
 		}
 
