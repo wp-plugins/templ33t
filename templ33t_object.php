@@ -821,7 +821,7 @@ class Templ33t {
 	 * @param string $content
 	 * @return string
 	 */
-	function templ33t_add_comment($content = null) {
+	function add_comment($content = null) {
 
 		global $templ33t, $templ33t_templates, $wpdb, $post;
 
