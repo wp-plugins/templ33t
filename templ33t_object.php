@@ -65,7 +65,7 @@ class Templ33t {
 		$this->use_site_option = function_exists('add_site_option');
 
 		// grab theme name
-		$theme = get_template();
+		$theme = get_stylesheet();
 
 		// get theme map
 		$map = unserialize($this->getOption('templ33t_map'));
@@ -259,7 +259,7 @@ class Templ33t {
 			}
 
 			// grab theme name
-			$theme = get_template();
+			$theme = get_stylesheet();
 
 			// grab template map
 			$this->map = unserialize($this->getOption('templ33t_map'));
@@ -1689,7 +1689,7 @@ class Templ33t {
 		if(isset($_GET['theme']) && !empty($_GET['theme'])) {
 			$theme_selected = htmlspecialchars($_GET['theme'], ENT_QUOTES);
 		} else {
-			$theme_selected = get_template();
+			$theme_selected = get_stylesheet();
 		}
 
 		/*
