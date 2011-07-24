@@ -68,10 +68,12 @@ class Templ33t {
 		$theme = get_stylesheet();
 
 		// get theme map
-		$map = unserialize($this->getOption('templ33t_map'));
-		if(is_array($map) && array_key_exists($theme, $map)) {
-			$this->map = $map[$theme];
+		$this->map = unserialize($this->getOption('templ33t_map'));
+		if(is_array($this->map) && array_key_exists($theme, $this->map)) {
+			$this->templates = $this->map[$theme];
+			$this->active = true;
 		} else {
+			$this->templates = array();
 			$this->active = false;
 		}
 		
@@ -262,10 +264,22 @@ class Templ33t {
 			$theme = get_stylesheet();
 
 			// grab template map
-			$this->map = unserialize($this->getOption('templ33t_map'));
-
+			if(empty($this->map)) {
+				$this->map = unserialize($this->getOption('templ33t_map'));
+				if(array_key_exists($theme, $this->map)) {
+					$this->templates = $this->map[$theme];
+					$this->render = true;
+				} else {
+					$this->templates = array();
+					$this->render = false;
+				}
+			} else {
+				if(empty($this->templates))
+					$this->render = false;
+			}
+			
 			// get theme map
-			$this->templates = array_key_exists($theme, $this->map) ? $this->map[$theme] : array();
+			//$this->templates = array_key_exists($theme, $this->map) ? $this->map[$theme] : array();
 
 		} elseif(basename($_SERVER['PHP_SELF']) == $this->menu_parent && $_GET['page'] == 'templ33t_settings') {
 
@@ -348,25 +362,49 @@ class Templ33t {
 	}
 
 	function parseTheme($theme = null) {
-
-		$tdir = self::$wp_content_dir . '/themes/' . $theme . '/';
-
-		$files = scandir($tdir);
-
+		
+		$theme_data = get_theme_data(get_theme_root().'/'.$theme.'/style.css');
+		
+		$theme_dirs = array(get_theme_root() . '/' . $theme . '/');
+		
+		if(!empty($theme_data['Template']) && strtolower($theme) != strtolower($theme_data['Template']))
+			$theme_dirs[] = get_theme_root() . '/' . $theme_data['Template'] . '/';
+		
 		$ignore = array('.', '..', 'style.css', 'header.php', 'footer.php', 'comments.php');
-
+		
+		$scanned = array();
+		
 		$templates = array();
+		
+		foreach($theme_dirs as $tdir) {
 
-		foreach($files as $tfile) {
+			$files = scandir($tdir);
 
-			if(!in_array($tfile, $ignore) && !is_dir($tfile) && strpos($tfile, '.php')) {
+			foreach($files as $tfile) {
+				
+//				echo $tfile.': '
+//					.(!in_array($tfile, $ignore) ? 'NOT IGNORED' : 'IGNORED')
+//					.(!in_array($tfile, $scanned) ? ' | NOT SCANNED' : ' | SCANNED')
+//					.(!is_dir($tfile) ? ' | NOT DIRECTORY' : ' | DIRECTORY')
+//					.(strpos($tfile, '.php') !== false ? ' | IS PHP' : ' | NOT PHP')
+//					.'<br/>';
+				
+				if(!in_array($tfile, $ignore) && !in_array($tfile, $scanned) && !is_dir($tfile) && strpos($tfile, '.php') !== false) {
+					
+					if($conf = $this->parseTemplate($tdir.$tfile))
+						$templates[$tfile] = $conf;
 
-				if($conf = $this->parseTemplate($tdir.$tfile))
-					$templates[$tfile] = $conf;
+				}
+				
+				$scanned[] = $tfile;
 
 			}
 
 		}
+		//echo $theme.'<br/>';
+		//print_r($theme_data);
+		//print_r($theme_dirs);
+		//print_r($templates);
 
 		return $templates;
 
@@ -379,9 +417,9 @@ class Templ33t {
 		$template_data = implode( '', file( $template ));
 		
 		// parse retrieved data
+		/*
 		$config = $this->parseConfig($template_data);
 		$options = $this->parseOptions($template_data);
-
 
 		if(!empty($config) || !empty($options)) {
 
@@ -403,9 +441,60 @@ class Templ33t {
 			return false;
 
 		}
+		*/
+		
+		
+		// get blocks
+		$blocks = array();
+		$block_matches = array();
+		preg_match_all('/templ33t\_block\s*\(\s*[\'|\"]([^\']+)[\'|\"]/i', $template_data, $block_matches);
+		if(!empty($block_matches[1])) {
+			foreach($block_matches[1] as $slug) {
+				$blocks[$slug] = array_merge(
+					$this->config_defaults,
+					array(
+						'slug' => $slug,
+						'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+					)
+				);
+			}
+		}
+		
+		// get options
+		$options = array();
+		$option_matches = array();
+		preg_match_all('/templ33t\_option\s*\(\s*[\'|\"]([^\']+)[\'|\"]/i', $template_data, $option_matches);
+		if(!empty($option_matches[1])) {
+			foreach($option_matches[1] as $slug) {
+				$options[$slug] = array_merge(
+					$this->config_defaults,
+					array(
+						'slug' => $slug,
+						'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+					)
+				);
+			}
+		}
+		
+		if(!empty($blocks) || !empty($options)) {
 
+			$config = array(
+				'main' => 'Page Content',
+				'description' => '',
+				'blocks' => $blocks,
+				'options' => $options,
+			);
+			
+			return $config;
+
+		} else {
+			
+			return false;
+			
+		}
+		
 	}
-
+	/*
 	function parseOptions($template_str = null) {
 
 		// grab options config string from file
@@ -417,7 +506,7 @@ class Templ33t {
 
 		// grab option string
 		$matches = array();
-		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),*/i', $data, $matches);
+		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),* /i', $data, $matches);
 
 		$options = array();
 		
@@ -482,7 +571,7 @@ class Templ33t {
 		);
 
 		$matches = array();
-		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),*/i', $blockstr, $matches);
+		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),* /i', $blockstr, $matches);
 
 		if(!empty($matches[1])) {
 
@@ -557,7 +646,7 @@ class Templ33t {
 		return $descriptions;
 		
 	}
-
+	*/
 	public static function slug($key = null) {
 
 		$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $key)))));
@@ -569,13 +658,13 @@ class Templ33t {
 	public function prepare_meta() {
 
 		global $wpdb, $post;
-
+		
 		if(!$this->active || !empty($this->meta)) return;
-
+		
 		// cleanse default page name
 		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = basename(get_page_template());
-
-		if(array_key_exists($post->page_template, $this->map)) {
+		
+		if(array_key_exists($post->page_template, $this->templates)) {
 
 			// grab meta
 			$all_meta = $wpdb->get_results(
@@ -629,9 +718,9 @@ class Templ33t {
 			}
 
 			// prepare block meta
-			if(!empty($this->map[$post->page_template]['blocks'])) {
+			if(!empty($this->templates[$post->page_template]['blocks'])) {
 
-				foreach($this->map[$post->page_template]['blocks'] as $slug => $block) {
+				foreach($this->templates[$post->page_template]['blocks'] as $slug => $block) {
 
 					// create any non-existent custom fields
 					if(!array_key_exists($slug, $this->meta)) {
@@ -772,7 +861,7 @@ class Templ33t {
 			/* <![CDATA[ */
 			var TL33T_current = { template: "'.$post->page_template.'", assets: "'.Templ33t::$assets_url.'" };
 			';
-
+		
 		// output js template map
 		if(!empty($this->templates)) {
 
@@ -833,8 +922,8 @@ class Templ33t {
 
 			// grab searchable block slugs
 			$searchable = array();
-			if(array_key_exists($template, $this->map)) {
-				foreach($this->map[$template]['blocks'] as $slug => $block) {
+			if(array_key_exists($template, $this->templates)) {
+				foreach($this->templates[$template]['blocks'] as $slug => $block) {
 					if($block['searchable']) $searchable[] = $slug;
 				}
 			}
@@ -856,7 +945,7 @@ class Templ33t {
 
 					if(!array_key_exists($slug, $this->block_objects)) {
 
-						$block = $this->map[$template]['blocks'][$slug];
+						$block = $this->templates[$template]['blocks'][$slug];
 						$block['slug'] = $slug;
 						$block['id'] = $metadata['templ33t_'.$slug]['id'];
 						$block['value'] = $metadata['templ33t_'.$slug]['value'];
@@ -905,19 +994,19 @@ class Templ33t {
 	function tab_elements() {
 
 		global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
-
+		
 		// keep track of selected template
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
 		if($this->render) {
-
+			
 			// grab main label
-			if(array_key_exists($post->page_template, $this->map)) {
-				$main_label = $this->map[$post->page_template]['main'];
-				$main_desc = $this->map[$post->page_template]['description'];
-			} elseif(array_key_exists('ALL', $this->map)) {
-				$main_label = $this->map['ALL']['main'];
-				$main_desc = $this->map['ALL']['description'];
+			if(array_key_exists($post->page_template, $this->templates)) {
+				$main_label = $this->templates[$post->page_template]['main'];
+				$main_desc = $this->templates[$post->page_template]['description'];
+			} elseif(array_key_exists('ALL', $this->templates)) {
+				$main_label = $this->templates['ALL']['main'];
+				$main_desc = $this->templates['ALL']['description'];
 			} else {
 				$main_label = 'Page Content';
 				$main_desc = 'Enter your page content here.';
@@ -1011,7 +1100,7 @@ class Templ33t {
 	
 	function save_options() {
 
-		if(array_key_exists($_POST['templ33t_template'], $this->map)) {
+		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
 
 			if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
 
@@ -1020,9 +1109,9 @@ class Templ33t {
 					$slug = str_replace('templ33t_', '', str_replace('templ33t_option_', '', $data['key']));
 
 					// handle blocks
-					if(array_key_exists($slug, $this->map[$_POST['templ33t_template']]['blocks'])) {
+					if(array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks'])) {
 
-						$block = $this->map[$_POST['templ33t_template']]['blocks'][$slug];
+						$block = $this->templates[$_POST['templ33t_template']]['blocks'][$slug];
 						$block['slug'] = $slug;
 						$block['id'] = $id;
 						$block['value'] = $data['value'];
@@ -1046,9 +1135,9 @@ class Templ33t {
 					}
 
 					// handle options
-					if(array_key_exists($slug, $this->map[$_POST['templ33t_template']]['options'])) {
+					if(array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options'])) {
 
-						$option = $this->map[$_POST['templ33t_template']]['options'][$slug];
+						$option = $this->templates[$_POST['templ33t_template']]['options'][$slug];
 						$option['slug'] = $slug;
 						$option['id'] = $id;
 						$option['value'] = $data['value'];
@@ -1081,9 +1170,9 @@ class Templ33t {
 				foreach($_POST['templ33t_meta'] as $slug => $data) {
 
 					// handle blocks
-					if(array_key_exists($slug, $this->map[$_POST['templ33t_template']]['blocks'])) {
+					if(array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks'])) {
 
-						$block = $this->map[$_POST['templ33t_template']]['blocks'][$slug];
+						$block = $this->templates[$_POST['templ33t_template']]['blocks'][$slug];
 						$block['slug'] = $slug;
 						$block['id'] = $data['id'];
 						$block['value'] = $data['value'];
@@ -1100,9 +1189,9 @@ class Templ33t {
 					}
 
 					// handle options
-					if(array_key_exists($slug, $this->map[$_POST['templ33t_template']]['options'])) {
+					if(array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options'])) {
 
-						$option = $this->map[$_POST['templ33t_template']]['options'][$slug];
+						$option = $this->templates[$_POST['templ33t_template']]['options'][$slug];
 						$option['slug'] = $slug;
 						$option['id'] = $data['id'];
 						$option['value'] = $data['value'];
@@ -1376,7 +1465,7 @@ class Templ33t {
 						foreach($old as $key => $val) {
 							$compare[$val['template']] = unserialize($val['config']);
 						}
-
+						
 						// get templates
 						$templates = $this->parseTheme($theme);
 
@@ -1778,15 +1867,15 @@ class Templ33t {
 		<?php } ?>
 
 		<br/>
-
+		
 		<div id="templ33t_settings">
 
 			<div class="templ33t_themes">
 
 				<ul>
 					<?php $x = 1; foreach($themes as $key => $val) { ?>
-					<li class="<?php if($theme_selected == $val['Template']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Template']; ?>">
-						<a href="<?php echo self::$settings_url; ?>&theme=<?php echo $val['Template']; ?>">
+					<li class="<?php if($theme_selected == $val['Stylesheet']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Stylesheet']; ?>">
+						<a href="<?php echo self::$settings_url; ?>&theme=<?php echo $val['Stylesheet']; ?>">
 							<?php if(strlen($key) > 22) echo substr($key, 0, 22).'...'; else echo $key; ?>
 						</a>
 					</li>
