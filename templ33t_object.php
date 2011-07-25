@@ -530,8 +530,6 @@ class Templ33t {
 
 		global $wpdb, $post;
 		
-		echo 'METAMETAMETA!!<br/>';
-		
 		if(!$this->active || !empty($this->meta)) return;
 		
 		// cleanse default page name
