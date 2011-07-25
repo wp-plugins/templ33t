@@ -126,8 +126,6 @@ function templ33t_hideCustomFields() {
 
 function templ33t_switchEditor(prel) {
 	
-	alert('TESTING: '+prel);
-	
 	var ntmode = getUserSetting('editor') == 'tinymce' ? false : true;
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
 	var nobj = typeof(prel) == 'string' ? jQuery('div#templ33t_control li a[rel="'+prel+'"]') : jQuery(this);
@@ -150,7 +148,9 @@ function templ33t_switchEditor(prel) {
 
 	// if mode has been switched, process content
 	if(ntmode != ctmode) templ33t_switchMode(null);
-
+	
+	alert(jQuery('textarea#content').length+' - '+jQuery('#content_ifr').length);
+	
 	// load new tab value
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
