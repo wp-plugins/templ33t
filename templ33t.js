@@ -55,7 +55,7 @@ jQuery(document).ready(
 			templ33t_hideCustomFields();
 
 			// add rel to editor
-			jQuery('#postdivrich').attr('rel', 'default');
+			jQuery('#postdivrich:last').attr('rel', 'default');
 
 			if(ctmode) templ33t_switchMode('html');
 
@@ -108,12 +108,12 @@ function templ33t_switchTemplate() {
 
 function templ33t_placeControl() {
 
-	jQuery('#postdivrich').attr('rel','default');
-	jQuery('#postdivrich').before(jQuery('div#templ33t_control'));
+	jQuery('#postdivrich:last').attr('rel','default');
+	jQuery('#postdivrich:last').before(jQuery('div#templ33t_control'));
 	jQuery('div#templ33t_control').show();
-	jQuery('#postdivrich').before(jQuery('div#templ33t_descriptions'));
+	jQuery('#postdivrich:last').before(jQuery('div#templ33t_descriptions'));
 	jQuery('div#templ33t_descriptions').show();
-	jQuery('#postdivrich').before(jQuery('div#templ33t_editors'));
+	jQuery('#postdivrich:last').before(jQuery('div#templ33t_editors'));
 	jQuery('div#templ33t_editors').show();
 
 }
@@ -130,9 +130,9 @@ function templ33t_switchEditor(prel) {
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
 	var nobj = typeof(prel) == 'string' ? jQuery('div#templ33t_control li a[rel="'+prel+'"]') : jQuery(this);
 	var nrel = nobj.attr('rel');
-	var ccontent = ntmode ? jQuery('textarea#content').val() : jQuery('#content_ifr').contents().find('body').html();
+	var ccontent = ntmode ? jQuery('textarea#content:last').val() : jQuery('#content_ifr:last').contents().find('body').html();
 	var ncontent;
-	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
+	var fromcustom = (jQuery('#postdivrich:last').css('display') == 'none');
 	var tocustom;
 	if(nobj.parent().index() > 0)
 		tocustom = TL33T_def[jQuery('select#page_template').val()].blocks[(nobj.parent().index() - 1)].custom;
@@ -149,18 +149,18 @@ function templ33t_switchEditor(prel) {
 	// if mode has been switched, process content
 	if(ntmode != ctmode) templ33t_switchMode(null);
 	
-	alert(jQuery('textarea#content').val()+' - '+jQuery('#content_ifr').contents());
+	alert(jQuery('textarea#content:last').val()+' - '+jQuery('#content_ifr:last').contents());
 	
 	// load new tab value
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
-		jQuery('textarea#content').val(ncontent);
-		if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
+		jQuery('textarea#content:last').val(ncontent);
+		if(!ntmode) jQuery('#content_ifr:last').contents().find('body').html(ncontent);
 	} else {
 		if(!tocustom) {
 			ncontent = jQuery('#templ33t_val_'+nrel).val();
-			jQuery('textarea#content').val(ncontent);
-			if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
+			jQuery('textarea#content:last').val(ncontent);
+			if(!ntmode) jQuery('#content_ifr:last').contents().find('body').html(ncontent);
 		}
 	}
 
@@ -168,7 +168,7 @@ function templ33t_switchEditor(prel) {
 	jQuery('div.templ33t_editor').hide();
 
 	// set rel
-	jQuery('#postdivrich').attr('rel', nrel);
+	jQuery('#postdivrich:last').attr('rel', nrel);
 
 	// mark selected
 	jQuery('div#templ33t_control li.selected').removeClass('selected');
@@ -180,12 +180,12 @@ function templ33t_switchEditor(prel) {
 
 	if(!tocustom) {
 
-		jQuery('#postdivrich').show();
+		jQuery('#postdivrich:last').show();
 		//jQuery('#templ33t_descriptions').show();
 
 	} else {
 		
-		jQuery('#postdivrich').hide();
+		jQuery('#postdivrich:last').hide();
 		//jQuery('#templ33t_descriptions').hide();
 		jQuery('div#templ33t_editor_'+nrel).show();
 
@@ -255,12 +255,12 @@ function templ33t_switchMode(switchTo) {
 function templ33t_append(scode) {
 	
 	if(!ctmode) {
-		jQuery('textarea#content').val(jQuery('textarea#content').val()+"<p>"+scode+"</p>");
-		jQuery('#content_ifr').contents().find('body').append("<p>"+scode+"</p>");
-		jQuery('#content_ifr').attr('scrollTop', jQuery('#content_ifr').attr('scrollHeight'));
+		jQuery('textarea#content:last').val(jQuery('textarea#content:last').val()+"<p>"+scode+"</p>");
+		jQuery('#content_ifr:last').contents().find('body').append("<p>"+scode+"</p>");
+		jQuery('#content_ifr:last').attr('scrollTop', jQuery('#content_ifr:last').attr('scrollHeight'));
 	} else {
-		jQuery('textarea#content').val(jQuery('textarea#content').val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>"));
-		jQuery('textarea#content').attr('scrollTop', jQuery('textarea#content').attr('scrollHeight'));
+		jQuery('textarea#content:last').val(jQuery('textarea#content:last').val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>"));
+		jQuery('textarea#content:last').attr('scrollTop', jQuery('textarea#content:last').attr('scrollHeight'));
 	}
 
 }
