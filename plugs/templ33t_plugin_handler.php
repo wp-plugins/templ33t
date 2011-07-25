@@ -23,7 +23,7 @@ class Templ33tPluginHandler {
 			if(!array_key_exists($cname, self::$loaded)) {
 
 				$class = self::classify($cname);
-				$cpath = TEMPL33T_ASSETS_DIR . 'plugs/' . $cname . '/templ33t_' . $cname . '.php';
+				$cpath = realpath(dirname(__FILE__)) . '/' . $cname . '/templ33t_' . $cname . '.php';
 				require_once($cpath);
 
 				self::$loaded[$cname] = $class;

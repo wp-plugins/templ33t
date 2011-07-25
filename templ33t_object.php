@@ -3,16 +3,27 @@
 class Templ33t {
 	
 	static $version				= '0.2';
+	
 	static $db_version			= '0.2';
+	
 	static $wp_content_url;
+	
 	static $wp_content_dir;
+	
 	static $wp_plugin_url;
+	
 	static $wp_plugin_dir;
+	
 	static $wpmu_plugin_url;
+	
 	static $wpmu_plugin_dir;
+	
 	static $assets_url;
+	
 	static $assets_dir;
+	
 	static $settings_url;
+	
 	
 	var $tab_pages = array(
 		'page.php',
@@ -41,18 +52,41 @@ class Templ33t {
 	);
 
 	var $active = true;
+	
 	var $render = false;
-
+	
 	var $use_site_option;
 	
 	var $map = array();
+	
 	var $templates = array();
+	
 	var $meta = array();
+	
 	var $block_objects = array();
+	
 	var $option_objects = array();
+	
 	var $groups = array();
+	
 	var $menu_parent = null;
-	var $errors = array();
+	
+	var $errors = array(
+		'theme' => 'Please choose a theme.',
+		'template' => 'Please enter a template file name.',
+		'mainlabel' => 'Please enter the main label for this template.',
+		'block' => 'Please enter a custom block name.',
+		'duptemp' => 'This template has already been added.',
+		'dupblock' => 'This block already exists.',
+		'notemp' => 'This template file does not exist in the chosen theme.',
+		'notheme' => 'No theme chosen.',
+		'noblock' => 'Invalid block.',
+		'nopub' => 'The most recent configuration has already been published.',
+		'noaction' => 'Invalid action.',
+		'nochange' => 'No configuration changes detected.',
+		'nothemeconfig' => 'No Templ33t configuration detected for this theme. The cached configuration can be removed.',
+		'noconfig' => 'No Templ33t configuration detected for this template. The cached configuration can be removed.',
+	);
 	
 	function __construct() {
 		
@@ -87,8 +121,8 @@ class Templ33t {
 			add_action('admin_menu', array($this, 'menu'));
 		else
 			add_action('network_admin_menu', array($this, 'menu'));
-		add_filter('the_content', array($this, 'search_results'), 1);
-		add_action('wp', array($this, 'prepare_meta'), 1);
+		add_filter('the_content', array($this, 'searchResults'), 1);
+		add_action('wp', array($this, 'prepareMeta'), 1);
 		
 	}
 
@@ -216,14 +250,14 @@ class Templ33t {
 
 			// add hooks
 			//add_action('posts_selection', 'templ33t_handle_meta', 1);
-			add_action('posts_selection', array($this, 'prepare_meta'), 1);
+			add_action('posts_selection', array($this, 'prepareMeta'), 1);
 			add_action('admin_print_styles', array($this, 'styles'), 10);
 			add_action('admin_print_scripts', array($this, 'scripts'), 10);
-			add_filter('the_editor_content', array($this, 'strip_comment'), 1);
-			add_filter('content_save_pre', array($this, 'add_comment'), 10);
-			add_action('edit_page_form', array($this, 'tab_elements'), 1);
+			add_filter('the_editor_content', array($this, 'stripComment'), 1);
+			add_filter('content_save_pre', array($this, 'addComment'), 10);
+			add_action('edit_page_form', array($this, 'tabElements'), 1);
 
-			if(!empty($_POST)) $this->save_options();
+			if(!empty($_POST)) $this->saveOptions();
 
 			// create new page with forced template if from_template passed
 			if(in_array(basename($_SERVER['PHP_SELF']), array('page-new.php', 'post-new.php')) && array_key_exists('from_template', $_GET)) {
@@ -284,11 +318,11 @@ class Templ33t {
 		} elseif(basename($_SERVER['PHP_SELF']) == $this->menu_parent && $_GET['page'] == 'templ33t_settings') {
 
 			// add styles & scripts
-			add_action('admin_print_styles', array($this, 'settings_styles'), 1);
-			add_action('admin_print_scripts', array($this, 'settings_scripts'), 1);
+			add_action('admin_print_styles', array($this, 'settingsStyles'), 1);
+			add_action('admin_print_scripts', array($this, 'settingsScripts'), 1);
 
 			// handle settings page post
-			$this->save_settings();
+			$this->saveSettings();
 
 		} elseif(basename($_SERVER['PHP_SELF']) == 'media-upload.php') {
 
@@ -370,7 +404,14 @@ class Templ33t {
 		if(!empty($theme_data['Template']) && strtolower($theme) != strtolower($theme_data['Template']))
 			$theme_dirs[] = get_theme_root() . '/' . $theme_data['Template'] . '/';
 		
-		$ignore = array('.', '..', 'style.css', 'header.php', 'footer.php', 'comments.php');
+		$ignore = array('.', '..', 'style.css');
+		
+		$all = array(
+			'header.php',
+			'footer.php',
+			'sidebar.php',
+			'comments.php'
+		);
 		
 		$scanned = array();
 		
@@ -382,18 +423,32 @@ class Templ33t {
 
 			foreach($files as $tfile) {
 				
-//				echo $tfile.': '
-//					.(!in_array($tfile, $ignore) ? 'NOT IGNORED' : 'IGNORED')
-//					.(!in_array($tfile, $scanned) ? ' | NOT SCANNED' : ' | SCANNED')
-//					.(!is_dir($tfile) ? ' | NOT DIRECTORY' : ' | DIRECTORY')
-//					.(strpos($tfile, '.php') !== false ? ' | IS PHP' : ' | NOT PHP')
-//					.'<br/>';
-				
 				if(!in_array($tfile, $ignore) && !in_array($tfile, $scanned) && !is_dir($tfile) && strpos($tfile, '.php') !== false) {
 					
-					if($conf = $this->parseTemplate($tdir.$tfile))
-						$templates[$tfile] = $conf;
-
+					if($conf = $this->parseTemplate($tdir.$tfile)) {
+						
+						if(!in_array($tfile, $all)) {
+							
+							$templates[$tfile] = $conf;
+							
+						} else {
+							
+							if(!array_key_exists('ALL', $templates)) {
+								$templates['ALL'] = array(
+									'main' => $conf['main'],
+									'description' => $conf['description'],
+									'blocks' => array(),
+									'options' => array(),
+								);
+							}
+							
+							$templates['ALL']['blocks'] += $conf['blocks'];
+							$templates['ALL']['options'] += $conf['options'];
+							
+						}
+						
+					}
+					
 				}
 				
 				$scanned[] = $tfile;
@@ -401,10 +456,6 @@ class Templ33t {
 			}
 
 		}
-		//echo $theme.'<br/>';
-		//print_r($theme_data);
-		//print_r($theme_dirs);
-		//print_r($templates);
 
 		return $templates;
 
@@ -415,34 +466,6 @@ class Templ33t {
 		// catch invalid file
 		if(empty($template) || !file_exists($template)) return false;
 		$template_data = implode( '', file( $template ));
-		
-		// parse retrieved data
-		/*
-		$config = $this->parseConfig($template_data);
-		$options = $this->parseOptions($template_data);
-
-		if(!empty($config) || !empty($options)) {
-
-			$config = array_merge(
-				array(
-					'main' => 'Page Content',
-					'description' => '',
-					'blocks' => array(),
-					'options' => array(),
-				),
-				$config,
-				$options
-			);
-
-			return $config;
-
-		} else {
-
-			return false;
-
-		}
-		*/
-		
 		
 		// get blocks
 		$blocks = array();
@@ -494,159 +517,7 @@ class Templ33t {
 		}
 		
 	}
-	/*
-	function parseOptions($template_str = null) {
-
-		// grab options config string from file
-		$data = '';
-		if ( preg_match( '|Templ33t Options:(.*)$|mi', $template_str, $data ) )
-			$data = _cleanup_header_comment($data[1]);
-
-		if(empty($data)) return array();
-
-		// grab option string
-		$matches = array();
-		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),* /i', $data, $matches);
-
-		$options = array();
-		
-		if(!empty($matches[1])) {
-
-			// grab description strings
-			$descriptions = array();
-			if(preg_match_all('|Templ33t Description (.*\:.*)$|mi', $template_str, $descriptions))
-				$descriptions = $this->parseDescriptions($descriptions[1]);
-
-			foreach($matches[1] as $key => $val) {
-
-				$opt = array('label' => $matches[2][$key], 'slug' => $this->slug($matches[2][$key]));
-				$opt['description'] = array_key_exists($opt['slug'], $descriptions) ? $descriptions[$opt['slug']] : '';
-
-				if(!empty($matches[3][$key])) {
-
-					$cstr = trim(chop($matches[3][$key]));
-					$cstr = trim(chop(substr($cstr, 1, (strlen($cstr) - 2))));
-					
-					if(strpos($cstr, '?') !== false) {
-						list($opt['type'], $opt['config']) = explode('?', $cstr);
-					} else {
-						$opt['type'] = $cstr;
-					}
-
-				} else {
-
-					$opt['type'] = 'text';
-
-				}
-
-				$options[$opt['slug']] = array_merge(
-					$this->config_defaults,
-					$opt
-				);
-
-			}
-
-		}
-
-		return array('options' => $options);
-
-	}
-
-	function parseConfig($template_str = null) {
-
-		// grab block config string from file
-		$blockstr = '';
-		if ( preg_match( '|Templ33t Blocks:(.*)$|mi', $template_str, $blockstr ) )
-			$blockstr = _cleanup_header_comment($blockstr[1]);
-
-		// catch empty configuration (not a templ33t template)
-		if(empty($blockstr)) return array();
-
-		// set up config array
-		$config = array(
-			'main' => 'Page Content',
-			'description' => '',
-			'blocks' => array(),
-			'options' => array(),
-		);
-
-		$matches = array();
-		preg_match_all('/\s*(([^,\[]+)\s*(\[[^\]]+\])*),* /i', $blockstr, $matches);
-
-		if(!empty($matches[1])) {
-
-			// grab description data
-			$descriptions = array();
-			if(preg_match_all('|Templ33t Description (.*\:.*)$|mi', $template_str, $descriptions))
-				$descriptions = $this->parseDescriptions($descriptions[1]);
-
-			foreach($matches[1] as $key => $val) {
-
-				$block = array('label' => $matches[2][$key], 'slug' => $this->slug($matches[2][$key]));
-				$block['description'] = array_key_exists($block['slug'], $descriptions) ? $descriptions[$block['slug']] : '';
-				
-				if(!empty($matches[3][$key])) {
-
-					$cstr = trim(chop($matches[3][$key]));
-					$cstr = trim(chop(substr($cstr, 1, (strlen($cstr) - 2))));
-
-					$attributes = explode('|', $cstr);
-
-					foreach($attributes as $akey => $aval) {
-
-						if($aval == 'main') {
-							$config['main'] = $block['label'];
-							$config['description'] = array_key_exists($block['slug'], $descriptions) ? $descriptions[$block['slug']] : '';
-							break;
-						}
-
-						if(strpos($aval, '?') !== false) {
-							list($block['type'], $block['config']) = explode('?', $aval);
-						} else {
-							if(in_array($aval, $this->plugin_attributes)) {
-								$block[$aval] = true;
-							} else {
-								$block['type'] = $aval;
-							}
-						}
-
-					}
-
-					if($aval == 'main') continue;
-
-				}
-
-				$config['blocks'][$block['slug']] = array_merge(
-					$this->config_defaults,
-					$block
-				);
-
-			}
-			
-		}
-
-		return $config;
-
-	}
 	
-	function parseDescriptions($descriptions = array()) {
-		
-		if(is_numeric(current(array_keys($descriptions)))) {
-
-			$new = array();
-			foreach($descriptions as $desc) {
-				list($title, $desc) = explode(':', $desc);
-				$new[self::slug($title)] = trim(chop($desc));
-			}
-
-			$descriptions = $new;
-
-		}
-
-		return $descriptions;
-		
-	}
-	*/
 	public static function slug($key = null) {
 
 		$slug = strtolower(str_replace(' ', '_', trim(chop(preg_replace('/([^a-z0-9]+)/i', ' ', $key)))));
@@ -655,9 +526,11 @@ class Templ33t {
 
 	}
 
-	public function prepare_meta() {
+	public function prepareMeta() {
 
 		global $wpdb, $post;
+		
+		echo 'METAMETAMETA!!<br/>';
 		
 		if(!$this->active || !empty($this->meta)) return;
 		
@@ -682,7 +555,13 @@ class Templ33t {
 					$this->meta[$slug] = array_merge($this->config_defaults, array('id' => $val['meta_id'], 'value' => $val['meta_value']));
 				}
 			}
-
+			
+			// add global blocks and options
+			if(array_key_exists('ALL', $this->templates)) {
+				$this->templates[$post->page_template]['blocks'] += $this->templates['ALL']['blocks'];
+				$this->templates[$post->page_template]['options'] += $this->templates['ALL']['options'];
+			}
+			
 			// prepare option meta
 			if(!empty($this->map[$post->page_template]['options'])) {
 
@@ -716,7 +595,7 @@ class Templ33t {
 				}
 
 			}
-
+			
 			// prepare block meta
 			if(!empty($this->templates[$post->page_template]['blocks'])) {
 
@@ -804,7 +683,7 @@ class Templ33t {
 		wp_enqueue_script('templ33t_scripts');
 
 		// output templ33t js data
-		$this->script_obj();
+		$this->scriptObj();
 
 
 		$load = array();
@@ -853,7 +732,7 @@ class Templ33t {
 	 *
 	 * @global array $templ33t_templates
 	 */
-	function script_obj() {
+	function scriptObj() {
 
 		global $templ33t, $templ33t_templates, $templ33t_plugins, $post;
 
@@ -910,7 +789,7 @@ class Templ33t {
 	 * @param string $content
 	 * @return string
 	 */
-	function add_comment($content = null) {
+	function addComment($content = null) {
 
 		global $templ33t, $templ33t_templates, $wpdb, $post;
 
@@ -937,7 +816,7 @@ class Templ33t {
 				}
 
 				// strip existing comment
-				$content = $this->strip_comment($content);
+				$content = $this->stripComment($content);
 
 				// generate apend string
 				$append = '<!-- TEMPL33T[ ';
@@ -975,7 +854,7 @@ class Templ33t {
 	 * @param string $content
 	 * @return string
 	 */
-	function strip_comment($content = null) {
+	function stripComment($content = null) {
 
 		$content = preg_replace('/(<!--\ TEMPL33T\[.+?\]END\_TEMPL33T\ -->)/mi', '', $content);
 
@@ -991,7 +870,7 @@ class Templ33t {
 	 * @global boolean $templ33t_render
 	 * @global object $post
 	 */
-	function tab_elements() {
+	function tabElements() {
 
 		global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
 		
@@ -1098,7 +977,7 @@ class Templ33t {
 
 	}
 	
-	function save_options() {
+	function saveOptions() {
 
 		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
 
@@ -1218,7 +1097,7 @@ class Templ33t {
 	/**
 	 * Enqueue css for settings page
 	 */
-	function settings_styles() {
+	function settingsStyles() {
 
 		wp_enqueue_style('templ33t_styles');
 		wp_enqueue_style('thickbox');
@@ -1228,7 +1107,7 @@ class Templ33t {
 	/**
 	 * Enqueue js for settings page
 	 */
-	function settings_scripts() {
+	function settingsScripts() {
 
 		wp_deregister_script('jquery');
 		wp_register_script('jquery', 'http://code.jquery.com/jquery-1.4.2.min.js');
@@ -1241,7 +1120,7 @@ class Templ33t {
 	 * Catch and act upon settings post & actions
 	 * @global object $wpdb
 	 */
-	function save_settings() {
+	function saveSettings() {
 
 		global $templ33t, $templ33t_menu_parent, $templ33t_settings_url, $wpdb, $wp_content_dir;
 
@@ -1733,7 +1612,7 @@ class Templ33t {
 	 * @param string $content
 	 * @return string
 	 */
-	function search_results($content = null) {
+	function searchResults($content = null) {
 
 		if(is_search()) {
 
@@ -1741,7 +1620,7 @@ class Templ33t {
 
 		} elseif(is_page()) {
 
-			$content = $this->strip_comment($content);
+			$content = $this->stripComment($content);
 
 		}
 
@@ -1757,7 +1636,7 @@ class Templ33t {
 
 	function settings() {
 
-		global $templ33t, $templ33t_menu_parent, $templ33t_settings_url, $templ33t_errors, $wpdb;
+		global $wpdb;
 
 		// get current configuration versions
 		$pub = $this->getOption('templ33t_map_pub');
@@ -1847,258 +1726,7 @@ class Templ33t {
 			}
 		}
 
-		?>
-
-		<h2>Templ33t Configuration</h2>
-
-		<?php if($pub < $dev) { ?>
-		<div id="templ33t_publish">
-			<p>
-				Your configuration has changed. Would you like to publish it for use?
-				<a href="<?php echo self::$settings_url.'&theme='.$theme_selected.'&t_action=publish'; ?>">Publish Configuration</a>
-			</p>
-		</div>
-		<?php } ?>
-
-		<?php if(!empty($error)) { ?>
-		<p class="templ33t_error">
-			<?php echo $error; ?>
-		</p>
-		<?php } ?>
-
-		<br/>
-		
-		<div id="templ33t_settings">
-
-			<div class="templ33t_themes">
-
-				<ul>
-					<?php $x = 1; foreach($themes as $key => $val) { ?>
-					<li class="<?php if($theme_selected == $val['Stylesheet']) echo 'selected'; if($x == 1) echo ' first'; elseif($x == $theme_count) echo ' last'; ?>" rel="<?php echo $val['Stylesheet']; ?>">
-						<a href="<?php echo self::$settings_url; ?>&theme=<?php echo $val['Stylesheet']; ?>">
-							<?php if(strlen($key) > 22) echo substr($key, 0, 22).'...'; else echo $key; ?>
-						</a>
-					</li>
-					<?php $x++; } ?>
-				</ul>
-
-			</div>
-
-			<div class="templ33t_blocks">
-
-				<div>
-
-					<div>
-
-						<a href="#TB_inline?width=400&height=180&inlineId=templ33t_new_template_container&modal=true" class="thickbox">Add Template</a> |
-						<a href="<?php echo self::$settings_url; ?>&t_action=scan&theme=<?php echo $theme_selected; ?>">Scan All Templates</a>
-
-						<div id="templ33t_new_template_container" style="display: none; text-align: center;">
-							<form id="templ33t_new_template" action="<?php echo self::$settings_url; ?>" method="post">
-								<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-
-								<h2>Scan a Template File</h2>
-
-								<br/>
-
-								<table border="0" width="100%">
-									<tr>
-										<td><label for="templ33t_template">Template File Name: </label></td>
-										<td><input type="text" class="templ33t_template" name="templ33t_template" value="" size="30" /></td>
-									</tr>
-									<tr>
-										<td colspan="2" align="center">
-											<br/>
-											<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-											<input type="submit" name="templ33t_new_template" value="Add Template" />
-										</td>
-									</tr>
-								</table>
-
-							</form>
-						</div>
-
-					</div>
-
-					<hr/>
-
-
-					<!-- template navigation -->
-					<?php if(!empty($templates)) { ?>
-					<div id="templ33t_control">
-						<ul>
-							<?php $x = 0; foreach($templates as $tkey => $tval) { ?>
-							<li<?php if($x == 0) { ?> class="selected"<?php } ?>><a href="#" rel="<?php echo $tval['templ33t_template_id']; ?>"><?php echo $tval['template']; ?></a></li>
-							<?php $x++; } ?>
-						</ul>
-					</div>
-					<?php } ?>
-
-
-					<ul>
-						<?php /*
-						<li class="templ33t_all_box">
-							<div class="templ33t_right">
-
-
-								<a href="#TB_inline?width=400&height=220&inlineId=templ33t_all_block_container&modal=true" class="thickbox">Add Content Block</a>
-
-								<div id="templ33t_all_block_container" style="display: none; text-align: center;">
-									<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
-										<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-										<input type="hidden" name="templ33t_template" value="ALL" />
-
-										<h2>Add a Theme-Wide Content Block</h2>
-
-										<p>This content block will be available to all templates within this theme.</p>
-
-										<table border="0" width="100%">
-											<tr>
-												<td><label for="templ33t_main_label">Content Block Label: </label></td>
-												<td><input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" /></td>
-											</tr>
-											<tr>
-												<td valign="top"><label for="templ33t_block_description">Content Block Description: </label></td>
-												<td><textarea class="templ33t_block_description" name="templ33t_block_description"></textarea></td>
-											</tr>
-											<tr>
-												<td colspan="2" align="center">
-													<br/>
-													<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-													<input type="submit" name="templ33t_new_block" value="Add Block" />
-												</td>
-											</tr>
-										</table>
-
-									</form>
-								</div>
-
-							</div>
-
-							<h2>Theme Wide / All Templates</h2>
-							<hr/>
-							<?php if(array_key_exists('ALL', $block_map) && !empty($block_map['ALL'])) { ?>
-							<ul>
-								<?php foreach($block_map['ALL'] as $bkey => $bval) { ?>
-								<li>
-									<a class="delblock" href="<?php echo $templ33t_settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a>
-									<strong><?php echo $bval['block_name']; ?></strong> (<?php echo $bval['block_slug']; ?>)<br/>
-									<hr/>
-									<p><?php echo $bval['block_description'] ? $bval['block_description'] : 'No Description'; ?></p>
-								</li>
-								<?php } ?>
-							</ul>
-							<?php } else { ?>
-							<p>No Content Blocks</p>
-							<?php } ?>
-						</li>
-						*/ ?>
-
-
-
-
-
-
-
-						<?php if(!empty($templates)) { $x = 0; foreach($templates as $tkey => $tval) { ?>
-						<li class="templ33t_template_box" rel="<?php echo $tval['templ33t_template_id']; ?>" <?php if($x > 0) { ?> style="display: none;"<?php } ?>>
-							<div class="templ33t_right">
-
-
-								<!--
-								<a href="#TB_inline?width=400&height=220&inlineId=templ33t_new_block_container_<?php echo $tval['templ33t_template_id']; ?>&modal=true" class="thickbox">Add Content Block</a>
-
-								<div id="templ33t_new_block_container_<?php echo $tval['templ33t_template_id']; ?>" style="display: none; text-align: center;">
-									<form id="templ33t_new_template" action="<?php echo $templ33t_settings_url; ?>" method="post">
-										<input type="hidden" name="templ33t_theme" value="<?php echo $theme_selected; ?>" />
-										<input type="hidden" name="templ33t_template" value="<?php echo $tval['templ33t_template_id']; ?>" />
-
-										<h2>Add a Theme-Wide Content Block</h2>
-
-										<p>This content block will be available to all templates within this theme.</p>
-
-										<table border="0" width="100%">
-											<tr>
-												<td><label for="templ33t_main_label">Content Block Label: </label></td>
-												<td><input type="text" class="templ33t_block" name="templ33t_block" value="" size="30" /></td>
-											</tr>
-											<tr>
-												<td valign="top"><label for="templ33t_block_description">Content Block Description: </label></td>
-												<td><textarea class="templ33t_block_description" name="templ33t_block_description"></textarea></td>
-											</tr>
-											<tr>
-												<td colspan="2" align="center">
-													<br/>
-													<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-													<input type="submit" name="templ33t_new_block" value="Add Block" />
-												</td>
-											</tr>
-										</table>
-
-									</form>
-								</div>
-								-->
-
-								<a href="<?php echo self::$settings_url; ?>&t_action=rescan&tid=<?php echo $tval['templ33t_template_id']; ?>">Rescan Template Configuration</a>
-
-							</div>
-							<h2><?php echo $tval['template']; ?></h2>
-							<hr/>
-
-							<h4>Blocks</h4>
-
-							<ul>
-								<li>
-									<strong><?php echo $tval['config']['main']; ?></strong> - main content label
-									<hr/>
-									<p><?php echo $tval['config']['description'] ? $tval['config']['description'] : 'No Description'; ?></p>
-								</li>
-								<?php if(!empty($tval['config']['blocks'])) { foreach($tval['config']['blocks'] as $bkey => $bval) { ?>
-								<li>
-									<div class="templ33t_right">
-										Type: <?php echo $bval['type']; ?>
-									</div>
-									<!-- <a class="delblock" href="<?php echo self::$settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php //echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a> -->
-									<strong><?php echo $bval['label']; ?></strong> (<?php echo $bkey; ?>)<br/>
-									<hr/>
-									<p><?php echo $bval['description'] ? $bval['description'] : 'No Description'; ?></p>
-								</li>
-								<?php } } ?>
-							</ul>
-							<h4>Options</h4>
-							<ul>
-								<?php if(!empty($tval['config']['options'])) { foreach($tval['config']['options'] as $okey => $oval) { ?>
-								<li>
-									<div class="templ33t_right">
-										Type: <?php echo $oval['type']; ?>
-									</div>
-									<strong><?php echo $oval['label']; ?></strong> (<?php echo $okey; ?>)<br/>
-									<hr/>
-									<p><?php echo $oval['description'] ? $oval['description'] : 'No Description'; ?></p>
-								</li>
-								<?php } } ?>
-							</ul>
-							<br/>
-							<p class="templ33t_right">
-								<a class="deltemp" href="<?php echo self::$settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=deltemp&tid=<?php echo $tval['templ33t_template_id']; ?>" onclick="return confirm('Are you sure you want to remove this template and all content blocks associated with it?');">Remove This Template</a>
-							</p>
-							<div class="templ33t_clear_right"></div>
-						</li>
-						<?php $x++; } } ?>
-					</ul>
-
-
-				</div>
-
-				<div class="templ33t_clear"></div>
-
-			</div>
-
-			<div class="templ33t_clear"></div>
-
-		</div>
-
-		<?php
+		include(dirname(__FILE__).'/settings.php');
 
 	}
 	
