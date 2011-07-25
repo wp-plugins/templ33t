@@ -111,15 +111,42 @@ function templ33t_switchTemplate() {
 }
 
 function templ33t_placeControl() {
+	
+	var tc = jQuery('div#templ33t_control');
+	var pdr = jQuery('#postdivrich');
+	var td = jQuery('div#templ33t_descriptions');
+	var te = jQuery('div#templ33t_editors');
+	var nl = jQuery('div#templ33t_control ul');
+	
+	pdr.each(function() { jQuery(this).attr('rel','default') });
+	pdr.before(tc);
+	tc.show();
+	pdr.before(td);
+	td.show();
+	pdr.before(te);
+	te.show();
+	
+	
+	// calculate prev/next
+	
+	var w = 0;
+	jQuery('li', nl).each(function() { w += jQuery(this).outerWidth(); });
+	if(w > nl.width()) {
+		nl.css('margin-left', '30px');
+		nl.css('margin-right', '30px');
+		tc.children('a').show();
+	}
+	
+}
 
-	jQuery('#postdivrich').each(function() { jQuery(this).attr('rel','default') });
-	jQuery('#postdivrich').before(jQuery('div#templ33t_control'));
-	jQuery('div#templ33t_control').show();
-	jQuery('#postdivrich').before(jQuery('div#templ33t_descriptions'));
-	jQuery('div#templ33t_descriptions').show();
-	jQuery('#postdivrich').before(jQuery('div#templ33t_editors'));
-	jQuery('div#templ33t_editors').show();
+function templ33t_nav_prev() {
+	var nl = jQuery('div#templ33t_control ul');
+	nl.animate({scrollLeft: '-='+nl.width()}, 300);
+}
 
+function templ33t_nav_next() {
+	var nl = jQuery('div#templ33t_control ul');
+	nl.animate({scrollLeft: '+='+nl.width()}, 300);
 }
 
 function templ33t_hideCustomFields() {

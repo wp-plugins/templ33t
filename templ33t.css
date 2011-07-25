@@ -30,16 +30,54 @@
 
 div#templ33t_control {
 	margin-bottom: 0px;
+	height: 28px;
+	position: relative;
+}
+
+a#templ33t_prev {
+	height: 26px;
+	left: 0px;
+	line-height: 26px;
+	position: absolute;
+	text-align: center;
+	text-decoration: none;
+	top: 0px;
+	width: 23px;
+	background: #dfdfdf url("../../../wp-admin/images/gray-grad.png") repeat-x left top;
+	border: 1px solid #909090;
+	-moz-border-radius: 4px;
+	-khtml-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+}
+
+a#templ33t_next {
+	height: 26px;
+	line-height: 26px;
+	position: absolute;
+	right: 0px;
+	text-align: center;
+	text-decoration: none;
+	top: 0px;
+	width: 23px;
+	background: #dfdfdf url("../../../wp-admin/images/gray-grad.png") repeat-x left top;
+	border: 1px solid #909090;
+	-moz-border-radius: 4px;
+	-khtml-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
 }
 
 div#templ33t_control ul {
 	list-style: none;
 	height: 27px;
 	border-bottom: 1px solid #909090;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 div#templ33t_control ul li {
-	float: left;
+	display: inline-block;
 	height: 26px;
 	margin: 0px 6px 0px 4px;
 	background: #dfdfdf url("../../../wp-admin/images/gray-grad.png") repeat-x left top;
