@@ -134,7 +134,7 @@ function templ33t_switchEditor(prel) {
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
 	var nobj = typeof(prel) == 'string' ? jQuery('div#templ33t_control li a[rel="'+prel+'"]') : jQuery(this);
 	var nrel = nobj.attr('rel');
-	var ccontent = ntmode ? jQuery('textarea#content').each(function() { jQuery(this).val() }) : jQuery('#content_ifr').each(function() { jQuery(this).contents().find('body').html() });
+	var ccontent = ntmode ? jQuery('textarea#content').val() : jQuery('#content_ifr').contents().find('body').html();
 	var ncontent;
 	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
 	var tocustom;
@@ -156,13 +156,13 @@ function templ33t_switchEditor(prel) {
 	// load new tab value
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
-		jQuery('textarea#content').each(function() { jQuery(this).val(ncontent) });
-		if(!ntmode) jQuery('#content_ifr').each(function() { jQuery(this).contents().find('body').html(ncontent); });
+		jQuery('textarea#content').val(ncontent);
+		if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
 	} else {
 		if(!tocustom) {
 			ncontent = jQuery('#templ33t_val_'+nrel).val();
-			jQuery('textarea#content').each(function() { jQuery(this).val(ncontent) });
-			if(!ntmode) jQuery('#content_ifr').each(function() { jQuery(this).contents().find('body').html(ncontent); });
+			jQuery('textarea#content').val(ncontent);
+			if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
 		}
 	}
 
@@ -257,12 +257,12 @@ function templ33t_switchMode(switchTo) {
 function templ33t_append(scode) {
 	
 	if(!ctmode) {
-		jQuery('textarea#content').each(function() { jQuery(this).val(jQuery(this).val()+"<p>"+scode+"</p>"); });
-		jQuery('#content_ifr').each(function() { jQuery(this).contents().find('body').append("<p>"+scode+"</p>"); });
-		jQuery('#content_ifr').each(function() { jQuery(this).attr('scrollTop', jQuery(this).attr('scrollHeight')); });
+		jQuery('textarea#content').val(jQuery('textarea#content').val()+"<p>"+scode+"</p>");
+		jQuery('#content_ifr').contents().find('body').append("<p>"+scode+"</p>");
+		jQuery('#content_ifr').attr('scrollTop', jQuery('#content_ifr').attr('scrollHeight'));
 	} else {
-		jQuery('textarea#content').each(function() { jQuery(this).val(jQuery(this).val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>")); });
-		jQuery('textarea#content').each(function() { jQuery(this).attr('scrollTop', jQuery(this).attr('scrollHeight')); });
+		jQuery('textarea#content').val(jQuery('textarea#content').val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>"));
+		jQuery('textarea#content').attr('scrollTop', jQuery('textarea#content').attr('scrollHeight'));
 	}
 
 }
