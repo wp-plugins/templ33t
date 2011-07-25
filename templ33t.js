@@ -149,7 +149,7 @@ function templ33t_switchEditor(prel) {
 	// if mode has been switched, process content
 	if(ntmode != ctmode) templ33t_switchMode(null);
 	
-	alert(jQuery('textarea#content').length+' - '+jQuery('#content_ifr').length);
+	alert(jQuery('textarea#content').val()+' - '+jQuery('#content_ifr').contents());
 	
 	// load new tab value
 	if(nrel == 'default') {
