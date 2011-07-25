@@ -962,9 +962,9 @@ class Templ33t {
 			// output tab bar & descriptions
 			echo '<div id="templ33t_control" style="display: none;"><a href="#" id="templ33t_prev" onclick="templ33t_nav_prev();"><</a><a href="#" id="templ33t_next" onclick="templ33t_nav_next();">></a><ul>';
 			echo $tabs;
-			echo '</ul></div><div id="templ33t_descriptions" style="display: none;">';
+			echo '</ul></div> <!-- <div id="templ33t_descriptions" style="display: none;">';
 			echo $descs;
-			echo '</div><div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
+			echo '</div> --> <div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
 			echo $editors;
 			echo '</div>';
 
