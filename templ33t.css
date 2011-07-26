@@ -79,7 +79,7 @@ div#templ33t_control ul {
 div#templ33t_control ul li {
 	display: inline-block;
 	height: 26px;
-	margin: 0px 6px 0px 4px;
+	margin: 0px 6px 0px 0px;
 	background: #dfdfdf url("../../../wp-admin/images/gray-grad.png") repeat-x left top;
 	border: 1px solid #909090;
 	border-bottom: 0px;
