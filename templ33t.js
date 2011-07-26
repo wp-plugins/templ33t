@@ -118,7 +118,7 @@ function templ33t_placeControl() {
 	var te = jQuery('div#templ33t_editors');
 	var nl = jQuery('div#templ33t_control ul');
 	
-	pdr.each(function() { jQuery(this).attr('rel','default') });
+	pdr.each(function() { jQuery(this).attr('rel','default'); });
 	pdr.before(tc);
 	tc.show();
 	pdr.before(td);
