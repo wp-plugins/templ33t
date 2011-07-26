@@ -92,6 +92,7 @@ div#templ33t_control ul li {
 	-khtml-border-radius: 4px 4px 0px 0px;
 	-webkit-border-radius: 4px 4px 0px 0px;
 	border-radius: 4px 4px 0px 0px;
+	zoom: 1;
 }
 
 div#templ33t_control ul li:last-child {
