@@ -73,6 +73,7 @@ div#templ33t_control ul {
 	height: 27px;
 	border-bottom: 1px solid #909090;
 	overflow: hidden;
+	padding-right: -6px;
 	white-space: nowrap;
 }
 
