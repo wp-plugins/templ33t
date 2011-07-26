@@ -129,7 +129,7 @@ function templ33t_placeControl() {
 	
 	// calculate prev/next
 	var w = 0;
-	jQuery('li', nl).each(function() { w += jQuery(this).outerWidth(); });
+	jQuery('li', nl).each(function() { w += jQuery(this).outerWidth()+parseInt(jQuery(this).css('margin-right')); });
 	if((w+40) > nl.width()) {
 		tc.prepend('<span style="display: block; width: 30px; height: 30px; float: left;">&nbsp;</span>');
 		nl.css('margin-left', '30px');
