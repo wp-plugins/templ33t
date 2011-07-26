@@ -76,6 +76,9 @@ div#templ33t_control ul {
 	border-bottom: 1px solid #909090;
 	overflow: hidden;
 	white-space: nowrap;
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
 }
 
 div#templ33t_control ul li {
