@@ -64,7 +64,7 @@ jQuery(document).ready(
 			if(ctmode) templ33t_switchMode('html');
 
 			// add tab event listeners
-			jQuery('div#templ33t_control a').click(templ33t_switchEditor);
+			jQuery('div#templ33t_control ul a').click(templ33t_switchEditor);
 
 			// add cleanup to form submission
 			jQuery('form#post').submit(templ33t_cleanup);
