@@ -91,10 +91,6 @@ div#templ33t_control ul li {
 	border-radius: 4px 4px 0px 0px;
 }
 
-div#templ33t_control ul li:last-child {
-	margin-right: -6px;
-}
-
 div#templ33t_control ul li.templ33t_settings {
 	float: right;
 }
