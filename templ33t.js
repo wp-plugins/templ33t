@@ -131,6 +131,7 @@ function templ33t_placeControl() {
 	var w = 0;
 	jQuery('li', nl).each(function() { w += jQuery(this).outerWidth()+parseInt(jQuery(this).css('margin-right')); });
 	if(w > nl.width()) {
+		alert(nl.width()+' - '+w);
 		tc.prepend('<span style="display: block; width: 30px; height: 30px; float: right;">&nbsp;</span>')
 			.prepend('<span style="display: block; width: 30px; height: 30px; float: left;">&nbsp;</span>');
 		nl.css('margin-left', '30px');
