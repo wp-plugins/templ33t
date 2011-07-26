@@ -35,6 +35,7 @@ div#templ33t_control {
 }
 
 a#templ33t_prev {
+	display: none;
 	height: 26px;
 	left: 0px;
 	line-height: 26px;
@@ -52,6 +53,7 @@ a#templ33t_prev {
 }
 
 a#templ33t_next {
+	display: none;
 	height: 26px;
 	line-height: 26px;
 	position: absolute;
