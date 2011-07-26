@@ -128,10 +128,11 @@ function templ33t_placeControl() {
 	
 	
 	// calculate prev/next
-	
 	var w = 0;
 	jQuery('li', nl).each(function() { w += jQuery(this).outerWidth(); });
 	if(w > nl.width()) {
+		tc.prepend('<div style="width: 30px; height: 30px; float: right;"></div>')
+			.prepend('<div style="width: 30px; height: 30px; float: left;"></div>');
 		nl.css('margin-left', '30px');
 		nl.css('margin-right', '30px');
 		tc.children('a').show();
