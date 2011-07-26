@@ -73,7 +73,6 @@ div#templ33t_control ul {
 	height: 27px;
 	border-bottom: 1px solid #909090;
 	overflow: hidden;
-	padding-right: -6px;
 	white-space: nowrap;
 }
 
@@ -88,6 +87,10 @@ div#templ33t_control ul li {
 	-khtml-border-radius: 4px 4px 0px 0px;
 	-webkit-border-radius: 4px 4px 0px 0px;
 	border-radius: 4px 4px 0px 0px;
+}
+
+div#templ33t_control ul li:last-child {
+	margin-right: -6px;
 }
 
 div#templ33t_control ul li.templ33t_settings {
