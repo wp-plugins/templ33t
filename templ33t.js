@@ -41,7 +41,9 @@ jQuery(document).ready(
 
 		// set current mode
 		ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
-
+		
+		alert('CTMODE: '+ctmode);
+		
 		// add event listener to template select
 		jQuery('select#page_template').change(templ33t_switchTemplate);
 
