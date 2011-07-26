@@ -1108,7 +1108,7 @@ class Templ33t {
 	function settingsScripts() {
 
 		wp_deregister_script('jquery');
-		wp_register_script('jquery', 'http://code.jquery.com/jquery-1.4.2.min.js');
+		wp_register_script('jquery', (is_ssl() ? 'https://' : 'http://') . 'code.jquery.com/jquery-1.4.2.min.js');
 		wp_enqueue_script('thickbox');
 		wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
