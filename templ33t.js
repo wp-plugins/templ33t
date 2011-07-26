@@ -134,7 +134,7 @@ function templ33t_placeControl() {
 		tc.prepend('<span style="display: block; width: 30px; height: 30px; float: right;">&nbsp;</span>')
 			.prepend('<span style="display: block; width: 30px; height: 30px; float: left;">&nbsp;</span>');
 		nl.css('margin-left', '30px');
-		//nl.css('margin-right', '30px');
+		nl.css('margin-right', '30px');
 		tc.children('a').show();
 	}
 	
@@ -143,11 +143,13 @@ function templ33t_placeControl() {
 function templ33t_nav_prev() {
 	var nl = jQuery('div#templ33t_control ul');
 	nl.animate({scrollLeft: '-='+nl.width()}, 300);
+	return false;
 }
 
 function templ33t_nav_next() {
 	var nl = jQuery('div#templ33t_control ul');
 	nl.animate({scrollLeft: '+='+nl.width()}, 300);
+	return false;
 }
 
 function templ33t_hideCustomFields() {
