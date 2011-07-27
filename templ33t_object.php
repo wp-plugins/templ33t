@@ -542,7 +542,7 @@ class Templ33t {
 				$wpdb->prepare('SELECT meta_key, meta_value, meta_id, post_id FROM '.$wpdb->postmeta.' WHERE post_id = %d', $post->ID),
 				ARRAY_A
 			);
-
+			
 			// filter out unrelated
 			foreach($all_meta as $key => $val) {
 				if(strpos($val['meta_key'], 'templ33t_option_') !== false) {
@@ -561,9 +561,9 @@ class Templ33t {
 			}
 			
 			// prepare option meta
-			if(!empty($this->map[$post->page_template]['options'])) {
+			if(!empty($this->templates[$post->page_template]['options'])) {
 
-				foreach($this->map[$post->page_template]['options'] as $slug => $opt) {
+				foreach($this->templates[$post->page_template]['options'] as $slug => $opt) {
 
 					// create any non-existent custom fields
 					if(!array_key_exists($slug, $this->meta)) {
@@ -876,6 +876,9 @@ class Templ33t {
 		if(empty($post->page_template) || $post->page_template == 'default') {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
+		
+		echo $post->ID.'<br/>';
+		print_r($post);
 		
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
