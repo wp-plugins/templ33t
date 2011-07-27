@@ -75,8 +75,8 @@ jQuery(document).ready(
 );
 
 function templ33t_switchTemplate() {
-
-	var newtemp = jQuery('select#page_template').val();
+	
+	var newtemp = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
 
 	var oldtemp = jQuery('select#page_template option:eq('+ctemp+')').attr('value');
 
@@ -168,8 +168,9 @@ function templ33t_switchEditor(prel) {
 	var ncontent;
 	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
 	var tocustom;
+	var tslg = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
 	if(nobj.parent().index() > 0)
-		tocustom = TL33T_def[jQuery('select#page_template').val()].blocks[(nobj.parent().index() - 1)].custom;
+		tocustom = TL33T_def[tslg].blocks[(nobj.parent().index() - 1)].custom;
 	else
 		tocustom = false;
 
@@ -259,8 +260,6 @@ function templ33t_switchMode(switchTo) {
 				} else {
 					
 					var tslg = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
-					
-					if(!(tslg in TL33T_def)) alert('TEMPLATE NOT FOUND: '+tslg);
 					
 					if(!TL33T_def[tslg].blocks[(jQuery(this).index() - 1)].custom) {
 
