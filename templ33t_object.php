@@ -882,12 +882,6 @@ class Templ33t {
 
 		global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
 		
-		// refresh once if missing post id
-		if(empty($post->id) && !array_key_exists('tl33tredir', $_GET)) {
-			wp_redirect(add_query_arg('tl33tredir', '1', $_SERVER['REQUEST_URI']));
-			exit();
-		}
-		
 		// keep track of selected template
 		if(empty($post->page_template) || $post->page_template == 'default') {
 			$post->page_template = $this->default_template = basename(get_page_template());
