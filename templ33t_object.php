@@ -980,7 +980,10 @@ class Templ33t {
 	}
 	
 	function saveOptions() {
-
+		
+		print_r($_POST);
+		die();
+		
 		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
 
 			if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
