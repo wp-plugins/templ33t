@@ -605,10 +605,11 @@ class Templ33t {
 					// create any non-existent custom fields
 					if(!array_key_exists($slug, $this->meta)) {
 
-						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
+						if($go = add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
 							$block['id'] = $wpdb->insert_id;
 							$block['value'] = '';
 						}
+						echo 'ADDING POST META: templ33t_'.$slug.' = '.$go.'<br/>';
 						$this->meta[$slug] = array_merge($this->config_defaults, $block);
 
 					// add meta ID and value to existing custom fields
