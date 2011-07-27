@@ -871,7 +871,7 @@ class Templ33t {
 	function tabElements() {
 
 		global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
-		print_r($page);
+		print_r($post);
 		// keep track of selected template
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
