@@ -532,7 +532,7 @@ class Templ33t {
 		
 		// cleanse default page name
 		if(empty($post->page_template) || $post->page_template == 'default') {
-			if($post->page_template == 'default') $this->default_template = $post->page_template;
+			$this->default_template = $post->page_template;
 			$post->page_template = basename(get_page_template());
 		}
 		
