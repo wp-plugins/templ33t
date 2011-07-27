@@ -162,7 +162,7 @@ function templ33t_hideCustomFields() {
 
 function templ33t_switchEditor(prel) {
 
-	var ntmode = getUserSetting('editor') == 'tinymce' ? false : true;
+	var ntmode = getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true;
 	var crel = jQuery('div#templ33t_control li.selected a').attr('rel');
 	var nobj = typeof(prel) == 'string' ? jQuery('div#templ33t_control li a[rel="'+prel+'"]') : jQuery(this);
 	var nrel = nobj.attr('rel');
