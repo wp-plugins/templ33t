@@ -737,7 +737,7 @@ class Templ33t {
 
 		echo '<script type="text/javascript">
 			/* <![CDATA[ */
-			var TL33T_current = { template: "'.$post->page_template.'", default_template: "'+$this->default_template+'", assets: "'.Templ33t::$assets_url.'" };
+			var TL33T_current = { template: "'.$post->page_template.'", default_template: "'.$this->default_template.'", assets: "'.Templ33t::$assets_url.'" };
 			';
 		
 		// output js template map
