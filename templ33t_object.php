@@ -982,6 +982,8 @@ class Templ33t {
 	function saveOptions() {
 		
 		print_r($_POST);
+		echo 'TEMPLATES';
+		print_r($this->templates);
 		die();
 		
 		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
