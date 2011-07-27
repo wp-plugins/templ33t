@@ -61,6 +61,8 @@ class Templ33t {
 	
 	var $templates = array();
 	
+	var $default_template = 'page.php';
+	
 	var $meta = array();
 	
 	var $block_objects = array();
@@ -529,9 +531,10 @@ class Templ33t {
 		if(!$this->active || !empty($this->meta)) return;
 		
 		// cleanse default page name
-		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = basename(get_page_template());
-		
-		print_r($post->page_template);
+		if(empty($post->page_template) || $post->page_template == 'default') {
+			if($post->page_template == 'default') $this->default_template = $post->page_template;
+			$post->page_template = basename(get_page_template());
+		}
 		
 		if(array_key_exists($post->page_template, $this->templates)) {
 
@@ -734,7 +737,7 @@ class Templ33t {
 
 		echo '<script type="text/javascript">
 			/* <![CDATA[ */
-			var TL33T_current = { template: "'.$post->page_template.'", assets: "'.Templ33t::$assets_url.'" };
+			var TL33T_current = { template: "'.$post->page_template.'", default_template: "'+$this->default_template+'", assets: "'.Templ33t::$assets_url.'" };
 			';
 		
 		// output js template map

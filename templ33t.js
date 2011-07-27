@@ -257,8 +257,10 @@ function templ33t_switchMode(switchTo) {
 					}
 
 				} else {
-
-					if(!TL33T_def[jQuery('select#page_template').val()].blocks[(jQuery(this).index() - 1)].custom) {
+					
+					var tslg = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
+					
+					if(!TL33T_def[tslg].blocks[(jQuery(this).index() - 1)].custom) {
 
 						cval = jQuery('#templ33t_val_'+crel).val();
 						if(cval) {
