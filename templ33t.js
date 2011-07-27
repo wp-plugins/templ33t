@@ -285,7 +285,7 @@ function templ33t_switchMode(switchTo) {
 		}
 	);
 
-	ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
+	ctmode = getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true;
 
 }
 
