@@ -260,6 +260,8 @@ function templ33t_switchMode(switchTo) {
 					
 					var tslg = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
 					
+					if(!(tslg in TL33T_def)) alert(tslg);
+					
 					if(!TL33T_def[tslg].blocks[(jQuery(this).index() - 1)].custom) {
 
 						cval = jQuery('#templ33t_val_'+crel).val();
