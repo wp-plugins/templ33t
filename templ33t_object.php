@@ -255,7 +255,7 @@ class Templ33t {
 			add_filter('content_save_pre', array($this, 'addComment'), 10);
 			add_action('edit_page_form', array($this, 'tabElements'), 1);
 
-			if(!empty($_POST)) $this->saveOptions();
+			if(!empty($_POST)) $this->saveContent();
 
 			// create new page with forced template if from_template passed
 			if(in_array(basename($_SERVER['PHP_SELF']), array('page-new.php', 'post-new.php')) && array_key_exists('from_template', $_GET)) {
@@ -560,9 +560,11 @@ class Templ33t {
 				$this->templates[$post->page_template]['options'] += $this->templates['ALL']['options'];
 			}
 			
+			$x = 0;
+			
 			// prepare option meta
 			if(!empty($this->templates[$post->page_template]['options'])) {
-
+				
 				foreach($this->templates[$post->page_template]['options'] as $slug => $opt) {
 
 					// create any non-existent custom fields
@@ -571,6 +573,10 @@ class Templ33t {
 						if(add_post_meta($post->ID, 'templ33t_option_'.$slug, '', true)) {
 							$opt['id'] = $wpdb->insert_id;
 							$opt['value'] = '';
+						} else {
+							$opt['id'] = 'NEW-'.$x;
+							$opt['value'] = '';
+							$x++;
 						}
 						$this->meta[$slug] = array_merge($this->config_defaults, $opt);
 
@@ -605,6 +611,10 @@ class Templ33t {
 						if(add_post_meta($post->ID, 'templ33t_'.$slug, '', true)) {
 							$block['id'] = $wpdb->insert_id;
 							$block['value'] = '';
+						} else {
+							$block['id'] = 'NEW-'.$x;
+							$block['value'] = '';
+							$x++;
 						}
 						$this->meta[$slug] = array_merge($this->config_defaults, $block);
 
@@ -985,19 +995,32 @@ class Templ33t {
 
 	}
 	
-	function saveOptions() {
+	function saveContent() {
+		
+		global $wpdb;
 		
 		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
-
+			
 			if(array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
-
+				
 				foreach($_POST['meta'] as $id => $data) {
 
 					$slug = str_replace('templ33t_', '', str_replace('templ33t_option_', '', $data['key']));
 
 					// handle blocks
 					if(array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks'])) {
-
+						
+						// create post meta if new
+						if(!is_numeric($id)) {
+							$split = explode('-', $id);
+							if($split[0] == 'TL33T_NEW') {
+								if(add_post_meta($_POST['id'], 'templ33t_'.$slug, '', true)) {
+									unset($_POST['meta'][$id]);
+									$id = $wpdb->insert_id;
+								}
+							}
+						}
+						
 						$block = $this->templates[$_POST['templ33t_template']]['blocks'][$slug];
 						$block['slug'] = $slug;
 						$block['id'] = $id;
@@ -1023,7 +1046,18 @@ class Templ33t {
 
 					// handle options
 					if(array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options'])) {
-
+						
+						// create post meta if new
+						if(!is_numeric($id)) {
+							$split = explode('-', $id);
+							if($split[0] == 'TL33T_NEW') {
+								if(add_post_meta($_POST['id'], 'templ33t_option_'.$slug, '', true)) {
+									unset($_POST['meta'][$id]);
+									$id = $wpdb->insert_id;
+								}
+							}
+						}
+						
 						$option = $this->templates[$_POST['templ33t_template']]['options'][$slug];
 						$option['slug'] = $slug;
 						$option['id'] = $id;
