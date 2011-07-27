@@ -1008,12 +1008,9 @@ class Templ33t {
 						if(!is_numeric($id)) {
 							$split = explode('-', $id);
 							if($split[0] == 'TL33T_NEW') {
-								if(add_post_meta($_POST['id'], 'templ33t_'.$slug, $data['value'], true)) {
+								if(add_post_meta($_POST['post_ID'], 'templ33t_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
-									die('ADDED META: '.$id);
-								} else {
-									die('COULD NOT ADD META: templ33t_'.$slug.' - '.$id);
 								}
 							}
 						}
@@ -1048,7 +1045,7 @@ class Templ33t {
 						if(!is_numeric($id)) {
 							$split = explode('-', $id);
 							if($split[0] == 'TL33T_NEW') {
-								if(add_post_meta($_POST['id'], 'templ33t_option_'.$slug, $data['value'], true)) {
+								if(add_post_meta($_POST['post_ID'], 'templ33t_option_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
 								}
