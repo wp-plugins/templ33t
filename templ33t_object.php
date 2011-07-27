@@ -906,7 +906,7 @@ class Templ33t {
 			if(!empty($this->block_objects)) {
 				//foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
 				foreach($this->block_objects as $slug => $block) {
-
+					print_r($block);
 					//$cname = Templ33tPluginHandler::load($block['type']);
 					//$instance = $block['instance'];
 
@@ -980,11 +980,6 @@ class Templ33t {
 	}
 	
 	function saveOptions() {
-		
-		print_r($_POST);
-		echo 'TEMPLATES';
-		print_r($this->templates);
-		die();
 		
 		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
 
