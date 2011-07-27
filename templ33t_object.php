@@ -887,6 +887,8 @@ class Templ33t {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
 		
+		print_r($this->block_objects);
+		
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
 		if($this->render) {
@@ -1011,8 +1013,6 @@ class Templ33t {
 								if(add_post_meta($_POST['id'], 'templ33t_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
-								} else {
-									die('could not create meta data');
 								}
 							}
 						}
@@ -1050,8 +1050,6 @@ class Templ33t {
 								if(add_post_meta($_POST['id'], 'templ33t_option_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
-								} else {
-									die('could not create meta data');
 								}
 							}
 						}
