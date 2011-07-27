@@ -574,7 +574,7 @@ class Templ33t {
 							$opt['id'] = $wpdb->insert_id;
 							$opt['value'] = '';
 						} else {
-							$opt['id'] = 'NEW-'.$x;
+							$opt['id'] = 'Tl33T_NEW-'.$x;
 							$opt['value'] = '';
 							$x++;
 						}
@@ -612,7 +612,7 @@ class Templ33t {
 							$block['id'] = $wpdb->insert_id;
 							$block['value'] = '';
 						} else {
-							$block['id'] = 'NEW-'.$x;
+							$block['id'] = 'TL33T_NEW-'.$x;
 							$block['value'] = '';
 							$x++;
 						}
@@ -887,8 +887,6 @@ class Templ33t {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
 		
-		print_r($this->block_objects);
-		
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
 		if($this->render) {
@@ -994,9 +992,6 @@ class Templ33t {
 	function saveContent() {
 		
 		global $wpdb;
-		
-		print_r($_POST);
-		die();
 		
 		if(array_key_exists($_POST['templ33t_template'], $this->templates)) {
 			
