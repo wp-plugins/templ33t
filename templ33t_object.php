@@ -535,6 +535,9 @@ class Templ33t {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
 		
+		echo $post->ID.'<br/>';
+		print_r($post);
+		
 		if(array_key_exists($post->page_template, $this->templates)) {
 
 			// grab meta
@@ -876,9 +879,6 @@ class Templ33t {
 		if(empty($post->page_template) || $post->page_template == 'default') {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
-		
-		echo $post->ID.'<br/>';
-		print_r($post);
 		
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
