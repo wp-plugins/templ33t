@@ -182,7 +182,7 @@ function templ33t_switchEditor(prel) {
 	} else if(!fromcustom) {
 		jQuery('#templ33t_val_'+crel).val(ccontent);
 	}
-	alert(ntmode+' - '+ctmode);
+	
 	// if mode has been switched, process content
 	if(ntmode != ctmode) templ33t_switchMode(null);
 
@@ -233,7 +233,7 @@ function templ33t_switchEditor(prel) {
 function templ33t_switchMode(switchTo) {
 
 	if(ctmode == 'set')
-		ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
+		ctmode = getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true;
 
 	jQuery('div#templ33t_control ul li').each(
 		function() {
