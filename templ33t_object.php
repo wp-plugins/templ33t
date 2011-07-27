@@ -128,11 +128,7 @@ class Templ33t {
 
 	function fillPaths() {
 
-		if ( version_compare( get_bloginfo( 'version' ) , '3.0' , '<' ) && is_ssl() ) {
-			self::$wp_content_url = str_replace( 'http://' , 'https://' , get_option( 'siteurl' ) );
-		} else {
-			self::$wp_content_url = get_option( 'siteurl' );
-		}
+		self::$wp_content_url = is_ssl() ? str_replace( 'http://' , 'https://' , get_option( 'siteurl' )) : get_option( 'siteurl' );
 
 		self::$wp_content_url .= '/wp-content';
 		self::$wp_content_dir = ABSPATH . 'wp-content';
