@@ -38,9 +38,11 @@ jQuery(document).ready(
 
 		// save current template index
 		ctemp = jQuery('select#page_template').attr('selectedIndex');
-
+		
+		alert(getUserSetting('editor')+' = '+(!getUserSetting('editor')));
+		
 		// set current mode
-		ctmode = getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true;
+		ctmode = (getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true);
 		
 		// add event listener to template select
 		jQuery('select#page_template').change(templ33t_switchTemplate);
