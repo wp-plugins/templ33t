@@ -40,9 +40,7 @@ jQuery(document).ready(
 		ctemp = jQuery('select#page_template').attr('selectedIndex');
 
 		// set current mode
-		ctmode = getUserSetting('editor') == 'tinymce' ? false : true;
-		
-		alert(getUserSetting('editor'));
+		ctmode = getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true;
 		
 		// add event listener to template select
 		jQuery('select#page_template').change(templ33t_switchTemplate);
@@ -190,12 +188,12 @@ function templ33t_switchEditor(prel) {
 	if(nrel == 'default') {
 		ncontent = jQuery('div#templ33t_main_content').html();
 		jQuery('textarea#content').val(ncontent);
-		/* if(!ntmode) */ jQuery('#content_ifr').contents().find('body').html(ncontent);
+		if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
 	} else {
 		if(!tocustom) {
 			ncontent = jQuery('#templ33t_val_'+nrel).val();
 			jQuery('textarea#content').val(ncontent);
-			/* if(!ntmode) */ jQuery('#content_ifr').contents().find('body').html(ncontent);
+			if(!ntmode) jQuery('#content_ifr').contents().find('body').html(ncontent);
 		}
 	}
 
