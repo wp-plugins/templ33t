@@ -1011,6 +1011,9 @@ class Templ33t {
 								if(add_post_meta($_POST['id'], 'templ33t_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
+									die('ADDED META: '.$id);
+								} else {
+									die('COULD NOT ADD META: templ33t_'.$slug.' - '.$id);
 								}
 							}
 						}
