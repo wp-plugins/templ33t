@@ -39,7 +39,7 @@ jQuery(document).ready(
 		// save current template index
 		ctemp = jQuery('select#page_template').attr('selectedIndex');
 		
-		alert(getUserSetting('editor')+' = '+(!getUserSetting('editor')));
+		//alert(getUserSetting('editor')+' = '+(!getUserSetting('editor')));
 		
 		// set current mode
 		ctmode = (getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true);
@@ -182,7 +182,7 @@ function templ33t_switchEditor(prel) {
 	} else if(!fromcustom) {
 		jQuery('#templ33t_val_'+crel).val(ccontent);
 	}
-
+	alert(ntmode+' - '+ctmode);
 	// if mode has been switched, process content
 	if(ntmode != ctmode) templ33t_switchMode(null);
 
