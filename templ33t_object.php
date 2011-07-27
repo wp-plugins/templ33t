@@ -916,7 +916,7 @@ class Templ33t {
 			if(!empty($this->block_objects)) {
 				//foreach($templ33t_templates[$post->page_template]['blocks'] as $slug => $block) {
 				foreach($this->block_objects as $slug => $block) {
-					print_r($block);
+					
 					//$cname = Templ33tPluginHandler::load($block['type']);
 					//$instance = $block['instance'];
 
@@ -1008,7 +1008,7 @@ class Templ33t {
 						if(!is_numeric($id)) {
 							$split = explode('-', $id);
 							if($split[0] == 'TL33T_NEW') {
-								if(add_post_meta($_POST['id'], 'templ33t_'.$slug, '', true)) {
+								if(add_post_meta($_POST['id'], 'templ33t_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
 								}
@@ -1045,7 +1045,7 @@ class Templ33t {
 						if(!is_numeric($id)) {
 							$split = explode('-', $id);
 							if($split[0] == 'TL33T_NEW') {
-								if(add_post_meta($_POST['id'], 'templ33t_option_'.$slug, '', true)) {
+								if(add_post_meta($_POST['id'], 'templ33t_option_'.$slug, $data['value'], true)) {
 									unset($_POST['meta'][$id]);
 									$id = $wpdb->insert_id;
 								}
