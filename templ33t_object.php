@@ -531,6 +531,8 @@ class Templ33t {
 		// cleanse default page name
 		if(empty($post->page_template) || $post->page_template == 'default') $post->page_template = basename(get_page_template());
 		
+		print_r($post->page_template);
+		
 		if(array_key_exists($post->page_template, $this->templates)) {
 
 			// grab meta
