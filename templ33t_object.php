@@ -873,7 +873,9 @@ class Templ33t {
 		global $templ33t, $templ33t_templates, $templ33t_options, $templ33t_meta, $templ33t_render, $post;
 		
 		// keep track of selected template
-		if(empty($post->page_template)) $post->page_template = basename(get_page_template());
+		if(empty($post->page_template)) {
+			$post->page_template = $this->default_template = basename(get_page_template());
+		}
 		
 		echo '<input type="hidden" name="templ33t_template" value="'.$post->page_template.'" />';
 
