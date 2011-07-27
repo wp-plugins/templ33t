@@ -531,15 +531,17 @@ class Templ33t {
 		if(!$this->active || !empty($this->meta)) return;
 		
 		// refresh once if missing post id
-		if(empty($post->id) && !array_key_exists('tl33tredir', $_GET)) {
-			wp_redirect(add_query_arg('tl33tredir', '1', $_SERVER['REQUEST_URI']));
-			exit();
-		}
+		//if(empty($post->id) && !array_key_exists('tl33tredir', $_GET)) {
+		//	wp_redirect(add_query_arg('tl33tredir', '1', $_SERVER['REQUEST_URI']));
+		//	exit();
+		//}
 		
 		// cleanse default page name
 		if(empty($post->page_template) || $post->page_template == 'default') {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
+		
+		print_r($post);
 		
 		if(array_key_exists($post->page_template, $this->templates)) {
 
