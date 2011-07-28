@@ -60,15 +60,19 @@ $templ33t = new Templ33t;
  * @param string $block
  * @param string $before
  * @param string $after
+ * @param boolean $return
  */
-function templ33t_block($block = null, $before = null, $after = null) {
+function templ33t_block($block = null, $before = null, $after = null, $return = false) {
 
 	global $templ33t;
 	
 	$value = array_key_exists($block, $templ33t->block_objects) ? ($templ33t->block_objects[$block] instanceOf Templ33tTab ? $templ33t->block_objects[$block]->output(true) : $templ33t->block_objects[$block]->value) : '';
 
 	if(!empty($value) || $templ33t->block_objects[$block]->optional) {
-		echo apply_filters('the_content', $before.$value.$after);
+		if($return)
+			return apply_filters('the_content', $before.$value.$after);
+		else
+			echo apply_filters('the_content', $before.$value.$after);
 	}
 
 }
