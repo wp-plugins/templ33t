@@ -682,7 +682,10 @@ class Templ33t {
 		?>
 		<!--[if IE 7]>
 		<style type="text/css">
-			div#templ33t_control ul li {display: inline;}
+			div#templ33t_control ul li {
+				display: block;
+				float: left;
+			}
 		</style>
 		<![endif]-->
 		<?php
