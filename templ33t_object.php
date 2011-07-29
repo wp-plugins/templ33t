@@ -250,6 +250,7 @@ class Templ33t {
 			//add_action('posts_selection', 'templ33t_handle_meta', 1);
 			add_action('posts_selection', array($this, 'prepareMeta'), 1);
 			add_action('admin_print_styles', array($this, 'styles'), 10);
+			add_action('admin_head', array($this, 'ieStyles'), 90);
 			add_action('admin_print_scripts', array($this, 'scripts'), 10);
 			add_filter('the_editor_content', array($this, 'stripComment'), 1);
 			add_filter('content_save_pre', array($this, 'addComment'), 10);
@@ -671,6 +672,21 @@ class Templ33t {
 			wp_enqueue_style('templ33t_plug_styles', Templ33t::$assets_url . 'templ33t_styles.php?load=' . implode(',', $load));
 		}
 
+	}
+	
+	/**
+	 * Output IE7 specific styles for tabs
+	 */
+	function ieStyles() {
+		
+		?>
+		<!--[if IE 7]>
+		<style type="text/css">
+			div#templ33t_control ul li {display: inline;}
+		</style>
+		<![endif]-->
+		<?php
+		
 	}
 	
 	/**
