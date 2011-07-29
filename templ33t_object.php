@@ -684,7 +684,6 @@ class Templ33t {
 		<style type="text/css">
 			div#templ33t_control ul li {
 				display: inline;
-				max-width: 200px;
 			}
 		</style>
 		<![endif]-->
