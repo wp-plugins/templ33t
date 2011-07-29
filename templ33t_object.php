@@ -683,8 +683,8 @@ class Templ33t {
 		<!--[if IE 7]>
 		<style type="text/css">
 			div#templ33t_control ul li {
-				display: block;
-				float: left;
+				display: inline;
+				max-width: 200px;
 			}
 		</style>
 		<![endif]-->
