@@ -209,6 +209,7 @@
 								<li>
 									<div class="templ33t_right">
 										Type: <?php echo $bval['type']; ?>
+										<a href="<?php echo self::$settings_url; ?>&subpage=block&theme=<?php echo $theme_selected; ?>&tid=<?php echo $tval['templ33t_template_id']; ?>&block=<?php echo $bval['slug']; ?>">Edit Block</a>
 									</div>
 									<!-- <a class="delblock" href="<?php echo self::$settings_url; ?>&theme=<?php echo $theme_selected; ?>&t_action=delblock&bid=<?php //echo $bval['templ33t_block_id']; ?>" onclick="return confirm('Are you sure you want to remove this custom block?');">[X]</a> -->
 									<strong><?php echo $bval['label']; ?></strong> (<?php echo $bkey; ?>)<br/>
