@@ -337,6 +337,7 @@ class Templ33t {
 
 		// set menu parent and settings url
 		if($this->multiSite()) {
+			
 			if($wp_version < '3.0.0')
 				$this->menu_parent = 'wpmu-admin.php';
 			elseif($wp_version < '3.2.0')
@@ -344,12 +345,17 @@ class Templ33t {
 			else
 				$this->menu_parent = 'settings.php';
 			self::$settings_url = $this->menu_parent.'?page=templ33t_settings';
+			
 		} else {
+			
 			$this->menu_parent = 'options-general.php';
 			self::$settings_url = $this->menu_parent.'?page=templ33t_settings';
+			
 		}
 
 		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', array($this, 'settings'));
+		
+		
 		
 	}
 
@@ -1462,12 +1468,12 @@ class Templ33t {
 				case 'rescan':
 
 					// grab template from db
-					$temp = $wpdb->get_row('SELECT * FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = "'.htmlspecialchars($_GET['tid'], ENT_QUOTES).'"', ARRAY_A);
-
+					$temp = $wpdb->get_row($wpdb->prepare('SELECT * FROM `'.$template_table_name.'` WHERE `templ33t_template_id` = %d', $_GET['tid']), ARRAY_A);
+					
 					if(!empty($temp)) {
 
-						$tfile = $wp_content_dir . '/themes/' . $temp['theme'] . '/' . $temp['template'];
-
+						$tfile = self::$wp_content_dir . '/themes/' . $temp['theme'] . '/' . $temp['template'];
+						
 						if(file_exists($tfile)) {
 
 							// grab templ33t config
@@ -1649,6 +1655,36 @@ class Templ33t {
 
 					//}
 					break;
+					
+				case 'reset':
+					
+					$pub = $this->getOption('templ33t_map_pub');
+					$dev = $this->getOption('templ33t_map_dev');
+					$map = unserialize($this->getOption('templ33t_map'));
+					
+					$template_sql = 'DELETE FROM `'.$template_table_name.'`';
+					
+					$wpdb->query($template_sql);
+					
+					$insert_sql = 'INSERT INTO `'.$template_table_name.'` (`theme`, `template`, `config`) VALUES ';
+					
+					$records = array();
+					
+					if(!empty($map)) {
+						foreach($map as $theme => $templates) {
+							foreach($templates as $template => $config) {
+								$records[] = $wpdb->prepare('(%s, %s, %s)', $theme, $template, serialize($config));
+							}
+						}
+					}
+					
+					$wpdb->query($insert_sql.' '.implode(', ', $records));
+					
+					$this->updateOption('templ33t_map_dev', $pub);
+					
+					wp_redirect(self::$settings_url.'&theme='.$_GET['theme']);
+					
+					break;
 
 				// return error on invalid action
 				default:
@@ -1757,11 +1793,18 @@ class Templ33t {
 			WHERE `theme` = "'.$theme_selected.'"',
 			ARRAY_A
 		);
-
-		// unserialize template config
+		
+		// unserialize template config & separate global blocks
+		$all = array();
 		if(!empty($templates)) {
 			foreach($templates as $key => $val) {
-				$templates[$key]['config'] = unserialize($val['config']);
+				//if($val['template'] == 'ALL') {
+				//	$val['config'] = unserialize($val['config']);
+				//	$all[$key] = $val;
+				//	unset($templates[$key]);
+				//} else {
+					$templates[$key]['config'] = unserialize($val['config']);
+				//}
 			}
 		}
 
@@ -1780,8 +1823,31 @@ class Templ33t {
 				$error = $this->errors[$_GET['error']];
 			}
 		}
-
-		include(dirname(__FILE__).'/settings.php');
+		
+		$_GET['subpage'] = array_key_exists('subpage', $_GET) ? $_GET['subpage'] : 'theme';
+		
+		switch($_GET['subpage']) {
+			
+			case 'theme':
+				
+				include(dirname(__FILE__).'/inc/settings.php');
+				
+			break;
+			
+			case 'template':
+				
+				include(dirname(__FILE__).'/inc/template_settings.php');
+				
+			break;
+			
+			case 'block':
+				
+				include(dirname(__FILE__).'/inc/block_settings.php');
+				
+			break;
+			
+		}
+		
 
 	}
 	

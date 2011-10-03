@@ -6,6 +6,8 @@
 			<p>
 				Your configuration has changed. Would you like to publish it for use?
 				<a href="<?php echo self::$settings_url.'&theme='.$theme_selected.'&t_action=publish'; ?>">Publish Configuration</a>
+				or
+				<a class="reset" href="<?php echo self::$settings_url.'&theme='.$theme_selected.'&t_action=reset'; ?>">Reset Configuration</a>
 			</p>
 		</div>
 		<?php } ?>

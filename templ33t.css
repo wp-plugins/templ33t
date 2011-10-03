@@ -168,6 +168,10 @@ div#templ33t_publish a {
 	color: #FFF;
 }
 
+div#templ33t_publish a.reset {
+	background: #e00;
+}
+
 div#templ33t_settings {
 	margin: 0px 18px;
 }
