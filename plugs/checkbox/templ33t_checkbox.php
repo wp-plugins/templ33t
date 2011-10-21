@@ -7,6 +7,12 @@ class Templ33tCheckbox extends Templ33tPlugin implements Templ33tTab, Templ33tOp
 
 
 	}
+	
+	function displayConfig() {
+		
+		return '';
+		
+	}
 
 	function displayPanel() {
 

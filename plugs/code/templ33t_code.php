@@ -35,6 +35,12 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 		}
 
 	}
+	
+	function displayConfig() {
+		
+		return '';
+		
+	}
 
 	function displayPanel() {
 

@@ -93,3 +93,27 @@ function templ33tSwitchTab() {
 	jQuery(this).parent().addClass('selected');
 	
 }
+
+function getBlockConfig() {
+	
+	jQuery.ajax(
+		{
+			url: ajaxurl,
+			type: 'post',
+			data: jQuery('form#templ33t_block_settings').serialize(),
+			dataType: 'json',
+			success: function(d) {
+				
+				jQuery('tbody#block-config').empty();
+				jQuery('tbody#block-config').html(d.config);
+				alert(d['default']);
+			},
+			error: function(d) {
+				
+				alert('There was an error: '+d.responseText);
+				
+			}
+		}
+	);
+	
+}

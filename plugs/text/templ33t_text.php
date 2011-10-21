@@ -7,6 +7,12 @@ class Templ33tText extends Templ33tPlugin implements Templ33tTab, Templ33tOption
 
 
 	}
+	
+	function displayConfig() {
+		
+		return '';
+		
+	}
 
 	function displayPanel() {
 

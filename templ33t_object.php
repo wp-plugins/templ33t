@@ -6,6 +6,8 @@ class Templ33t {
 	
 	static $db_version			= '0.2';
 	
+	static $templates_table;
+	
 	static $wp_content_url;
 	
 	static $wp_content_dir;
@@ -92,11 +94,15 @@ class Templ33t {
 	
 	function __construct() {
 		
-		global $wp_version;
+		global $wp_version, $wpdb;
 		
 		// generate paths
 		if(empty(self::$wp_content_url)) $this->fillPaths();
-
+		
+		// set table names
+		$the_prefix = property_exists($wpdb, 'base_prefix') ? $wpdb->base_prefix : $wpdb->prefix;
+		self::$templates_table = $the_prefix . 'templ33t_templates';
+		
 		// check existence of site options
 		$this->use_site_option = function_exists('add_site_option');
 
@@ -242,6 +248,9 @@ class Templ33t {
 		wp_register_style('templ33t_styles', self::$assets_url.'templ33t.css');
 		wp_register_script('templ33t_scripts', self::$assets_url.'templ33t.js');
 		wp_register_script('templ33t_settings_scripts', self::$assets_url.'templ33t_settings.js');
+		
+		// ajax functions
+		add_action('wp_ajax_templ33t_block_config', array($this, 'blockConfig'));
 
 		// initialize tabs & content filters
 		if(in_array(basename($_SERVER['PHP_SELF']), $this->tab_pages)) {
@@ -1786,30 +1795,6 @@ class Templ33t {
 		}
 		*/
 
-		// grab templates for selected theme
-		$templates = $wpdb->get_results(
-			'SELECT `templ33t_template_id`, `template`, `config`
-			FROM `'.$templates_table_name.'`
-			WHERE `theme` = "'.$theme_selected.'"',
-			ARRAY_A
-		);
-		
-		// unserialize template config & separate global blocks
-		$all = array();
-		if(!empty($templates)) {
-			foreach($templates as $key => $val) {
-				//if($val['template'] == 'ALL') {
-				//	$val['config'] = unserialize($val['config']);
-				//	$all[$key] = $val;
-				//	unset($templates[$key]);
-				//} else {
-					$templates[$key]['config'] = unserialize($val['config']);
-				//}
-			}
-		}
-
-		//die(print_r($templates, true));
-
 		// parse error message
 		$error = null;
 		if(isset($_GET['error'])) {
@@ -1849,6 +1834,41 @@ class Templ33t {
 		}
 		
 
+	}
+	
+	function blockConfig() {
+		
+		global $wpdb;
+		
+		if(array_key_exists('templ33t_block_config', $_POST)) {
+			
+			$block = $_POST['templ33t_block_config'];
+			
+			unset($block['tid']);
+			unset($block['theme']);
+			
+			if(!array_key_exists('default', $block)) {
+				$block['default'] = '';
+			}
+			
+			$resp = new StdClass;
+			
+			// instantiate plugin
+			$obj = Templ33tPluginHandler::instantiate($block['type'], $block);
+			$obj->init();
+			$resp->config = $obj->displayConfig();
+			$resp->default = $obj->displayPanel();
+			
+			echo json_encode($resp);
+			
+		} else {
+			
+			echo '<em>No block configuration passed.</em>';
+			
+		}
+		
+		die();
+		
 	}
 	
 }

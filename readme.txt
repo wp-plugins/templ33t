@@ -1,22 +1,21 @@
 ﻿=== Templ33t ===
 Contributors: Ryan Willis
 Tags: tabs, tabbed, editor, editable, template, templete, page, admin, custom fields, blocks, cms, teml33t
-Requires at least: 2.9
-Tested up to: 3.0.1
-Stable tag: 0.1
+Requires at least: 3.1
+Tested up to: 3.2.1
+Stable tag: 0.6
 
-Add tabs for custom content blocks to the edit page with enhanced theme-specific configuration and smart template switching.
+Add tabs for custom content blocks to the edit page with theme-specific template configuration, custom field types, page-specific settings and smart template switching.
 
 == Description ==
 
-Add tabs for custom content blocks to the edit page with enhanced theme-specific configuration and smart template switching. Makes use of custom fields, page templates and a theme-specific XML file. This plugin is based on [Page.ly MultiEdit][1]. Visit [Templ33t Home][2] for updates and info.
+Add tabs for custom content blocks to the edit page with theme-specific template configuration, custom field types, page-specific settings and smart template switching. Makes use of custom fields, page templates and new configuration page. Visit [Templ33t Home][1] for updates and info.
 
- [1]: http://blog.page.ly/multiedit-plugin/ "Page.ly MultiEdit"
- [2]: http://www.totallyryan.com/projects/Templ33t "Templ33t"
+ [1]: http://www.totallyryan.com/projects/Templ33t "Templ33t"
 
 == Installation ==
 
-Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your WordPress installation and then activate the Plugin from Plugins page.
+Extract the zip file and just drop the contents in the wp-content/plugins/ directory of your WordPress installation and then activate the Plugin from Plugins page (or network activate from the Network Admin).
 
 **Templating**: use the templ33t\_block('block\_name') function wherever you want to add custom content (replacing 'block_name' with your custom block name).
 

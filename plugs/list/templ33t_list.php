@@ -57,6 +57,56 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 		}
 
 	}
+	
+	function displayConfig() {
+		
+		$str = '
+		
+			<tr>
+				<td valign="top"><label for="">Class:</label>&nbsp;</td>
+				<td valign="top"><input type="text" name="templ33t_block_config[class]" value="'.$this->class.'"></td>
+			</tr>
+			<tr>
+				<td valign="top"><label for="">Element:</label>&nbsp;</td>
+				<td valign="top">
+					<select name="templ33t_block_config[element]">
+						<option value="ul"';
+		
+		if($this->element == 'ul') $str .= ' selected="selected"';
+		
+		$str .= '>Unordered List</option>
+						<option value="ol"';
+		
+		if($this->element == 'ol') $str .= ' selected="selected"';
+		
+		$str .= '>Ordered List</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top"><label for="">Option Field Type:</label>&nbsp;</td>
+				<td valign="top">
+					<select name="templ33t_block_config[renderAs]">
+						<option value="text"';
+		
+		if($this->renderAs == 'text') $str .= ' selected="selected"';
+
+		$str .= '>Text</option>
+						<option value="textarea"';
+		
+		if($this->renderAs == 'textarea') $str .= ' selected="selected"';
+		
+		$str .= '>TextArea</option>
+					</select>
+				</td>
+			</tr>
+		
+		
+		';
+		
+		return $str;
+		
+	}
 
 	function displayPanel() {
 

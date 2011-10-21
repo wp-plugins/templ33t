@@ -47,6 +47,34 @@ class Templ33tSize extends Templ33tPlugin implements Templ33tOption {
 		}
 
 	}
+	
+	function displayConfig() {
+		
+		$str = '
+		
+			<tr>
+				<td valign="top"><label for="">Size Type:</label>&nbsp;</td>
+				<td valign="top">
+					<select name="templ33t_block_config[size_type]">
+						<option value="%"';
+		
+		if($this->element == '%') $str .= ' selected="selected"';
+		
+		$str .= '>Percent</option>
+						<option value="px"';
+		
+		if($this->element == 'px') $str .= ' selected="selected"';
+		
+		$str .= '>Pixels</option>
+					</select>
+				</td>
+			</tr>
+		
+		';
+		
+		return $str;
+		
+	}
 
 	function displayOption() {
 

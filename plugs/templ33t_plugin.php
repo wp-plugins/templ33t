@@ -116,6 +116,12 @@ abstract class Templ33tPlugin {
 		if(!empty($config)) $this->config = $config;
 
 	}
+	
+	public function displayConfig() {
+		
+		return '';
+		
+	}
 
 	public function init() {
 		

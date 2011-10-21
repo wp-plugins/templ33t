@@ -44,6 +44,12 @@ class Templ33tSelect extends Templ33tPlugin implements Templ33tTab, Templ33tOpti
 		
 
 	}
+	
+	function displayConfig() {
+		
+		return '';
+		
+	}
 
 	function displayPanel() {
 

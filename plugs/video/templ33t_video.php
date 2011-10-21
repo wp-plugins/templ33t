@@ -14,6 +14,12 @@ class Templ33tVideo extends Templ33tPlugin implements Templ33tTab {
 	function __construct() {
 		
 	}
+	
+	function displayConfig() {
+		
+		return '';
+		
+	}
 
 	function displayPanel() {
 

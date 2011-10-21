@@ -1,6 +1,6 @@
 <?php
 
-class Templ33tEditor extends Templ33tPlugin {
+class Templ33tEditor extends Templ33tPlugin implements Templ33tTab {
 
 	var $id;
 	var $value;
@@ -12,6 +12,24 @@ class Templ33tEditor extends Templ33tPlugin {
 
 	function __construct() {
 
+		
+	}
+	
+	function displayConfig() {
+		
+		return '';
+		
+	}
+	
+	function displayPanel() {
+		
+		return '';
+		
+	}
+	
+	function output($ret = false) {
+		
+		return '';
 		
 	}
 
