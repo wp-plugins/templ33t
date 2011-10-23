@@ -17,7 +17,7 @@ class Templ33tEditor extends Templ33tPlugin implements Templ33tTab {
 	
 	function displayConfig() {
 		
-		return '';
+		return '<tr><td valign="top"><label for="default">Default Value:</label>&nbsp;</td><td valign="top"><textarea name="templ33t_block_config[default]">'.$this->default.'</textarea>';
 		
 	}
 	

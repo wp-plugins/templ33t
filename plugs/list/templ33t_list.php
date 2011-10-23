@@ -60,8 +60,44 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	
 	function displayConfig() {
 		
-		$str = '
+		if(empty($this->default)) $this->default[] = '';
+		elseif(!is_array($this->default)) $this->default = array();
 		
+		$str = '
+			
+			<tr>
+				<td valign="top"><label for="optional">Optional:</label>&nbsp;</td>
+				<td valign="top">
+					<input type="hidden" name="templ33t_block_config[optional]" value="0" />
+					<input type="checkbox" id="optional" name="templ33t_block_config[optional]" value="1"';
+		
+		if($this->optional) $str .= ' checked="checked"';
+		
+		$str .= '/>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top"><label for="bindable">Bindable:</label>&nbsp;</td>
+				<td valign="top">
+					<input type="hidden" name="templ33t_block_config[bindable]" value="0" />
+					<input type="checkbox" id="bindable" name="templ33t_block_config[bindable]" value="1"';
+		
+		if($this->bindable) $str .= ' checked="checked"';
+		
+		$str .= '/>
+				</td>
+			</tr>
+			<tr>
+				<td valign="top"><label for="searchable">Searchable:</label>&nbsp;</td>
+				<td valign="top">
+					<input type="hidden" name="templ33t_block_config[searchable]" value="0" />
+					<input type="checkbox" id="searchable" name="templ33t_block_config[searchable]" value="1"';
+		
+		if($this->searchable) $str .= ' checked="checked"';
+		
+		$str .= '/>
+				</td>
+			</tr>
 			<tr>
 				<td valign="top"><label for="">Class:</label>&nbsp;</td>
 				<td valign="top"><input type="text" name="templ33t_block_config[class]" value="'.$this->class.'"></td>
@@ -84,9 +120,9 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 				</td>
 			</tr>
 			<tr>
-				<td valign="top"><label for="">Option Field Type:</label>&nbsp;</td>
+				<td valign="top"><label for="field-type">Option Field Type:</label>&nbsp;</td>
 				<td valign="top">
-					<select name="templ33t_block_config[renderAs]">
+					<select id="field-type" name="templ33t_block_config[renderAs]" onChange="templ33t_switchDefaultListType();">
 						<option value="text"';
 		
 		if($this->renderAs == 'text') $str .= ' selected="selected"';
@@ -100,7 +136,34 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 					</select>
 				</td>
 			</tr>
+			<tr>
+				<td valign="top"><label for="default">Default:</label>&nbsp;</td>
+				<td valign="top">
+					<ul id="templ33t_list" class="templ33t_list">
+						';
 		
+		foreach($this->default as $key => $val) {
+			$str .= '<li><div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'.Templ33t::$assets_url.'img/delete.jpg"></a></div>';
+			switch($this->renderAs) {
+				case 'textarea':
+					$str .= '<textarea name="templ33t_block_config[default][]">'.$val.'</textarea>';
+					break;
+				case 'text':
+				default:
+					$str .= '<input type="text" name="templ33t_block_config[default][]" value="'.$val.'" />';
+					break;
+			}
+			$str .= '</li>';
+		}
+		
+		$str .= '
+					</ul>
+					<script type="text/javascript">jQuery(\'ul.templ33t_list\').sortable({items: \'li\', handle: \'div.handle\', axis: \'y\'});</script>
+					
+					<input type="button" value="Add Item" onclick="templ33t_addDefaultListItem(); return false;" />
+					
+				</td>
+			</tr>
 		
 		';
 		
@@ -208,7 +271,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 				if(!ltype) ltype = 'text';
 
-				str += '<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'+TL33T_current.assets+'img/delete.jpg"></a></div>';
+				str += '<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'+TL33T_current.assets+'/img/delete.jpg"></a></div>';
 
 				switch(ltype) {
 					case 'textarea':
@@ -224,6 +287,64 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 				list.append(str);
 
+			}
+			
+			function templ33t_addDefaultListItem() {
+
+				var list = jQuery('#templ33t_list');
+				
+				ltype = jQuery('select#field-type').val();
+				
+				var str = '<li>';
+				
+				str += '<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'+TL33T_current.assets+'/img/delete.jpg"></a></div>';
+
+				switch(ltype) {
+					case 'textarea':
+						str += '<textarea name="templ33t_block_config[default][]"></textarea>';
+						break;
+					case 'text':
+					default:
+						str += '<input type="text" name="templ33t_block_config[default][]" />';
+						break;
+				}
+
+				str += '</li>';
+
+				list.append(str);
+
+			}
+			
+			function templ33t_switchDefaultListType() {
+				
+				var list = jQuery('#templ33t_list');
+				
+				ltype = jQuery('select#field-type').val();
+				
+				jQuery('ul#templ33t_list li').not(':has('+ltype+')').each(
+					function() {
+						
+						switch(ltype) {
+							
+							case 'text':
+								jQuery('<input type="text" name="templ33t_block_config[default][]" />')
+									.val(jQuery(this).children('textarea').val())
+									.appendTo(jQuery(this));
+								jQuery(this).children('textarea').remove();
+								break;
+								
+							case 'textarea':
+								jQuery('<textarea name="templ33t_block_config[default][]"></textarea>')
+									.val(jQuery(this).children('input').val())
+									.appendTo(jQuery(this));
+								jQuery(this).children('input').remove();
+								break;
+							
+						}
+						
+					}
+				);
+				
 			}
 
 			function templ33t_delListItem(aobj) {
@@ -266,11 +387,14 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 		if($wrap) { ?>
 		<style type="text/css">
 		<?php } ?>
+			ul.templ33t_list {
+				margin: 6px 0px;
+			}
 			ul.templ33t_list, ul.templ33t_list li { position: relative; list-style: none; }
 			ul.templ33t_list li div.handle {
 				position: absolute;
-				top: -1px;
-				bottom: -1px;
+				top: 0px;
+				bottom: 0px;
 				left: -2px;
 				width: 15px;
 				-webkit-border-radius: 4px 0px 0px 4px;
@@ -279,13 +403,13 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 				border-radius: 4px 0px 0px 4px;
 				background: #dfdfdf url(img/handle.jpg) no-repeat top center;
 				text-align: center;
-				cursor: pointer;
+				cursor: move;
 			}
 			ul.templ33t_list li div.actions {
 				position: absolute;
-				top: -1px;
+				top: 0px;
 				right: -2px;
-				bottom: -1px;
+				bottom: 0px;
 				width: 15px;
 				padding: 3px 2px;
 				-webkit-border-radius: 0px 4px 4px 0px;
@@ -296,8 +420,8 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 				text-align: center;
 			}
 			ul.templ33t_list li div.handle a { float: right; color: #F00000; text-decoration: none; }
-			ul.templ33t_list li input[type=text] { display: block; width: 100%; padding: 4px 20px; }
-			ul.templ33t_list li textarea { display: block; height: auto; padding: 4px 20px; }
+			ul.templ33t_list li input[type=text] { display: block; width: 100%; padding: 4px 18px; margin: 0px; }
+			ul.templ33t_list li textarea { display: block; height: auto; padding: 4px 18px; margin: 0px; }
 		<?php if($wrap) { ?>
 		</style>
 		<?php }

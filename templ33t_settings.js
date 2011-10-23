@@ -101,12 +101,11 @@ function getBlockConfig() {
 			url: ajaxurl,
 			type: 'post',
 			data: jQuery('form#templ33t_block_settings').serialize(),
-			dataType: 'json',
+			dataType: 'text',
 			success: function(d) {
 				
-				jQuery('tbody#block-config').empty();
-				jQuery('tbody#block-config').html(d.config);
-				alert(d['default']);
+				jQuery('tbody#block-config').empty().html(d);
+				
 			},
 			error: function(d) {
 				

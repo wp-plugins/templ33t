@@ -235,7 +235,10 @@ foreach ($themes as $key => $val) { ?>
 
 							<ul>
 								<li>
-									<strong><?php echo $tval['config']['main']; ?></strong> - main content label
+									<div class="templ33t_right">
+										<a href="<?php echo self::$settings_url; ?>&subpage=main_block&theme=<?php echo $theme_selected; ?>&tid=<?php echo $tval['templ33t_template_id']; ?>">Edit Main Tab</a>
+									</div>
+									<strong><?php echo $tval['config']['main']; ?></strong> - main content
 									<hr/>
 									<p><?php echo $tval['config']['description'] ? $tval['config']['description'] : 'No Description'; ?></p>
 								</li>

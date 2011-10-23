@@ -26,7 +26,6 @@ class Templ33t {
 	
 	static $settings_url;
 	
-	
 	var $tab_pages = array(
 		'page.php',
 		'page-new.php',
@@ -66,6 +65,8 @@ class Templ33t {
 	var $default_template = 'page.php';
 	
 	var $meta = array();
+	
+	var $load_plugs = array();
 	
 	var $block_objects = array();
 	
@@ -328,10 +329,33 @@ class Templ33t {
 			// add styles & scripts
 			add_action('admin_print_styles', array($this, 'settingsStyles'), 1);
 			add_action('admin_print_scripts', array($this, 'settingsScripts'), 1);
-
+			
 			// handle settings page post
 			$this->saveSettings();
+			
+			// load plugin styles and scripts for block settings
+			if(array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block') {
 
+				$plug_path = realpath(self::$assets_dir . 'plugs');
+				$ignore = array('.', '..', '.svn');
+				$plugs = scandir($plug_path);
+				foreach ($plugs as $key => $dir) {
+					if (in_array($dir, $ignore) || !is_dir($plug_path . '/' . $dir)) {
+						unset($plugs[$key]);
+					} else {
+						$class = Templ33tPluginHandler::load($dir);
+						//echo $dir . ' - ' . ($class === false ? 'FALSE' : $class) . '<br/>';
+						$obj = new $class;
+						if(!($obj instanceOf Templ33tTab)) {
+							unset($plugs[$key]);
+						}
+					}
+				}
+
+				$this->load_plugs = $plugs;
+
+			}
+			
 		} elseif(basename($_SERVER['PHP_SELF']) == 'media-upload.php') {
 
 			//add_filter( 'media_send_to_editor', 'templ33t_intercept_media', 15 );
@@ -1009,9 +1033,9 @@ class Templ33t {
 			// output tab bar & descriptions
 			echo '<div id="templ33t_control" style="display: none;"><a href="#" id="templ33t_prev" onclick="return templ33t_nav_prev();"><</a><a href="#" id="templ33t_next" onclick="return templ33t_nav_next();">></a><ul>';
 			echo $tabs;
-			echo '</ul></div> <!-- <div id="templ33t_descriptions" style="display: none;">';
+			echo '</ul></div> <div id="templ33t_descriptions" style="display: none;">';
 			echo $descs;
-			echo '</div> --> <div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
+			echo '</div> <div id="templ33t_editors" class="templ33t_editors" style="display: none;">';
 			echo $editors;
 			echo '</div>';
 
@@ -1170,6 +1194,13 @@ class Templ33t {
 
 		wp_enqueue_style('templ33t_styles');
 		wp_enqueue_style('thickbox');
+		
+		// load plugin styles and scripts for block settings
+		if(array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block') {
+			
+			wp_enqueue_style('templ33t_plug_styles', self::$assets_url . 'templ33t_styles.php?load=' . implode(',', $this->load_plugs));
+			
+		}
 
 	}
 
@@ -1183,6 +1214,25 @@ class Templ33t {
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('thickbox');
 		wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
+		
+		// load plugin styles and scripts for block settings
+		if(array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block' && !empty($this->load_plugs)) {
+			
+			$enqueue = array();
+			foreach($this->load_plugs as $plug) {
+				$class = Templ33tPluginHandler::classify($plug);
+				if(!empty($class::$dependencies)) {
+					foreach($class::$dependencies as $script) {
+						wp_enqueue_script($script);
+					}
+				}
+			}
+			
+			wp_enqueue_script('templ33t_plug_scripts', self::$assets_url . 'templ33t_scripts.php?load=' . implode(',', $this->load_plugs));
+			
+		}
+		
+		echo '<script type="text/javascript">var TL33T_current = {assets: \''.self::$assets_url.'\'};</script>';
 
 	}
 	
@@ -1392,6 +1442,99 @@ class Templ33t {
 
 				}
 
+			}
+			
+			if(array_key_exists('action', $_POST)) {
+				
+				switch($_POST['action']) {
+					
+					case 'templ33t_block_config':
+						
+						if(empty($_POST['templ33t_block_config'])) {
+							die('No block data passed.');
+						}
+						
+						$pub = $this->getOption('templ33t_map_pub');
+						$dev = $this->getOption('templ33t_map_dev');
+						
+						$block = $_POST['templ33t_block_config'];
+						
+						$tid = $block['tid'];
+						unset($block['tid']);
+						
+						$theme = $block['theme'];
+						unset($block['theme']);
+						
+						// grab original template & block
+						$template = $wpdb->get_row(
+								'SELECT `templ33t_template_id`, `template`, `config`
+									FROM `' . self::$templates_table . '`
+									WHERE `templ33t_template_id` = "' . $tid . '"', ARRAY_A
+						);
+
+						$template['config'] = unserialize($template['config']);
+						
+						$oblock = array();
+						
+						foreach ($template['config']['blocks'] as $key => $val) {
+							if ($key == $_GET['block']) {
+								$oblock = $val;
+								break;
+							}
+						}
+							
+						$new = array_merge($this->config_defaults, $oblock, $block);
+						
+						$template['config']['blocks'][$new['slug']] = $new;
+						
+						//print_r($template);
+						//die();
+						
+						$wpdb->update(self::$templates_table, array('config' => serialize($template['config'])), array('templ33t_template_id' => $tid));
+						
+						if($oblock != $new && $dev <= $pub) {
+							$dev = $pub+1;
+							$pub = $this->updateOption('templ33t_map_dev', $dev);
+						}
+						
+						// return to settings page
+						$redirect = self::$settings_url.'&theme='.$theme;
+						wp_redirect($redirect);
+						
+					break;
+					
+					case 'templ33t_main_block_config':
+						
+						if(empty($_POST['templ33t_block_config'])) {
+							die('No block data passed.');
+						}
+						
+						$pub = $this->getOption('templ33t_map_pub');
+						$dev = $this->getOption('templ33t_map_dev');
+						
+						$block = $_POST['templ33t_block_config'];
+						
+						$tid = $block['tid'];
+						unset($block['tid']);
+						
+						$theme = $block['theme'];
+						unset($block['theme']);
+						
+						// grab original template & block
+						$template = $wpdb->get_row(
+								'SELECT `templ33t_template_id`, `template`, `config`
+									FROM `' . self::$templates_table . '`
+									WHERE `templ33t_template_id` = "' . $tid . '"', ARRAY_A
+						);
+						
+						$template['config'] = unserialize($template['config']);
+						
+						
+						
+						break;
+						
+				}
+				
 			}
 
 		}
@@ -1811,25 +1954,22 @@ class Templ33t {
 		
 		$_GET['subpage'] = array_key_exists('subpage', $_GET) ? $_GET['subpage'] : 'theme';
 		
-		switch($_GET['subpage']) {
+		$cd = dirname(__FILE__);
+		
+		$pages = array(
+			'theme' => '/inc/settings.php',
+			'template' => '/inc/template_settings.php',
+			'main_block' => '/inc/main_block_settings.php',
+			'block' => '/inc/block_settings.php',
+		);
+		
+		if(array_key_exists(strtolower($_GET['subpage']), $pages)) {
 			
-			case 'theme':
-				
-				include(dirname(__FILE__).'/inc/settings.php');
-				
-			break;
+			include($cd . $pages[strtolower($_GET['subpage'])]);
 			
-			case 'template':
-				
-				include(dirname(__FILE__).'/inc/template_settings.php');
-				
-			break;
+		} else {
 			
-			case 'block':
-				
-				include(dirname(__FILE__).'/inc/block_settings.php');
-				
-			break;
+			include($cd . current($pages));
 			
 		}
 		
@@ -1856,14 +1996,12 @@ class Templ33t {
 			// instantiate plugin
 			$obj = Templ33tPluginHandler::instantiate($block['type'], $block);
 			$obj->init();
-			$resp->config = $obj->displayConfig();
-			$resp->default = $obj->displayPanel();
 			
-			echo json_encode($resp);
+			echo $obj->displayConfig();
 			
 		} else {
 			
-			echo '<em>No block configuration passed.</em>';
+			echo '<tr><td colspan="2"><em>No block configuration passed.</em></td></tr>';
 			
 		}
 		
