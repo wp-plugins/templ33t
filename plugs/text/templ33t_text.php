@@ -47,7 +47,11 @@ class Templ33tText extends Templ33tPlugin implements Templ33tTab, Templ33tOption
 
 	function output($ret = false) {
 
-		
+		if(!$ret) {
+			echo $this->multiline ? nl2br($this->value) : $this->value;
+		} else {
+			return $this->multiline ? nl2br($this->value) : $this->value;
+		}
 
 	}
 

@@ -26,7 +26,7 @@ print_r($template);
 		<tbody>
 			<tr>
 				<td valign="top"><label for="label">Label:</label>&nbsp;</td>
-				<td valign="top"><input type="text" id="label" name="templ33t_block_config[label]" value="<?php echo $template['config']['main']; ?>" /></td>
+				<td valign="top"><input type="text" id="label" name="templ33t_block_config[main]" value="<?php echo $template['config']['main']; ?>" /></td>
 			</tr>
 			<tr>
 				<td valign="top"><label for="description">Description:</label>&nbsp;</td>
@@ -34,7 +34,7 @@ print_r($template);
 			</tr>
 			<tr>
 				<td valign="top"><label for="weight">Sort Order:</label>&nbsp;</td>
-				<td valign="top"><input type="text" name="templ33t_block_config[main_weight]" value="<?php echo $template['config']['main_weight']; ?>" /></td>
+				<td valign="top"><input type="text" name="templ33t_block_config[weight]" value="<?php echo $template['config']['weight']; ?>" /></td>
 			</tr>
 		</tbody>
 		<tbody>

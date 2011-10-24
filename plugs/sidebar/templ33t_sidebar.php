@@ -25,7 +25,11 @@ class Templ33tSidebar extends Templ33tSelect implements Templ33tTab, Templ33tOpt
 
 	function output($ret = false) {
 
-		
+		if(!$ret) {
+			echo $this->value;
+		} else {
+			return $this->value;
+		}
 
 	}
 

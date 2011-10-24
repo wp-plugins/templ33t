@@ -66,6 +66,8 @@ function templ33t_block($block = null, $before = null, $after = null, $return = 
 
 	global $templ33t;
 	
+	//print_r($templ33t->block_objects);
+	
 	$value = array_key_exists($block, $templ33t->block_objects) ? ($templ33t->block_objects[$block] instanceOf Templ33tTab ? $templ33t->block_objects[$block]->output(true) : $templ33t->block_objects[$block]->value) : '';
 
 	if(!empty($value) || $templ33t->block_objects[$block]->optional) {

@@ -29,7 +29,11 @@ class Templ33tEditor extends Templ33tPlugin implements Templ33tTab {
 	
 	function output($ret = false) {
 		
-		return '';
+		if(!$ret) {
+			echo $this->value;
+		} else {
+			return $this->value;
+		}
 		
 	}
 

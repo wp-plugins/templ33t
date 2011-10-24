@@ -42,6 +42,7 @@ class Templ33t {
 		'optional' => false,
 		'bindable' => false,
 		'searchable' => false,
+		'weight' => '',
 	);
 
 	var $plugin_attributes = array(
@@ -1487,6 +1488,20 @@ class Templ33t {
 						
 						$template['config']['blocks'][$new['slug']] = $new;
 						
+						// reorder
+						$newblocks = array();
+						//$weights = array('main' => $main['weight'].' aaa');
+						$weights = array();
+						foreach($template['config']['blocks'] as $slug => $block) {
+							$weights[$slug] = (array_key_exists('weight', $block) ? (int) $block['weight'] : 0) . ' ' .strtolower($slug);
+						}
+						asort($weights);
+						foreach($weights as $slug => $val) {
+							$newblocks[$slug] = $template['config']['blocks'][$slug];
+						}
+						
+						$template['config']['blocks'] = $newblocks;
+						
 						//print_r($template);
 						//die();
 						
@@ -1512,13 +1527,13 @@ class Templ33t {
 						$pub = $this->getOption('templ33t_map_pub');
 						$dev = $this->getOption('templ33t_map_dev');
 						
-						$block = $_POST['templ33t_block_config'];
+						$main = $_POST['templ33t_block_config'];
 						
-						$tid = $block['tid'];
-						unset($block['tid']);
+						$tid = $main['tid'];
+						unset($main['tid']);
 						
-						$theme = $block['theme'];
-						unset($block['theme']);
+						$theme = $main['theme'];
+						unset($main['theme']);
 						
 						// grab original template & block
 						$template = $wpdb->get_row(
@@ -1529,7 +1544,22 @@ class Templ33t {
 						
 						$template['config'] = unserialize($template['config']);
 						
+						$old = $template['config'];
 						
+						$template['config']['main'] = $main['main'];
+						$template['config']['description'] = $main['description'];
+						$template['config']['weight'] = $main['weight'];
+						
+						$wpdb->update(self::$templates_table, array('config' => serialize($template['config'])), array('templ33t_template_id' => $tid));
+						
+						if(serialize($old) != $template['config'] && $dev <= $pub) {
+							$dev = $pub+1;
+							$pub = $this->updateOption('templ33t_map_dev', $dev);
+						}
+						
+						// return to settings page
+						$redirect = self::$settings_url.'&theme='.$theme;
+						wp_redirect($redirect);
 						
 						break;
 						

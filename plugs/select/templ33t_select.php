@@ -59,7 +59,11 @@ class Templ33tSelect extends Templ33tPlugin implements Templ33tTab, Templ33tOpti
 
 	function output($ret = false) {
 
-		
+		if(!$ret) {
+			echo $this->value;
+		} else {
+			return $this->value;
+		}
 
 	}
 

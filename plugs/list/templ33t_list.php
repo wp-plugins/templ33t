@@ -240,7 +240,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 		} else {
 
-			return false;
+			return $this->value;
 
 		}
 

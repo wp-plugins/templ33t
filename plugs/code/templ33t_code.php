@@ -72,10 +72,13 @@ class Templ33tCode extends Templ33tPlugin implements Templ33tTab {
 	}
 
 	function output($ret = false) {
-
-		if($ret) return $this->value();
-		else echo $this->value();
-
+		
+		if(!$ret) {
+			echo $this->value;
+		} else {
+			return $this->value;
+		}
+		
 	}
 
 }
