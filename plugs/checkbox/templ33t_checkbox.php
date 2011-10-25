@@ -2,7 +2,7 @@
 
 class Templ33tCheckbox extends Templ33tPlugin implements Templ33tTab, Templ33tOption {
 	
-	var $custom_panel = true;
+	static $custom_panel = true;
 	
 	var $positive_output = 'Yes';
 	

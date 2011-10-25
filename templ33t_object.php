@@ -359,7 +359,7 @@ class Templ33t {
 			
 		} elseif(basename($_SERVER['PHP_SELF']) == 'media-upload.php') {
 
-			//add_filter( 'media_send_to_editor', 'templ33t_intercept_media', 15 );
+			add_filter( 'media_send_to_editor', array($this, 'interceptMedia'), 15 );
 
 		}
 
@@ -476,6 +476,7 @@ class Templ33t {
 								$templates['ALL'] = array(
 									'main' => $conf['main'],
 									'description' => $conf['description'],
+									'weight' => $conf['weight'],
 									'blocks' => array(),
 									'options' => array(),
 								);
@@ -804,7 +805,7 @@ class Templ33t {
 
 		echo '<script type="text/javascript">
 			/* <![CDATA[ */
-			var TL33T_current = { template: "'.$post->page_template.'", default_template: "'.$this->default_template.'", assets: "'.Templ33t::$assets_url.'" };
+			var TL33T_current = { template: "'.$post->page_template.'", default_template: "'.$this->default_template.'", assets: "'.Templ33t::$assets_url.'", media_target: false, media_hook: false };
 			';
 		
 		// output js template map
@@ -847,6 +848,46 @@ class Templ33t {
 			/* ]]> */
 			</script>';
 
+	}
+	
+	/**
+	 * Catch "insert into post" button
+	 * @param type $html 
+	 */
+	function interceptMedia($html = '') {
+		
+		?>
+		<script type="text/javascript">
+			
+			var TL33T_win = window.dialogArguments || opener || parent || top;
+			
+			if(TL33T_win.TL33T_current != undefined && TL33T_win.TL33T_current.media_target !== false && TL33T_win.TL33T_current.media_hook !== false) {
+				
+				var tid = TL33T_win.TL33T_current.media_target;
+				var thook = TL33T_win.TL33T_current.media_hook;
+				
+				TL33T_win.TL33T_current.media_target = false;
+				TL33T_win.TL33T_current.media_hook = false;
+				
+				thook(tid, '<?php echo addslashes($html); ?>');
+				
+			} else {
+				
+				
+				if(TL33T_win.TL33T_current != undefined) {
+					TL33T_win.TL33T_current.media_target = false;
+					TL33T_win.TL33T_current.media_hook = false;
+				}
+				
+				TL33T_win.send_to_editor('<?php echo addslashes($html); ?>');
+				
+			}
+			
+			TL33T_win.tb_remove();
+			
+		</script>
+		<?php
+		
 	}
 	
 	/**

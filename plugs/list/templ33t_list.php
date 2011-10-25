@@ -178,7 +178,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 		$str = '<div class="postbox"><div class="inside">';
 		$str .= '<input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_'.$this->slug.'" /><ul id="templ33t_list_'.$this->id.'" class="templ33t_list">';
 		if(empty($this->value)) $this->value[] = '';
-		foreach($this->value as $key => $val) {
+		foreach($this->value as $val) {
 			$str .= '<li><div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'.Templ33t::$assets_url.'img/delete.jpg"></a></div>';
 			switch($this->renderAs) {
 				case 'textarea':
@@ -255,35 +255,37 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	function js($return = false, $wrap = true) {
 
 		//wp_enqueue_script('jquery-ui-sortable');
-		global $templ33t;
+		//global $templ33t;
 
-		if($return) ob_start();
-
-		if($wrap) { ?>
-		<script type="text/javascript">
-		<?php } ?>
+		//if($return) ob_start();
 		
-			function templ33t_addListItem(lid, ltype) {
+		$str = '';
+		
+		if($wrap) {
+			$str .= '<script type="text/javascript">';
+		}
+		
+		$str .= '	function templ33t_addListItem(lid, ltype) {
 
-				var list = jQuery('#templ33t_list_'+lid);
+				var list = jQuery(\'#templ33t_list_\'+lid);
 				
-				var str = '<li>';
+				var str = \'<li>\';
 
-				if(!ltype) ltype = 'text';
+				if(!ltype) ltype = \'text\';
 
-				str += '<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'+TL33T_current.assets+'/img/delete.jpg"></a></div>';
+				str += \'<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="\'+TL33T_current.assets+\'/img/delete.jpg"></a></div>\';
 
 				switch(ltype) {
-					case 'textarea':
-						str += '<textarea name="meta['+lid+'][value][]"></textarea>';
+					case \'textarea\':
+						str += \'<textarea name="meta[\'+lid+\'][value][]"></textarea>\';
 						break;
-					case 'text':
+					case \'text\':
 					default:
-						str += '<input type="text" name="meta['+lid+'][value][]" />';
+						str += \'<input type="text" name="meta[\'+lid+\'][value][]" />\';
 						break;
 				}
 
-				str += '</li>';
+				str += \'</li>\';
 
 				list.append(str);
 
@@ -291,25 +293,25 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 			
 			function templ33t_addDefaultListItem() {
 
-				var list = jQuery('#templ33t_list');
+				var list = jQuery(\'#templ33t_list\');
 				
-				ltype = jQuery('select#field-type').val();
+				ltype = jQuery(\'select#field-type\').val();
 				
-				var str = '<li>';
+				var str = \'<li>\';
 				
-				str += '<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="'+TL33T_current.assets+'/img/delete.jpg"></a></div>';
+				str += \'<div class="handle"></div><div class="actions"><a href="#" onclick="templ33t_delListItem(this); return false;"><img src="\'+TL33T_current.assets+\'/img/delete.jpg"></a></div>\';
 
 				switch(ltype) {
-					case 'textarea':
-						str += '<textarea name="templ33t_block_config[default][]"></textarea>';
+					case \'textarea\':
+						str += \'<textarea name="templ33t_block_config[default][]"></textarea>\';
 						break;
-					case 'text':
+					case \'text\':
 					default:
-						str += '<input type="text" name="templ33t_block_config[default][]" />';
+						str += \'<input type="text" name="templ33t_block_config[default][]" />\';
 						break;
 				}
 
-				str += '</li>';
+				str += \'</li>\';
 
 				list.append(str);
 
@@ -317,27 +319,27 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 			
 			function templ33t_switchDefaultListType() {
 				
-				var list = jQuery('#templ33t_list');
+				var list = jQuery(\'#templ33t_list\');
 				
-				ltype = jQuery('select#field-type').val();
+				ltype = jQuery(\'select#field-type\').val();
 				
-				jQuery('ul#templ33t_list li').not(':has('+ltype+')').each(
+				jQuery(\'ul#templ33t_list li\').not(\':has(\'+ltype+\')\').each(
 					function() {
 						
 						switch(ltype) {
 							
-							case 'text':
-								jQuery('<input type="text" name="templ33t_block_config[default][]" />')
-									.val(jQuery(this).children('textarea').val())
+							case \'text\':
+								jQuery(\'<input type="text" name="templ33t_block_config[default][]" />\')
+									.val(jQuery(this).children(\'textarea\').val())
 									.appendTo(jQuery(this));
-								jQuery(this).children('textarea').remove();
+								jQuery(this).children(\'textarea\').remove();
 								break;
 								
-							case 'textarea':
-								jQuery('<textarea name="templ33t_block_config[default][]"></textarea>')
-									.val(jQuery(this).children('input').val())
+							case \'textarea\':
+								jQuery(\'<textarea name="templ33t_block_config[default][]"></textarea>\')
+									.val(jQuery(this).children(\'input\').val())
 									.appendTo(jQuery(this));
-								jQuery(this).children('input').remove();
+								jQuery(this).children(\'input\').remove();
 								break;
 							
 						}
@@ -356,25 +358,27 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 			jQuery(document).ready(
 				function() {
 					
-					jQuery('ul.templ33t_list').sortable(
+					jQuery(\'ul.templ33t_list\').sortable(
 						{
-							items: 'li',
-							handle: 'div.handle',
-							axis: 'y'
+							items: \'li\',
+							handle: \'div.handle\',
+							axis: \'y\'
 						}
 					);
 					
 				}
-			);
+			);';
 
-		<?php if($wrap) { ?>
-		</script>
-		<?php }
-
-		if($return) {
-			$ret = ob_get_clean ();
-			return $ret;
+		if($wrap) {
+		 $str .= '</script>';
 		}
+
+		if(!$return) {
+			echo $str;
+		} else {
+			return $str;
+		}
+			
 
 	}
 

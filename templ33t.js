@@ -338,3 +338,10 @@ function send_to_templ33t_field(h) {
 	templ33t_editor_focus = undefined;
 
 }
+
+function templ33t_set_media_target(tid, thook) {
+	
+	TL33T_current.media_target = tid;
+	TL33T_current.media_hook = thook;
+	
+}
