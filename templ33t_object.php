@@ -340,6 +340,8 @@ class Templ33t {
 	
 	function adminMenu() {
 		
+		global $wp_version;
+		
 		// set menu parent and settings url
 		if ($this->multiSite()) {
 
@@ -355,7 +357,7 @@ class Templ33t {
 			$this->menu_parent = 'options-general.php';
 			self::$settings_url = $this->menu_parent . '?page=templ33t_settings';
 		}
-
+		
 		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', array($this, 'settings'));
 		
 	}
