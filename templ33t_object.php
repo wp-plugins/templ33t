@@ -101,10 +101,9 @@ class Templ33t {
 
 		// actions & filters
 		add_action('admin_init', array($this, 'init'), 1);
-		if ($wp_version < '3.1.0')
-			add_action('admin_menu', array($this, 'menu'));
-		else
-			add_action('network_admin_menu', array($this, 'menu'));
+		add_action('admin_menu', array($this, 'menu'));
+		if($wp_version > '3.1.0')
+			add_action('network_admin_menu', array($this, 'adminMenu'));
 		add_filter('the_content', array($this, 'searchResults'), 1);
 		add_action('wp', array($this, 'prepareMeta'), 1);
 	}
@@ -331,7 +330,16 @@ class Templ33t {
 	function menu() {
 
 		global $wp_version;
-
+		
+		add_submenu_page('themes.php', 'Customize Theme', 'Templ33t', 'edit_themes', 'templ33t_customize', array($this, 'customize'));
+		
+		if($wp_version < '3.1.0')
+			$this->adminMenu();
+		
+	}
+	
+	function adminMenu() {
+		
 		// set menu parent and settings url
 		if ($this->multiSite()) {
 
@@ -349,8 +357,6 @@ class Templ33t {
 		}
 
 		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', array($this, 'settings'));
-
-		add_submenu_page('themes.php', 'Customize Theme', 'Templ33t', 'edit_themes', 'templ33t_customize', array($this, 'customize'));
 		
 	}
 
