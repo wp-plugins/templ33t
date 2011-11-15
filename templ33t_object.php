@@ -351,6 +351,7 @@ class Templ33t {
 		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', array($this, 'settings'));
 
 		add_submenu_page('themes.php', 'Customize Theme', 'Templ33t', 'edit_themes', 'templ33t_customize', array($this, 'customize'));
+		
 	}
 
 	function getOption($key) {
