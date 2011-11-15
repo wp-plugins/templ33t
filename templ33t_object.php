@@ -331,7 +331,7 @@ class Templ33t {
 
 		global $wp_version;
 		
-		add_submenu_page('themes.php', 'Customize Theme', 'Templ33t', 'edit_themes', 'templ33t_customize', array($this, 'customize'));
+		add_submenu_page('themes.php', 'Customize Theme', 'Customize Theme', 'edit_themes', 'templ33t_customize', array($this, 'customize'));
 		
 		if($wp_version < '3.1.0')
 			$this->adminMenu();
