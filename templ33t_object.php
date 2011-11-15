@@ -1960,6 +1960,8 @@ class Templ33t {
 		
 		echo $theme;
 		
+		echo '<pre>'.print_r($this->map, true).'</pre>';
+		
 	}
 
 }
