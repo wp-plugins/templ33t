@@ -1960,7 +1960,9 @@ class Templ33t {
 		
 		echo $theme;
 		
-		echo '<pre>'.print_r($this->map, true).'</pre>';
+		if(array_key_exists($theme, $this->map)) {
+			echo '<pre>'.print_r($this->map[$theme], true).'</pre>';
+		}
 		
 	}
 
