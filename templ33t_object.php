@@ -339,7 +339,7 @@ class Templ33t {
 	}
 	
 	function adminMenu() {
-		
+		die('testing');
 		// set menu parent and settings url
 		if ($this->multiSite()) {
 
