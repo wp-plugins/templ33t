@@ -410,11 +410,11 @@ class Templ33t {
 
 	function parseTheme($theme = null) {
 		
-		$home = $page = get_query_template('home');
-		$page = get_query_template('page');
+		$home = $page = locate_template('home.php');
+		$page = locate_template('page.php');
 		$custom = get_page_templates();
-		$posts = get_query_template('posts');
-		$single = get_query_template('single');
+		$posts = locate_template('posts.php');
+		$single = locate_template('single.php');
 		
 		echo 'HOME: '.$home.'<br/>'
 			. 'PAGE: '.$page.'<br/>'
