@@ -360,7 +360,7 @@ class Templ33t {
 	
 	function previewTypes($type = null) {
 		
-		die($type);
+		die('TESTING: '.$type);
 		
 	}
 
