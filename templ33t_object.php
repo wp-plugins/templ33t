@@ -24,6 +24,7 @@ class Templ33t {
 		'slug' => '',
 		'type' => 'editor',
 		'description' => '',
+		'global' => false,
 		'config' => '',
 		'group' => null,
 		'optional' => false,
@@ -1422,7 +1423,7 @@ class Templ33t {
 
 						// grab original template & block
 						$template = $wpdb->get_row(
-								'SELECT `templ33t_template_id`, `template`, `config`
+								'SELECT `templ33t_template_id`, `theme`, `template`, `config`
 									FROM `' . self::$templates_table . '`
 									WHERE `templ33t_template_id` = "' . $tid . '"', ARRAY_A
 						);
@@ -1437,11 +1438,44 @@ class Templ33t {
 								break;
 							}
 						}
+						
+						if(!is_array($oblock)) {
+							
+							// grab global template
+							$global = $wpdb->get_row(
+									'SELECT `templ33t_template_id`, `theme`, `template`, `config`
+										FROM `' . self::$templates_table . '`
+										WHERE theme = "'.$template['theme'].'" AND template = "ALL"', ARRAY_A
+							);
 
-						$new = array_merge($this->config_defaults, $oblock, $block);
-
-						$template['config']['blocks'][$new['slug']] = $new;
-
+							$global['config'] = unserialize($all['config']);
+							
+							// global block exists
+							if(array_key_exists($_GET['block'], $global['config']['blocks'])) {
+								
+								// block is no longer global
+								if(empty($block['global'])) {
+									
+									
+									
+								}
+								
+							// global block does not exist
+							} else {
+								
+								
+								
+							}
+							
+						} else {
+							
+							$new = array_merge($this->config_defaults, $oblock, $block);
+							
+							$template['config']['blocks'][$new['slug']] = $new;
+							
+						}
+						
+						
 						// reorder
 						$newblocks = array();
 						//$weights = array('main' => $main['weight'].' aaa');
