@@ -1962,10 +1962,11 @@ class Templ33t {
 		
 		$theme = get_stylesheet();
 		
-		if(array_key_exists($theme, $this->map) && array_key_exists($theme, $themes)) {
+		if(array_key_exists($theme, $this->map)) {
 			echo '<pre>'.print_r($this->map[$theme], true).'</pre>';
-			echo '<pre>'.print_r($themes[$theme], true).'</pre>';
 		}
+		
+		echo '<pre>'.print_r($themes, true).'</pre>';
 		
 	}
 
