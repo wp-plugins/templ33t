@@ -409,7 +409,23 @@ class Templ33t {
 	}
 
 	function parseTheme($theme = null) {
-
+		
+		$home = $page = get_query_template('home');
+		$page = get_query_template('page');
+		$custom = get_page_templates();
+		$posts = get_query_template('posts');
+		$single = get_query_template('single');
+		
+		echo 'HOME: '.$home.'<br/>'
+			. 'PAGE: '.$page.'<br/>'
+			. 'CUSTOM: '.print_r($custom, true).'<br/>'
+			. 'POSTS: '.$posts.'<br/>'
+			. 'SINGLE: '.$single.'<br/>';
+		
+		die();
+		
+		/*
+		
 		$theme_data = get_theme_data(get_theme_root() . '/' . $theme . '/style.css');
 
 		$theme_dirs = array(get_theme_root() . '/' . $theme . '/');
@@ -466,6 +482,8 @@ class Templ33t {
 		}
 
 		return $templates;
+
+		*/
 	}
 
 	function parseTemplate($template = null) {
