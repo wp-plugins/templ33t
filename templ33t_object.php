@@ -359,9 +359,9 @@ class Templ33t {
 	
 	function previewTypes($type = null) {
 		
-		global $post;
+		global $wp_query, $post;
 		
-		die('TESTING: '.print_r($post, true));
+		die('TESTING: '.print_r($wp_query, true).print_r($post, true));
 		
 	}
 
