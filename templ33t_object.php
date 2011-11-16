@@ -110,9 +110,9 @@ class Templ33t {
 		
 		
 		if(array_key_exists('templ33t_preview', $_GET)) {
-			add_action('init', array($this, 'flushRewriteRules'));
-			add_action('generate_rewrite_rules', array($this, 'addRewriteRules'));
-			add_filter('query_vars', array($this, 'addQueryVars'));
+			//add_action('init', array($this, 'flushRewriteRules'));
+			//add_action('generate_rewrite_rules', array($this, 'addRewriteRules'));
+			//add_filter('query_vars', array($this, 'addQueryVars'));
 			add_action('template_redirect', array($this, 'previewTypes'));
 		}
 		
@@ -347,7 +347,7 @@ class Templ33t {
 	function addRewriteRules( $wp_rewrite )
 	{
 		$new_rules = array(
-	  		'([a-zA-Z]+)' => 'index.php?templ33t_preview=' . $wp_rewrite->preg_index(1) );
+	  		'(templ33t_preview)/([a-zA-Z]+)' => 'index.php?templ33t_preview=' . $wp_rewrite->preg_index(1) );
 		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 	}
 	
@@ -359,7 +359,9 @@ class Templ33t {
 	
 	function previewTypes($type = null) {
 		
-		die('TESTING: '.$type);
+		$args = func_get_args();
+		
+		die('TESTING: '.print_r($args, true));
 		
 	}
 
