@@ -359,9 +359,9 @@ class Templ33t {
 	
 	function previewTypes($type = null) {
 		
-		$args = func_get_args();
+		global $post;
 		
-		die('TESTING: '.print_r($args, true));
+		die('TESTING: '.print_r($post, true));
 		
 	}
 
