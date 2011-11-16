@@ -1958,7 +1958,8 @@ class Templ33t {
 
 	function customize() {
 		
-		$themes = get_themes();
+		//$themes = get_themes();
+		$templates = get_page_templates();
 		
 		$theme = get_stylesheet();
 		
@@ -1966,7 +1967,7 @@ class Templ33t {
 			echo '<pre>'.print_r($this->map[$theme], true).'</pre>';
 		}
 		
-		echo '<pre>'.print_r($themes, true).'</pre>';
+		echo '<pre>'.print_r($templates, true).'</pre>';
 		
 	}
 
