@@ -410,7 +410,10 @@ class Templ33t {
 
 	function parseTheme($theme = null) {
 		
-		$home = $page = locate_template('home.php');
+		$themes = get_themes();
+		print_r($themes[$theme]);
+		
+		$home = locate_template('home.php');
 		$page = locate_template('page.php');
 		$custom = get_page_templates();
 		$posts = locate_template('posts.php');
