@@ -347,8 +347,7 @@ class Templ33t {
 	function addRewriteRules( $wp_rewrite )
 	{
 		$new_rules = array(
-	  		'([a-zA-Z]+)' => 'templ33t_preview=' .
-			$wp_rewrite->preg_index(1) );
+	  		'([a-zA-Z]+)' => 'index.php?templ33t_preview=' . $wp_rewrite->preg_index(1) );
 		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
 	}
 	
