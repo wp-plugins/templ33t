@@ -107,6 +107,16 @@ class Templ33t {
 			add_action('network_admin_menu', array($this, 'adminMenu'));
 		add_filter('the_content', array($this, 'searchResults'), 1);
 		add_action('wp', array($this, 'prepareMeta'), 1);
+		
+		
+		if(array_key_exists('templ33t_preview', $_GET)) {
+			add_action('init', array($this, 'flushRewriteRules'));
+			add_action('generate_rewrite_rules', array($this, 'addRewriteRules'));
+			add_filter('query_vars', array($this, 'addQueryVars'));
+			add_action('template_redirect', array($this, 'previewTypes'));
+		}
+		
+		
 	}
 
 	function fillPaths() {
@@ -327,6 +337,32 @@ class Templ33t {
 			add_filter('media_send_to_editor', array($this, 'interceptMedia'), 15);
 		}
 	}
+	
+	function flushRewriteRules()
+	{
+		global $wp_rewrite;
+		$wp_rewrite->flush_rules(false);
+	}
+	
+	function addRewriteRules( $wp_rewrite )
+	{
+		$new_rules = array(
+	  		'([a-zA-Z]+)' => 'templ33t_preview=' .
+			$wp_rewrite->preg_index(1) );
+		$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
+	}
+	
+	function addQueryVars( $qvars )
+	{
+		$qvars[] = 'templ33t_preview';
+		return $qvars;
+	}
+	
+	function previewTypes($type = null) {
+		
+		die($type);
+		
+	}
 
 	function menu() {
 
@@ -428,6 +464,8 @@ class Templ33t {
 			. 'SINGLE: '.$single.'<br/>';
 		
 		die();
+		
+		
 		
 		/*
 		
