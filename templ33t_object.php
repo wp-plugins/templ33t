@@ -1438,42 +1438,10 @@ class Templ33t {
 								break;
 							}
 						}
+							
+						$new = array_merge($this->config_defaults, $oblock, $block);
 						
-						if(!is_array($oblock)) {
-							
-							// grab global template
-							$global = $wpdb->get_row(
-									'SELECT `templ33t_template_id`, `theme`, `template`, `config`
-										FROM `' . self::$templates_table . '`
-										WHERE theme = "'.$template['theme'].'" AND template = "ALL"', ARRAY_A
-							);
-
-							$global['config'] = unserialize($all['config']);
-							
-							// global block exists
-							if(array_key_exists($_GET['block'], $global['config']['blocks'])) {
-								
-								// block is no longer global
-								if(empty($block['global'])) {
-									
-									
-									
-								}
-								
-							// global block does not exist
-							} else {
-								
-								
-								
-							}
-							
-						} else {
-							
-							$new = array_merge($this->config_defaults, $oblock, $block);
-							
-							$template['config']['blocks'][$new['slug']] = $new;
-							
-						}
+						$template['config']['blocks'][$new['slug']] = $new;
 						
 						
 						// reorder
@@ -1990,12 +1958,13 @@ class Templ33t {
 
 	function customize() {
 		
+		$themes = get_themes();
+		
 		$theme = get_stylesheet();
 		
-		echo $theme;
-		
-		if(array_key_exists($theme, $this->map)) {
+		if(array_key_exists($theme, $this->map) && array_key_exists($theme, $themes)) {
 			echo '<pre>'.print_r($this->map[$theme], true).'</pre>';
+			echo '<pre>'.print_r($themes[$theme], true).'</pre>';
 		}
 		
 	}
