@@ -12,7 +12,7 @@
 <?php foreach($groups as $group => $blocks) { ?>
 <h3><?php echo $group; ?></h3>
 
-<div class="">
+<div>
 	
 	<ul>
 		<?php foreach($blocks as $slug => $block) { ?>
@@ -21,5 +21,21 @@
 	</ul>
 	
 </div>
-	
+
 <?php } ?>
+
+<div class="">
+	
+	<ul>
+		<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
+		<li class="<?php echo $slug; ?>">
+			<h3><?php echo $block->label; ?></h3>
+			<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
+			<div>
+				<?php echo $block->displayPanel(); ?>
+			</div>
+		</li>
+		<?php } } ?>
+	</ul>
+		
+</div>
