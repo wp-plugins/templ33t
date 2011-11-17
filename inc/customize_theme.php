@@ -16,7 +16,7 @@
 	
 	<ul>
 		<?php foreach($blocks as $slug => $block) { ?>
-		<li><a href="#TB_inline?width=400&height=180&inlineId=<?php echo $slug; ?>&modal=true"><?php echo $block->label; ?></a></li>
+		<li><a href="#TB_inline?width=400&height=180&inlineId=<?php echo $slug; ?>&modal=true" class="thickbox"><?php echo $block->label; ?></a></li>
 		<?php } ?>
 	</ul>
 	
