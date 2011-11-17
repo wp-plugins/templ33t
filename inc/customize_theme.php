@@ -16,7 +16,7 @@
 	
 	<ul>
 		<?php foreach($blocks as $slug => $block) { ?>
-		<li><a href=""><?php echo $block->label; ?></a></li>
+		<li><a href="#TB_inline?width=400&height=180&inlineId=<?php echo $slug; ?>&modal=true"><?php echo $block->label; ?></a></li>
 		<?php } ?>
 	</ul>
 	
@@ -24,18 +24,15 @@
 
 <?php } ?>
 
-<div class="">
+
 	
-	<ul>
-		<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
-		<li class="<?php echo $slug; ?>">
-			<h3><?php echo $block->label; ?></h3>
-			<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
-			<div>
-				<?php echo $block->displayPanel(); ?>
-			</div>
-		</li>
-		<?php } } ?>
-	</ul>
-		
+<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
+<div id="<?php echo $slug; ?>" style="display: none;">
+	<h3><?php echo $block->label; ?></h3>
+	<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
+	<div>
+		<?php echo $block->displayPanel(); ?>
+	</div>
 </div>
+<?php } } ?>
+
