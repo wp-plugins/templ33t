@@ -1191,13 +1191,17 @@ class Templ33t {
 
 							$this->block_objects[$slug] = $instance;
 							
+							echo '<b>CUSTOM:</b> '.$_POST['meta'][$id]['key'].' - '.$_POST['meta'][$id]['value'].'<br/>';
+							
 						} elseif(empty($data['value'])) {
 							
 							$_POST['meta'][$id]['value'] = 'templ33t_empty';
 							
+							echo '<b>EMPTY:</b> '.$_POST['meta'][$id]['key'].' - '.$_POST['meta'][$id]['value'].'<br/>';
+							
 						} else {
 							
-							echo $_POST['meta'][$id]['key'].' - '.$_POST['meta'][$id]['value'].'<br/>';
+							echo '<b>NOT EMPTY:</b> '.$_POST['meta'][$id]['key'].'<br/>';
 							
 						}
 						
