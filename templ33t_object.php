@@ -1260,7 +1260,7 @@ class Templ33t {
 		wp_enqueue_style('thickbox');
 
 		// load plugin styles and scripts for block settings
-		if ($_GET['subpage'] == 'templ33t_customize' || (array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block')) {
+		if (!empty($this->load_plugs)) {
 			wp_enqueue_style('templ33t_plug_styles', self::$assets_url . 'templ33t_styles.php?load=' . implode(',', $this->load_plugs));
 		}
 	}
@@ -1277,7 +1277,7 @@ class Templ33t {
 		wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 		// load plugin styles and scripts for block settings
-		if (array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block' && !empty($this->load_plugs)) {
+		if (!empty($this->load_plugs)) {
 
 			$enqueue = array();
 			foreach ($this->load_plugs as $plug) {
