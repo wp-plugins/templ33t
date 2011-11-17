@@ -7,7 +7,7 @@ $messages = array(
 ?>
 
 <style type="text/css">
-	label {display: inline-block; padding: 3px 6px; font-weight: bold;}
+	label {display: inline-block; padding-bottom: 6px; font-weight: bold;}
 	div.postbox div.inside {padding: 12px;}
 </style>
 
