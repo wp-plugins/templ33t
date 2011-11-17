@@ -409,7 +409,7 @@ class Templ33t {
 
 		global $wp_version;
 		
-		add_submenu_page('themes.php', 'Customize Theme', 'Customize Theme', 'edit_themes', 'templ33t_customize', array($this, 'customize'));
+		add_submenu_page('themes.php', 'Customize Theme', 'Customize Theme', 'switch_themes', 'templ33t_customize', array($this, 'customize'));
 		
 		if($wp_version < '3.1.0')
 			$this->adminMenu();
@@ -436,7 +436,7 @@ class Templ33t {
 			self::$settings_url = $this->menu_parent . '?page=templ33t_settings';
 		}
 		
-		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'switch_themes', 'templ33t_settings', array($this, 'settings'));
+		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', array($this, 'settings'));
 		
 	}
 
