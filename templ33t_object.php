@@ -1278,6 +1278,9 @@ class Templ33t {
 					}
 				}
 			}
+			
+			die(print_r($_POST));
+			
 		}
 	}
 
