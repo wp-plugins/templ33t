@@ -6,7 +6,8 @@ $messages = array(
 
 ?>
 
-<h1>Customize Theme</h1>
+<div id="icon-themes" class="icon32"><br></div>
+<h2>Customize Theme</h2>
 
 <?php if(array_key_exists('m', $_GET)) { ?>
 <p style="background: greenyellow;"><?php echo $messages[$_GET['m']]; ?></p>
