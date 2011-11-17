@@ -1186,14 +1186,10 @@ class Templ33t {
 
 							$_POST['meta'][$instance->id] = array(
 								'key' => 'templ33t_' . $instance->slug,
-								'value' => !empty($instance->value) ? $instance->value : 'templ33t_empty',
+								'value' => $instance->value,
 							);
 
 							$this->block_objects[$slug] = $instance;
-							
-						} elseif(empty($data['value'])) {
-							
-							$_POST['meta'][$id]['value'] = 'templ33t_empty';
 							
 						}
 						
