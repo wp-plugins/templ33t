@@ -372,6 +372,7 @@ class Templ33t {
 
 			add_filter('media_send_to_editor', array($this, 'interceptMedia'), 15);
 		}
+		
 	}
 	
 	function flushRewriteRules()
