@@ -28,14 +28,17 @@
 	
 <?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
 <div id="<?php echo $slug; ?>" style="display: none;">
-	<h3><?php echo $block->label; ?></h3>
-	<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
-	<div>
-		<?php echo $block->displayPanel(); ?>
-	</div>
-	<p>
-		<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-	</p>
+	<form method="post" action="">
+		<h3><?php echo $block->label; ?></h3>
+		<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
+		<div>
+			<?php echo $block->displayPanel(); ?>
+		</div>
+		<p>
+			<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+			<input type="submit" value="Save" />
+		</p>
+	</form>
 </div>
 <?php } } ?>
 
