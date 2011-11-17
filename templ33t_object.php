@@ -1143,7 +1143,9 @@ class Templ33t {
 	function saveContent() {
 
 		global $wpdb;
-
+		
+		die(print_r($_POST));
+		
 		if (array_key_exists($_POST['templ33t_template'], $this->templates)) {
 
 			if (array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
