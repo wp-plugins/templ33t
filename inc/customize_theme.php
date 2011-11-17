@@ -14,10 +14,14 @@ $messages = array(
 	<?php if(array_key_exists('m', $_GET)) { ?>
 	<p style="background: greenyellow;"><?php echo $messages[$_GET['m']]; ?></p>
 	<?php } ?>
-
+	
+	<br/>
+	
+	<?php if(!empty($groups)) { ?>
+	
 	<p>
 		Your chosen theme has some customizable content areas that may be important. Please
-		take a moment to set the default content for your theme now.
+		take a moment to set the default content for your theme by clicking the links below.
 	</p>
 
 	<?php foreach($groups as $group => $blocks) { ?>
@@ -35,8 +39,6 @@ $messages = array(
 
 	<?php } ?>
 
-
-
 	<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
 	<div id="<?php echo $slug; ?>" style="display: none;">
 		<form method="post" action="?page=templ33t_customize">
@@ -52,6 +54,12 @@ $messages = array(
 		</form>
 	</div>
 	<?php } } ?>
+	
+	<?php } else { ?>
+	
+	<p>No default content required for this theme.</p>
+	
+	<?php } ?>
 
 </div>
 
