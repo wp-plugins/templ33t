@@ -1072,7 +1072,7 @@ class Templ33t {
 
 			// add default tab
 			$tabs .= '<li id="templ33t_default" class="selected"><a href="#" rel="default">' . $main_label . '</a><div id="templ33t_main_content"></div></li>';
-			$descs .= '<div class="templ33t_description templ33t_desc_default"><p>' . $main_desc . '</p></div>';
+			$descs .= '<div class="templ33t_description templ33t_desc_default"><p>' . (!empty($main_desc) ? $main_desc : 'Please enter your content below') . '</p></div>';
 
 
 			if (!empty($this->block_objects)) {
