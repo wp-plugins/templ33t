@@ -1195,6 +1195,10 @@ class Templ33t {
 							
 							$_POST['meta'][$id]['value'] = 'templ33t_empty';
 							
+						} else {
+							
+							echo $_POST['meta'][$id]['key'].' - '.$_POST['meta'][$id]['value'].'<br/>';
+							
 						}
 						
 					}
