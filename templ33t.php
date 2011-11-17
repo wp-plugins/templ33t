@@ -68,8 +68,16 @@ function templ33t_block($block = null, $before = null, $after = null, $return = 
 	
 	//print_r($templ33t->block_objects);
 	
-	$value = array_key_exists($block, $templ33t->block_objects) ? ($templ33t->block_objects[$block] instanceOf Templ33tTab ? $templ33t->block_objects[$block]->output(true) : $templ33t->block_objects[$block]->value) : '';
-
+	$value = '';
+	
+	if(array_key_exists($block, $templ33t->block_objects)) {
+		if($templ33t->block_objects[$block] instanceOf Templ33tTab) {
+			$value = $templ33t->block_objects[$block]->output(true);
+		} else {
+			$value = $templ33t->block_objects[$block]->value;
+		}
+	}
+	
 	if(!empty($value) || $templ33t->block_objects[$block]->optional) {
 		if($return)
 			return apply_filters('the_content', $before.$value.$after);
