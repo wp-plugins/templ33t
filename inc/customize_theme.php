@@ -15,8 +15,8 @@
 <div class="">
 	
 	<ul>
-		<?php foreach($blocks as $slug => $config) { ?>
-		<li><a href=""><?php echo $config['label']; ?></a></li>
+		<?php foreach($blocks as $slug => $block) { ?>
+		<li><a href=""><?php echo $block->label; ?></a></li>
 		<?php } ?>
 	</ul>
 	

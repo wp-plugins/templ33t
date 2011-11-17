@@ -2039,7 +2039,10 @@ class Templ33t {
 							$groups[$config['customize_page_group']] = array();
 						}
 						
-						$groups[$config['customize_page_group']][$slug] = $config;
+						//$groups[$config['customize_page_group']][$slug] = $config;
+						$groups[$config['customize_page_group']][$slug] = Templ33tPluginHandler::instantiate($config['type'], $config);
+						
+						$groups[$config['customize_page_group']][$slug]->init();
 						
 					}
 					
