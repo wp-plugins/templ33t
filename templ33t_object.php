@@ -735,6 +735,11 @@ class Templ33t {
 						$this->meta[$slug] = array_merge($this->meta[$slug], $block);
 					}
 					
+					// remove empty placeholder
+					if(is_string($block['value']) && $block['value'] == 'templ33t_empty') {
+						$block['value'] = '';
+					}
+					
 					// set default values
 					if(array_key_exists($theme, $this->user_defaults) && array_key_exists($slug, $this->user_defaults[$theme])) {
 						$block['default'] = $this->user_defaults[$theme][$slug];
@@ -1144,8 +1149,6 @@ class Templ33t {
 
 		global $wpdb;
 		
-		die(print_r($_POST));
-		
 		if (array_key_exists($_POST['templ33t_template'], $this->templates)) {
 
 			if (array_key_exists('meta', $_POST) && !empty($_POST['meta'])) {
@@ -1183,11 +1186,17 @@ class Templ33t {
 
 							$_POST['meta'][$instance->id] = array(
 								'key' => 'templ33t_' . $instance->slug,
-								'value' => $instance->value,
+								'value' => !empty($instance->value) ? $instance->value : 'templ33t_empty',
 							);
 
 							$this->block_objects[$slug] = $instance;
+							
+						} elseif(empty($block['value'])) {
+							
+							$_POST['meta'][$block['id']]['value'] = 'templ33t_empty';
+							
 						}
+						
 					}
 
 					// handle options
