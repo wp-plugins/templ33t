@@ -2093,6 +2093,10 @@ class Templ33t {
 		
 		$defaults = get_option('templ33t_defaults');
 		
+		if(!is_array($defaults)) {
+			$defaults = array();
+		}
+		
 		$groups = array();
 		
 		if(array_key_exists($theme, $this->map)) {
