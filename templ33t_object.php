@@ -25,6 +25,9 @@ class Templ33t {
 		'type' => 'editor',
 		'description' => '',
 		'global' => false,
+		'customize_page' => false,
+		'customize_page_group' => null,
+		'customize_page_description' => null,
 		'config' => '',
 		'group' => null,
 		'optional' => false,
@@ -2020,16 +2023,20 @@ class Templ33t {
 
 	function customize() {
 		
-		//$themes = get_themes();
-		$templates = get_page_templates();
-		
 		$theme = get_stylesheet();
 		
-		if(array_key_exists($theme, $this->map)) {
-			echo '<pre>'.print_r($this->map[$theme], true).'</pre>';
-		}
+		$blocks = array();
 		
-		echo '<pre>'.print_r($templates, true).'</pre>';
+		if(array_key_exists($theme, $this->map)) {
+			
+			foreach($this->map[$theme] as $template) {
+				
+				print_r($template);
+				
+				
+			}
+			
+		}
 		
 	}
 

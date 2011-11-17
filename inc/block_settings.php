@@ -52,12 +52,29 @@ $obj->init();
 				<td valign="top"><label for="description">Description:</label>&nbsp;</td>
 				<td valign="top"><textarea id="description" name="templ33t_block_config[description]"><?php echo $block['description']; ?></textarea></td>
 			</tr>
+			<!--
 			<tr>
 				<td valign="top"><label for="global">Global:</label>&nbsp;</td>
 				<td valign="top">
 					<input type="hidden" name="templ33t_block_config[global]" value="0" />
 					<input type="checkbox" id="global" name="templ33t_block_config[global]" value="1"<?php echo $block['global'] ? ' checked="checked"' : ''; ?> />
 				</td>
+			</tr>
+			-->
+			<tr>
+				<td valign="top"><label for="customize_page">On Customize Page:</label>&nbsp;</td>
+				<td valign="top">
+					<input type="hidden" name="templ33t_block_config[customize_page]" value="0" />
+					<input type="checkbox" id="customize_page" name="templ33t_block_config[customize_page]" value="1"<?php echo $block['customize_page'] ? ' checked="checked"' : ''; ?> />
+				</td>
+			</tr>
+			<tr>
+				<td valign="top"><label for="customize_page_group">Customize Page Group:</label>&nbsp;</td>
+				<td valign="top"><input type="text" id="weight" name="templ33t_block_config[customize_page_group]" value="<?php echo $block['customize_page_group']; ?>" /></td>
+			</tr>
+			<tr>
+				<td valign="top"><label for="customize_page_description">Customize Page Description:</label>&nbsp;</td>
+				<td valign="top"><input type="text" id="weight" name="templ33t_block_config[customize_page_description]" value="<?php echo $block['customize_page_description']; ?>" /></td>
 			</tr>
 			<tr>
 				<td valign="top"><label for="weight">Sort order:</label>&nbsp;</td>
