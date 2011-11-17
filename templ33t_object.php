@@ -1085,7 +1085,7 @@ class Templ33t {
 					$cname = Templ33tPluginHandler::load($block->type);
 
 					$tabs .= '<li><a href="#" rel="' . $block->id . '">' . $block->label . '</a></li>';
-					$descs .= '<div class="templ33t_description templ33t_desc_' . $block->id . ' templ33t_hidden"><p>' . $block->description . (!empty($block['default']) ? ' (Leave empty for default value)' : '') . '</p></div>';
+					$descs .= '<div class="templ33t_description templ33t_desc_' . $block->id . ' templ33t_hidden"><p>' . $block->description . (!empty($block->default) ? ' (Leave empty for default value)' : '') . '</p></div>';
 
 					if ($cname::$custom_panel) {
 						$editors .= '<div id="templ33t_editor_' . $block->id . '" class="templ33t_editor" style="display: none;">';
