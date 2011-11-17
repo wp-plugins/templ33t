@@ -237,7 +237,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	function output($ret = false) {
 		
-		$value = !empty($this->parseValue()) ? $this->value : $this->parseValue($this->default);
+		$value = $this->parseValue() ? $this->value : $this->parseValue($this->default);
 
 		$str = '';
 		
