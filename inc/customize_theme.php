@@ -47,7 +47,7 @@ $messages = array(
 	<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
 	<div id="<?php echo $slug; ?>" style="display: none;">
 		<form method="post" action="?page=templ33t_customize">
-			<h3><?php echo $block->label; ?></h3>
+			<h2><?php echo $block->label; ?></h2>
 			<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
 			<div>
 				<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', str_replace('templ33t_', '', $block->displayPanel()))); ?>
