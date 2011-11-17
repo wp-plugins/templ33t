@@ -1158,7 +1158,7 @@ class Templ33t {
 					$slug = str_replace('templ33t_', '', str_replace('templ33t_option_', '', $data['key']));
 
 					// handle blocks
-					if (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks']) || array_key_exists($slug, $this->templates['ALL']['blocks'])) {
+					if (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks']) || (array_key_exists('ALL', $this->templates) && array_key_exists($slug, $this->templates['ALL']['blocks']))) {
 						
 						// create post meta if new
 						if (!is_numeric($id)) {
@@ -1200,7 +1200,7 @@ class Templ33t {
 					}
 
 					// handle options
-					elseif (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options'])) {
+					elseif (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options']) || (array_key_exists('ALL', $this->templates) && array_key_exists($slug, $this->templates['ALL']['options']))) {
 
 						// create post meta if new
 						if (!is_numeric($id)) {
@@ -1213,7 +1213,7 @@ class Templ33t {
 							}
 						}
 
-						$option = $this->templates[$_POST['templ33t_template']]['options'][$slug];
+						$option = array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options']) ? $this->templates[$_POST['templ33t_template']]['options'][$slug] : $this->templates['ALL']['options'][$slug];
 						$option['slug'] = $slug;
 						$option['id'] = $id;
 						$option['value'] = $data['value'];
@@ -1280,8 +1280,6 @@ class Templ33t {
 					}
 				}
 			}
-			
-			die(print_r($_POST));
 			
 		}
 	}
