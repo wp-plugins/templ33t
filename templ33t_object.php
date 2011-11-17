@@ -1158,8 +1158,8 @@ class Templ33t {
 					$slug = str_replace('templ33t_', '', str_replace('templ33t_option_', '', $data['key']));
 
 					// handle blocks
-					if (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks'])) {
-
+					if (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks']) || array_key_exists($slug, $this->templates['ALL']['blocks'])) {
+						
 						// create post meta if new
 						if (!is_numeric($id)) {
 							$split = explode('-', $id);
@@ -1170,8 +1170,8 @@ class Templ33t {
 								}
 							}
 						}
-
-						$block = $this->templates[$_POST['templ33t_template']]['blocks'][$slug];
+						
+						$block = array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['blocks']) ? $this->templates[$_POST['templ33t_template']]['blocks'][$slug] : $this->templates['ALL']['blocks'][$slug];
 						$block['slug'] = $slug;
 						$block['id'] = $id;
 						$block['value'] = $data['value'];
@@ -1191,17 +1191,9 @@ class Templ33t {
 
 							$this->block_objects[$slug] = $instance;
 							
-							echo '<b>CUSTOM:</b> '.$_POST['meta'][$id]['key'].' - '.$_POST['meta'][$id]['value'].'<br/>';
-							
 						} elseif(empty($data['value'])) {
 							
 							$_POST['meta'][$id]['value'] = 'templ33t_empty';
-							
-							echo '<b>EMPTY:</b> '.$_POST['meta'][$id]['key'].' - '.$_POST['meta'][$id]['value'].'<br/>';
-							
-						} else {
-							
-							echo '<b>NOT EMPTY:</b> '.$_POST['meta'][$id]['key'].'<br/>';
 							
 						}
 						
@@ -1242,15 +1234,10 @@ class Templ33t {
 							$this->option_objects[$slug] = $instance;
 						}
 						
-					} else {
-						
-						echo '<b>NOT FOUND:</b> '.$_POST['meta'][$id]['key'].' - '.$slug.'<br/>';
-						
 					}
+					
 				}
 			}
-			
-			print_r($this->templates);
 
 			if (array_key_exists('templ33t_meta', $_POST)) {
 
