@@ -33,6 +33,9 @@
 	<div>
 		<?php echo $block->displayPanel(); ?>
 	</div>
+	<p>
+		<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+	</p>
 </div>
 <?php } } ?>
 
