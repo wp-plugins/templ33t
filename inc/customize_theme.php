@@ -39,7 +39,7 @@ $messages = array(
 
 	<?php } ?>
 	
-	<ul>
+	<ul style="margin-left: 18px;">
 		<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
 		<li id="<?php echo $slug; ?>" style="display: none;">
 			<form method="post" action="?page=templ33t_customize">
