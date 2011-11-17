@@ -341,6 +341,7 @@ class Templ33t {
 			wp_enqueue_script('post');
 			wp_enqueue_script('editor');
 			wp_enqueue_script('media-upload');
+			wp_enqueue_script('thickbox');
 			
 			$theme = get_stylesheet();
 
