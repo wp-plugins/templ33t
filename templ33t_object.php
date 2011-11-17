@@ -351,8 +351,9 @@ class Templ33t {
 					foreach($template['blocks'] as $slug => $config) {
 
 						if($config['customize_page']) {
-
-							$this->load_plugs[] = Templ33tPluginHandler::load($config['type'], $config);
+							
+							Templ33tPluginHandler::load($config['type'], $config);
+							$this->load_plugs[] = $config['type'];
 
 						}
 
