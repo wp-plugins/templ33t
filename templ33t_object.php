@@ -2035,7 +2035,7 @@ class Templ33t {
 					
 					if($config['customize_page']) {
 						
-						if(!array_key_exists($config['customize_page_group'], $group)) {
+						if(!array_key_exists($config['customize_page_group'], $groups)) {
 							$groups[$config['customize_page_group']] = array();
 						}
 						
