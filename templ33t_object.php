@@ -1915,10 +1915,16 @@ class Templ33t {
 		
 		if(!empty($_POST) && array_key_exists('block', $_POST)) {
 			
+			$theme = get_stylesheet();
+			
 			$defaults = get_option('templ33t_defaults');
 			
 			if(!is_array($defaults)) {
 				$defaults = array();
+			}
+			
+			if(!array_key_exists($theme, $defaults)) {
+				$defaults[$theme] = array();
 			}
 			
 			$defaults[$_POST['block']['slug']] = $_POST['block']['value'];
@@ -2085,6 +2091,8 @@ class Templ33t {
 		
 		$theme = get_stylesheet();
 		
+		$defaults = get_option('templ33t_defaults');
+		
 		$groups = array();
 		
 		if(array_key_exists($theme, $this->map)) {
@@ -2099,7 +2107,7 @@ class Templ33t {
 							$groups[$config['customize_page_group']] = array();
 						}
 						
-						//$groups[$config['customize_page_group']][$slug] = $config;
+						$config['value'] = array_key_exists($theme, $defaults) && array_key_exists($slug, $defaults[$theme]) ? $defaults[$theme][$slug] : '';
 						$groups[$config['customize_page_group']][$slug] = Templ33tPluginHandler::instantiate($config['type'], $config);
 						
 						$groups[$config['customize_page_group']][$slug]->init();
