@@ -2049,7 +2049,9 @@ class Templ33t {
 			
 		}
 		
-		print_r($groups);
+		//print_r($groups);
+		
+		include(dirname(__FILE__).'/inc/customize_theme.php');
 		
 	}
 
