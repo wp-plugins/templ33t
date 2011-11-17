@@ -436,7 +436,7 @@ class Templ33t {
 			self::$settings_url = $this->menu_parent . '?page=templ33t_settings';
 		}
 		
-		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'edit_themes', 'templ33t_settings', array($this, 'settings'));
+		add_submenu_page($this->menu_parent, 'Templ33t Settings', 'Templ33t', 'switch_themes', 'templ33t_settings', array($this, 'settings'));
 		
 	}
 
