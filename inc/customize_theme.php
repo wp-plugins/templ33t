@@ -6,6 +6,11 @@ $messages = array(
 
 ?>
 
+<style type="text/css">
+	label {display: inline-block; padding: 3px 6px; font-weight: bold;}
+	div.postbox div.inside {padding: 12px;}
+</style>
+
 <div class="wrap">
 	
 	<div id="icon-themes" class="icon32"><br></div>
