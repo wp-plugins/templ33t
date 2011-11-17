@@ -32,7 +32,7 @@
 		<h3><?php echo $block->label; ?></h3>
 		<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
 		<div>
-			<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', $block->displayPanel())); ?>
+			<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', str_replace('templ33t_', '', $block->displayPanel()))); ?>
 		</div>
 		<p>
 			<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
