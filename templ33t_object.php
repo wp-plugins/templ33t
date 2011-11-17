@@ -1191,9 +1191,9 @@ class Templ33t {
 
 							$this->block_objects[$slug] = $instance;
 							
-						} elseif(empty($block['value'])) {
+						} elseif(empty($data['value'])) {
 							
-							$_POST['meta'][$block['id']]['value'] = 'templ33t_empty';
+							$_POST['meta'][$id]['value'] = 'templ33t_empty';
 							
 						}
 						
