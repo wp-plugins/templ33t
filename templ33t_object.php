@@ -1260,8 +1260,7 @@ class Templ33t {
 		wp_enqueue_style('thickbox');
 
 		// load plugin styles and scripts for block settings
-		if (array_key_exists('subpage', $_GET) && ($_GET['subpage'] == 'block' || $_GET['subpage'] == 'templ33t_customize')) {
-
+		if ($_GET['subpage'] == 'templ33t_customize' || (array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block')) {
 			wp_enqueue_style('templ33t_plug_styles', self::$assets_url . 'templ33t_styles.php?load=' . implode(',', $this->load_plugs));
 		}
 	}
