@@ -335,6 +335,37 @@ class Templ33t {
 
 				$this->load_plugs = $plugs;
 			}
+		} elseif (basename($_SERVER['PHP_SELF']) == 'themes.php' && $_GET['page'] == 'templ33t_customize') {
+			
+			wp_enqueue_script('word-count');
+			wp_enqueue_script('post');
+			wp_enqueue_script('editor');
+			wp_enqueue_script('media-upload');
+			
+			$theme = get_stylesheet();
+
+			if(array_key_exists($theme, $this->map)) {
+
+				foreach($this->map[$theme] as $template) {
+
+					foreach($template['blocks'] as $slug => $config) {
+
+						if($config['customize_page']) {
+
+							$this->load_plugs[] = Templ33tPluginHandler::instantiate($config['type'], $config);
+
+						}
+
+					}
+
+				}
+
+			}
+			
+			// add styles & scripts
+			add_action('admin_print_styles', array($this, 'settingsStyles'), 1);
+			add_action('admin_print_scripts', array($this, 'settingsScripts'), 1);
+			
 		} elseif (basename($_SERVER['PHP_SELF']) == 'media-upload.php') {
 
 			add_filter('media_send_to_editor', array($this, 'interceptMedia'), 15);
@@ -1229,7 +1260,7 @@ class Templ33t {
 		wp_enqueue_style('thickbox');
 
 		// load plugin styles and scripts for block settings
-		if (array_key_exists('subpage', $_GET) && $_GET['subpage'] == 'block') {
+		if (array_key_exists('subpage', $_GET) && ($_GET['subpage'] == 'block' || $_GET['subpage'] == 'templ33t_customize')) {
 
 			wp_enqueue_style('templ33t_plug_styles', self::$assets_url . 'templ33t_styles.php?load=' . implode(',', $this->load_plugs));
 		}

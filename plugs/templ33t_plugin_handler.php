@@ -12,7 +12,7 @@ class Templ33tPluginHandler {
 
 	static function classify($pname = null) {
 
-		return !empty($pname) ? 'Templ33t'.ucwords($pname) : false;
+		return !empty($pname) ? (strpos($pname, 'Templ33t') !== 0 ? 'Templ33t'.ucwords($pname) : $pname) : false;
 
 	}
 
