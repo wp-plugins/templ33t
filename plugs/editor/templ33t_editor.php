@@ -29,10 +29,12 @@ class Templ33tEditor extends Templ33tPlugin implements Templ33tTab {
 	
 	function output($ret = false) {
 		
+		$val = empty($this->value) ? $this->default : $this->value;
+		
 		if(!$ret) {
-			echo $this->value;
+			echo $val;
 		} else {
-			return $this->value;
+			return $val;
 		}
 		
 	}

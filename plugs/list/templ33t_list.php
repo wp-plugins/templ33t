@@ -49,12 +49,26 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	}
 
 	function parseValue($value = null) {
-
-		if(!empty($value)) $this->value = $value;
-
-		if(!empty($this->value) && !is_array($this->value)) {
-			$this->value = unserialize($this->value);
+		
+		if(!empty($value)) {
+			
+			if(!empty($value) && !is_array($value)) {
+				$value = unserialize($value);
+			}
+			
+			return $value;
+			
+		} else {
+			
+			if(!empty($this->value) && !is_array($this->value)) {
+				$this->value = unserialize($this->value);
+			}
+			
+			return $this->value;
+			
 		}
+
+		
 
 	}
 	
@@ -223,9 +237,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 	function output($ret = false) {
 		
-		$value = !empty($this->value) ? $this->value : $this->default;
-		
-		$this->parseValue($value);
+		$value = !empty($this->parseValue()) ? $this->value : $this->parseValue($this->default);
 
 		$str = '';
 		
