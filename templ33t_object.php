@@ -352,7 +352,7 @@ class Templ33t {
 
 						if($config['customize_page']) {
 
-							$this->load_plugs[] = Templ33tPluginHandler::instantiate($config['type'], $config);
+							$this->load_plugs[] = Templ33tPluginHandler::load($config['type'], $config);
 
 						}
 
