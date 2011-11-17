@@ -222,15 +222,17 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 	}
 
 	function output($ret = false) {
-
-		$this->parseValue();
+		
+		$value = !empty($this->value) ? $this->value : $this->default;
+		
+		$this->parseValue($value);
 
 		$str = '';
 		
-		if(!empty($this->value)) {
+		if(!empty($value)) {
 
 			$str .= '<'.$this->element.' class="'.$this->class.'">';
-			foreach($this->value as $val) {
+			foreach($value as $val) {
 				$str .= '<li>'.$val.'</li>';
 			}
 			$str .= '</'.$this->element.'>';
@@ -240,7 +242,7 @@ class Templ33tList extends Templ33tPlugin implements Templ33tTab {
 
 		} else {
 
-			return $this->value;
+			return $value;
 
 		}
 

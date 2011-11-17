@@ -49,6 +49,7 @@ class Templ33t {
 	var $templates = array();
 	var $default_template = 'page.php';
 	var $meta = array();
+	var $user_defaults = array();
 	var $load_plugs = array();
 	var $block_objects = array();
 	var $option_objects = array();
@@ -642,12 +643,20 @@ class Templ33t {
 		}
 
 		if (array_key_exists($post->page_template, $this->templates)) {
-
+			
+			$theme = get_stylesheet();
+			
 			// grab meta
 			$all_meta = $wpdb->get_results(
 					$wpdb->prepare('SELECT meta_key, meta_value, meta_id, post_id FROM ' . $wpdb->postmeta . ' WHERE post_id = %d', $post->ID), ARRAY_A
 			);
-
+			
+			// grab default values
+			$this->user_defaults = get_option('templ33t_defaults');
+			if(!is_array($this->user_defaults)) {
+				$this->user_defaults = array();
+			}
+			
 			// filter out unrelated
 			foreach ($all_meta as $key => $val) {
 				if (strpos($val['meta_key'], 'templ33t_option_') !== false) {
@@ -725,7 +734,12 @@ class Templ33t {
 
 						$this->meta[$slug] = array_merge($this->meta[$slug], $block);
 					}
-
+					
+					// set default values
+					if(array_key_exists($theme, $this->user_defaults) && array_key_exists($slug, $this->user_defaults[$theme])) {
+						$block['default'] = $this->user_defaults[$theme][$slug];
+					}
+					
 					// instantiate plugin
 					$block_handler = Templ33tPluginHandler::instantiate($block['type'], $this->meta[$slug]);
 

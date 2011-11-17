@@ -118,7 +118,9 @@ class Templ33tImage extends Templ33tPlugin implements Templ33tTab {
 	
 	function output($ret = false) {
 		
-		$str = '<img id="'.$this->outputID.'" class="'.$this->outputClass.'" src="'.$this->value.'" />';
+		$val = !empty($this->value) ? $this->value : $this->default;
+		
+		$str = !empty($val) ? '<img id="'.$this->outputID.'" class="'.$this->outputClass.'" src="'.$val.'" />' : '';
 		
 		if(!$ret) {
 			echo $str;

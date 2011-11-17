@@ -27,7 +27,7 @@ class Templ33tCheckbox extends Templ33tPlugin implements Templ33tTab, Templ33tOp
 	}
 
 	function output($ret = false) {
-
+		
 		if(!$ret) {
 			echo $this->value ? $this->positive_output : $this->negative_output;
 		} else {
