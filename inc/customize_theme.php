@@ -38,22 +38,24 @@ $messages = array(
 	</div>
 
 	<?php } ?>
-
-	<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
-	<div id="<?php echo $slug; ?>" style="display: none;">
-		<form method="post" action="?page=templ33t_customize">
-			<h3><?php echo $block->label; ?></h3>
-			<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
-			<div>
-				<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', str_replace('templ33t_', '', $block->displayPanel()))); ?>
-			</div>
-			<p>
-				<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-				<input type="submit" value="Save" />
-			</p>
-		</form>
-	</div>
-	<?php } } ?>
+	
+	<ul>
+		<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
+		<li id="<?php echo $slug; ?>" style="display: none;">
+			<form method="post" action="?page=templ33t_customize">
+				<h3><?php echo $block->label; ?></h3>
+				<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
+				<div>
+					<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', str_replace('templ33t_', '', $block->displayPanel()))); ?>
+				</div>
+				<p>
+					<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
+					<input type="submit" value="Save" />
+				</p>
+			</form>
+		</li>
+		<?php } } ?>
+	</ul>
 	
 	<?php } else { ?>
 	
