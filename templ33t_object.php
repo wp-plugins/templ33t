@@ -337,6 +337,8 @@ class Templ33t {
 			}
 		} elseif (basename($_SERVER['PHP_SELF']) == 'themes.php' && $_GET['page'] == 'templ33t_customize') {
 			
+			$this->saveDefaults();
+			
 			wp_enqueue_script('word-count');
 			wp_enqueue_script('post');
 			wp_enqueue_script('editor');
@@ -1905,7 +1907,32 @@ class Templ33t {
 			}
 		}
 	}
-
+	
+	/**
+	 * 
+	 */
+	function saveDefaults() {
+		
+		if(!empty($_POST) && array_key_exists('block', $_POST)) {
+			
+			$defaults = get_option('templ33t_defaults');
+			
+			if(!is_array($defaults)) {
+				$defaults = array();
+			}
+			
+			$defaults[$_POST['block']['slug']] = $_POST['block']['value'];
+			
+			update_option('templ33t_defaults', $defaults);
+			
+			wp_redirect('themes.php?page=templ33t_customize&m=saved');
+			
+			die();
+			
+		}
+		
+	}
+	
 	/**
 	 * Transform templ33t fields comment into appended text for search results
 	 * @param string $content

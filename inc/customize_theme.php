@@ -1,8 +1,16 @@
 <?php
 
+$messages = array(
+	'saved' => 'Changes saved.',
+);
+
 ?>
 
 <h1>Customize Theme</h1>
+
+<?php if(array_key_exists('m', $_GET)) { ?>
+<p style="background: greenyellow;"><?php echo $_GET['m']; ?></p>
+<?php } ?>
 
 <p>
 	Your chosen theme has some customizable content areas that may be important. Please
@@ -28,7 +36,7 @@
 	
 <?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
 <div id="<?php echo $slug; ?>" style="display: none;">
-	<form method="post" action="">
+	<form method="post" action="?page=templ33t_customize">
 		<h3><?php echo $block->label; ?></h3>
 		<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
 		<div>
