@@ -1241,13 +1241,16 @@ class Templ33t {
 
 							$this->option_objects[$slug] = $instance;
 						}
+						
 					} else {
 						
-						echo '<b>NOT FOUND:</b> '.$_POST['meta'][$id]['key'];
+						echo '<b>NOT FOUND:</b> '.$_POST['meta'][$id]['key'].' - '.$slug.'<br/>';
 						
 					}
 				}
 			}
+			
+			print_r($this->templates);
 
 			if (array_key_exists('templ33t_meta', $_POST)) {
 
