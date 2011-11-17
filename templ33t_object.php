@@ -2093,6 +2093,8 @@ class Templ33t {
 		
 		$defaults = get_option('templ33t_defaults');
 		
+		print_r($defaults);
+		
 		if(!is_array($defaults)) {
 			$defaults = array();
 		}
