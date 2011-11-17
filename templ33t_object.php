@@ -2111,7 +2111,7 @@ class Templ33t {
 							$groups[$config['customize_page_group']] = array();
 						}
 						
-						$config['value'] = array_key_exists($theme, $defaults) && array_key_exists($slug, $defaults[$theme]) ? $defaults[$theme][$slug] : '';
+						$config['value'] = array_key_exists($theme, $defaults) && array_key_exists($slug, $defaults[$theme]) ? $defaults[$theme][$slug] : $config['default'];
 						$groups[$config['customize_page_group']][$slug] = Templ33tPluginHandler::instantiate($config['type'], $config);
 						
 						$groups[$config['customize_page_group']][$slug]->init();
