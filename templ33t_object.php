@@ -1927,7 +1927,7 @@ class Templ33t {
 				$defaults[$theme] = array();
 			}
 			
-			$defaults[$_POST['block']['slug']] = $_POST['block']['value'];
+			$defaults[$theme][$_POST['block']['slug']] = $_POST['block']['value'];
 			
 			update_option('templ33t_defaults', $defaults);
 			
@@ -2092,8 +2092,6 @@ class Templ33t {
 		$theme = get_stylesheet();
 		
 		$defaults = get_option('templ33t_defaults');
-		
-		print_r($defaults);
 		
 		if(!is_array($defaults)) {
 			$defaults = array();
