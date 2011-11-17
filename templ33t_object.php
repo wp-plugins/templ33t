@@ -2025,18 +2025,31 @@ class Templ33t {
 		
 		$theme = get_stylesheet();
 		
-		$blocks = array();
+		$groups = array();
 		
 		if(array_key_exists($theme, $this->map)) {
 			
 			foreach($this->map[$theme] as $template) {
 				
-				print_r($template);
-				
+				foreach($template['blocks'] as $slug => $config) {
+					
+					if($config['customize_page']) {
+						
+						if(!array_key_exists($config['customize_page_group'], $group)) {
+							$groups[$config['customize_page_group']] = array();
+						}
+						
+						$groups[$config['customize_page_group']][$slug] = $config;
+						
+					}
+					
+				}
 				
 			}
 			
 		}
+		
+		print_r($groups);
 		
 	}
 
