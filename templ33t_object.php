@@ -736,13 +736,13 @@ class Templ33t {
 					}
 					
 					// remove empty placeholder
-					if(is_string($block['value']) && $block['value'] == 'templ33t_empty') {
-						$block['value'] = '';
+					if(is_string($this->meta[$slug]['value']) && $this->meta[$slug]['value'] == 'templ33t_empty') {
+						$this->meta[$slug]['value'] = '';
 					}
 					
 					// set default values
 					if(array_key_exists($theme, $this->user_defaults) && array_key_exists($slug, $this->user_defaults[$theme])) {
-						$block['default'] = $this->user_defaults[$theme][$slug];
+						$this->meta[$slug]['default'] = $this->user_defaults[$theme][$slug];
 					}
 					
 					// instantiate plugin
@@ -1186,10 +1186,14 @@ class Templ33t {
 
 							$_POST['meta'][$instance->id] = array(
 								'key' => 'templ33t_' . $instance->slug,
-								'value' => $instance->value,
+								'value' => !empty($instance->value) ? $instance->value : 'templ33t_empty',
 							);
 
 							$this->block_objects[$slug] = $instance;
+							
+						} elseif(empty($data['value'])) {
+							
+							$_POST['meta'][$id]['value'] = 'templ33t_empty';
 							
 						}
 						
