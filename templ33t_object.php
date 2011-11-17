@@ -1208,7 +1208,7 @@ class Templ33t {
 					}
 
 					// handle options
-					if (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options'])) {
+					elseif (array_key_exists($slug, $this->templates[$_POST['templ33t_template']]['options'])) {
 
 						// create post meta if new
 						if (!is_numeric($id)) {
@@ -1241,6 +1241,10 @@ class Templ33t {
 
 							$this->option_objects[$slug] = $instance;
 						}
+					} else {
+						
+						echo '<b>NOT FOUND:</b> '.$_POST['meta'][$id]['key'];
+						
 					}
 				}
 			}
