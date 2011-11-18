@@ -1959,9 +1959,11 @@ class Templ33t {
 			
 			update_option('templ33t_defaults', $defaults);
 			
-			wp_redirect('themes.php?page=templ33t_customize&m=saved');
+			//wp_redirect('themes.php?page=templ33t_customize&m=saved');
 			
-			die();
+			//die();
+			
+			$_GET['m'] = 'success';
 			
 		}
 		
