@@ -37,7 +37,7 @@ jQuery(document).ready(
 		//alert(TL33T_def.toString());
 
 		// save current template index
-		ctemp = jQuery('select#page_template').attr('selectedIndex');
+		ctemp = jQuery('select#page_template').prop('selectedIndex');
 		
 		//alert(getUserSetting('editor')+' = '+(!getUserSetting('editor')));
 		
@@ -59,7 +59,7 @@ jQuery(document).ready(
 			// add rel to editor
 			jQuery('#postdivrich').each(
 				function() {
-					jQuery(this).attr('rel', 'default');
+					jQuery(this).prop('rel', 'default');
 				}
 			);
 
@@ -80,7 +80,7 @@ function templ33t_switchTemplate() {
 	
 	var newtemp = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
 
-	var oldtemp = jQuery('select#page_template option:eq('+ctemp+')').attr('value');
+	var oldtemp = jQuery('select#page_template option:eq('+ctemp+')').prop('value');
 
 	if(!oldtemp || oldtemp == 'default') oldtemp = 'page.php';
 
@@ -90,11 +90,11 @@ function templ33t_switchTemplate() {
 		
 		if(r) {
 			
-			ctemp = jQuery('select#page_template').attr('selectedIndex');
+			ctemp = jQuery('select#page_template').prop('selectedIndex');
 
 			templ33t_cleanup();
 
-			if(jQuery('input#publish').attr('disabled')) {
+			if(jQuery('input#publish').prop('disabled')) {
 				jQuery('form#post').submit();
 			} else {
 				jQuery('input#publish').click();
@@ -104,7 +104,7 @@ function templ33t_switchTemplate() {
 			
 		} else {
 
-			jQuery('select#page_template').attr('selectedIndex', ctemp);
+			jQuery('select#page_template').prop('selectedIndex', ctemp);
 
 		}
 
@@ -294,10 +294,10 @@ function templ33t_append(scode) {
 	if(!ctmode) {
 		jQuery('textarea#content').val(jQuery('textarea#content').val()+"<p>"+scode+"</p>");
 		jQuery('#content_ifr').contents().find('body').append("<p>"+scode+"</p>");
-		jQuery('#content_ifr').attr('scrollTop', jQuery('#content_ifr').attr('scrollHeight'));
+		jQuery('#content_ifr').prop('scrollTop', jQuery('#content_ifr').prop('scrollHeight'));
 	} else {
 		jQuery('textarea#content').val(jQuery('textarea#content').val()+"\n\n"+switchEditors._wp_Nop("<p>"+scode+"</p>"));
-		jQuery('textarea#content').attr('scrollTop', jQuery('textarea#content').attr('scrollHeight'));
+		jQuery('textarea#content').prop('scrollTop', jQuery('textarea#content').prop('scrollHeight'));
 	}
 
 }

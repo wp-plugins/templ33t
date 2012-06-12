@@ -9,7 +9,7 @@ jQuery(document).ready(
 				function() {
 					jQuery(this).addClass('mceEditor');
 					if ( typeof( tinyMCE ) == "object" && typeof( tinyMCE.execCommand ) == "function" ) {
-						tinyMCE.execCommand("mceAddControl", false, jQuery(this).attr('id'));
+						tinyMCE.execCommand("mceAddControl", false, jQuery(this).prop('id'));
 					}
 				}
 			);
@@ -18,7 +18,7 @@ jQuery(document).ready(
 			jQuery('div.templ33t_editor #media-buttons a').click(
 				function(){
 
-					templ33t_editor_focus = tinyMCE.get(jQuery(this).parent().parent().parent().find('textarea').attr('id'));
+					templ33t_editor_focus = tinyMCE.get(jQuery(this).parent().parent().parent().find('textarea').prop('id'));
 
 				}
 			);
