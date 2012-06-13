@@ -1307,6 +1307,7 @@ class Templ33t {
 		//wp_register_script('jquery', (is_ssl() ? 'https://' : 'http://') . 'code.jquery.com/jquery-1.4.2.min.js');
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('thickbox');
+		wp_enqueue_script('media-upload');
 		wp_enqueue_script('templ33t_settings_scripts', null, array('jquery'));
 
 		// load plugin styles and scripts for block settings
@@ -1325,7 +1326,7 @@ class Templ33t {
 			wp_enqueue_script('templ33t_plug_scripts', self::$assets_url . 'templ33t_scripts.php?load=' . implode(',', $this->load_plugs));
 		}
 
-		echo '<script type="text/javascript">var TL33T_current = {assets: \'' . self::$assets_url . '\'};</script>';
+		echo '<script type="text/javascript">var TL33T_current = {assets: \'' . self::$assets_url . '\', media_target: false, media_hook: false};</script>';
 	}
 
 	/**

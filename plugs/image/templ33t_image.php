@@ -72,27 +72,29 @@ class Templ33tImage extends Templ33tPlugin implements Templ33tTab {
 		';
 		
 		$str .= '<tr><td valign="top"><label for="default">Default Value:</label>&nbsp;</td><td valign="top">';
-		$str .= '<input type="hidden" name="templ33t_block_config[default]" value="'.$this->default.'" />';
-		$str .= '<div class="image-default">'.stripslashes($this->default).'</div>';
+		$str .= '<input type="hidden" name="templ33t_block_config[default]" id="templ33t_image_value_0" value="'.$this->default.'" />';
+		$str .= '<div class="image-default" id="templ33t_image_preview_0">'.(!empty($this->default) ? '<img src="'.stripslashes($this->default).'" />' : 'no image').'</div>';
 		
 		$str .= '<script type="text/javascript">';
-		$str .= 'function send_to_editor(h) {
+		$str .= 'function send_to_editor(i, h) {
+			alert(i+' - '+h)
+			if(h != \'\') {
+				var c = jQuery(h);
 			
-			var c = jQuery(h);
+				if(c.is(\'a\')) {
+					c = c.find(\'img\');
+				}
 			
-			if(c.is(\'a\')) {
-				c = c.find(\'img\');
+				jQuery(\'div.image-default\').empty()
+					.append(c)
+					.siblings(\'input\').val(c.prop(\'src\'));
 			}
-			
-			jQuery(\'div.image-default\').empty()
-				.append(c)
-				.siblings(\'input\').val(c.prop(\'src\'));
-				
 			tb_remove();
+
 		}';
 		$str .= '</script>';
 		
-		$str .= '<p><a href="'.admin_url('media-upload.php?type=image&TB_iframe=1').'" class="thickbox">Choose Image</a></p>';
+		$str .= '<p><a href="'.admin_url('media-upload.php?type=image&from_templ33t_settings=1&TB_iframe=1').'" class="thickbox" onClick="templ33t_set_media_target(\'0\', templ33t_capture_image);">Choose Image</a></p>';
 		$str .= '</td></tr>';
 		
 		return $str;

@@ -116,3 +116,10 @@ function getBlockConfig() {
 	);
 	
 }
+
+function templ33t_set_media_target(tid, thook) {
+	
+	TL33T_current.media_target = tid;
+	TL33T_current.media_hook = thook;
+	
+}
