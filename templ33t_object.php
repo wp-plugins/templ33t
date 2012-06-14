@@ -651,9 +651,8 @@ class Templ33t {
 			
 			
 			// handle blocks
+			$blocks = array();
 			if(!empty($block_matches[1])) {
-				
-				$blocks = array();
 				
 				foreach($block_matches[1] as $slug) {
 					
@@ -693,9 +692,8 @@ class Templ33t {
 			}
 			
 			// handle options
+			$options = array();
 			if(!empty($option_matches[1])) {
-				
-				$options = array();
 				
 				foreach($option_matches[1] as $slug) {
 					
