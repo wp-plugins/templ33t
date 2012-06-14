@@ -576,8 +576,6 @@ class Templ33t {
 
 	function parseTemplate($template = null, $theme = null) {
 		
-		echo 'testing';
-		
 		// catch invalid file
 		if (empty($template) || !file_exists($template))
 			return false;
@@ -651,6 +649,7 @@ class Templ33t {
 			die();
 			
 		} else {
+			echo '<h2>ERROR</h2><pre>'.print_r($preview, true).'</pre>';
 			
 			return false;
 			
