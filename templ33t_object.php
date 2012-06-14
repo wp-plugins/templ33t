@@ -643,7 +643,7 @@ class Templ33t {
 		if(!is_wp_error($preview)) {
 			
 			$matches = array();
-			preg_match_all('/\<\-\-\s*TEMPL33T_BLOCK_PREVIEW\:\s*(.*)\s*\-\-\>/i', $response['body'], $matches);
+			preg_match_all('/\<\!\-\-\s*TEMPL33T\_BLOCK\_PREVIEW\:\s*(.*)\s*\-\-\>/i', $response['body'], $matches);
 			
 			print_r($matches);
 			die();
