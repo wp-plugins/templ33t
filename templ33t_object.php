@@ -401,7 +401,12 @@ class Templ33t {
 		
 		global $wp_query, $post;
 		
-		die('TESTING: '.print_r($wp_query, true).print_r($post, true));
+		$post->page_template = $_GET['templ33t_preview'];
+		
+		//die('TESTING: '.print_r($wp_query, true).print_r($post, true));
+		
+		print_r($post);
+		die();
 		
 	}
 
