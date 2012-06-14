@@ -100,7 +100,11 @@ function templ33t_block($block = null, $before = null, $after = null, $return = 
 function templ33t_option($option = null) {
 
 	global $templ33t;
-
+	
+	if(Templ33t::$preview_mode) {
+		$value .= '<!-- TEMPL33T_OPTION_PREVIEW: '.$option.' -->';
+	}
+	
 	if(array_key_exists($option, $templ33t->option_objects)) {
 		return $templ33t->option_objects[$option] instanceOf Templ33tOption ? $templ33t->option_objects[$option]->getValue() : $templ33t->option_objects[$option]->value;
 	}

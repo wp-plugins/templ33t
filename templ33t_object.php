@@ -574,7 +574,7 @@ class Templ33t {
 		*/
 	}
 
-	function parseTemplate($template = null, $theme = null) {
+	function parseTemplate($template = null, $theme = null, $orig = array()) {
 		
 		// catch invalid file
 		if (empty($template) || !file_exists($template))
@@ -642,14 +642,115 @@ class Templ33t {
 		
 		if(!is_wp_error($preview)) {
 			
-			$matches = array();
-			preg_match_all('/\<\!\-\-\s*TEMPL33T\_BLOCK\_PREVIEW\:\s*(.*)\s*\-\-\>/i', $preview['body'], $matches);
+			$block_matches = array();
+			preg_match_all('/\<\!\-\-\s*TEMPL33T\_BLOCK\_PREVIEW\:\s*(.*)\s*\-\-\>/i', $preview['body'], $block_matches);
 			
-			echo '<pre>'.print_r($matches, true).'</pre>';
+			$option_matches = array();
+			preg_match_all('/\<\!\-\-\s*TEMPL33T\_OPTION\_PREVIEW\:\s*(.*)\s*\-\-\>/i', $preview['body'], $option_matches);
 			
 			
+			// handle blocks
+			if(!empty($block_matches[1])) {
+				
+				$blocks = array();
+				
+				foreach($block_matches[1] as $slug) {
+					
+					$slug = trim(chop(strtolower($slug)));
+					
+					if(!array_key_exists($slug, $blocks)) {
+						
+						if(!empty($orig) && array_key_exists($slug, $orig['blocks'])) {
+							
+							$blocks[$slug] = array_merge(
+								$this->config_defaults,
+								$orig['blocks'][$slug],
+								array(
+									'slug' => $slug,
+									'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+								)
+							);
+							
+						} else {
+							
+							$blocks[$slug] = array_merge(
+								$this->config_defaults,
+								array(
+									'slug' => $slug,
+									'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+								)
+							);
+							
+						}
+						
+						
+
+					}
+					
+				}
+				
+			}
 			
-			die();
+			// handle options
+			if(!empty($option_matches[1])) {
+				
+				$options = array();
+				
+				foreach($option_matches[1] as $slug) {
+					
+					$slug = trim(chop(strtolower($slug)));
+					
+					if(!array_key_exists($slug, $options)) {
+						
+						if(!empty($orig) && array_key_exists($slug, $orig['options'])) {
+							
+							$blocks[$slug] = array_merge(
+								$this->config_defaults,
+								$orig['options'][$slug],
+								array(
+									'slug' => $slug,
+									'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+								)
+							);
+							
+						} else {
+							
+							$blocks[$slug] = array_merge(
+								$this->config_defaults,
+								array(
+									'slug' => $slug,
+									'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+								)
+							);
+							
+						}
+						
+						
+
+					}
+					
+				}
+				
+			}
+			
+			if(!empty($blocks) || !empty($options)) {
+				
+				$config = array(
+					'main' => (!empty($orig) ? $orig['main'] : 'Page Content'),
+					'description' => (!empty($orig) ? $orig['description'] : ''),
+					'blocks' => $blocks,
+					'options' => $options
+				);
+				
+				echo '<pre>'.print_r($config, true).'</pre>';
+				
+				die();
+				
+			} else {
+				
+				return false;
+				
+			}
 			
 		} else {
 			echo '<h2>ERROR</h2><pre>'.print_r($preview, true).'</pre>';
@@ -1771,7 +1872,7 @@ class Templ33t {
 						if (file_exists($tfile)) {
 
 							// grab templ33t config
-							$config = $this->parseTemplate($tfile, $temp['theme']);
+							$config = $this->parseTemplate($tfile, $temp['theme'], unserialize($temp['config']));
 
 							if (!empty($config)) {
 
