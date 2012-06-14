@@ -634,7 +634,7 @@ class Templ33t {
 		
 		$tname = str_replace('.php', '', basename($template));
 		
-		echo '/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname;
+		echo site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname);
 		
 		//die();
 		
