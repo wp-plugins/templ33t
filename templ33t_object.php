@@ -636,7 +636,7 @@ class Templ33t {
 		
 		echo '/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname;
 		
-		die();
+		//die();
 		
 		$preview = wp_remote_get('/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname);
 		
