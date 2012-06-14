@@ -397,11 +397,16 @@ class Templ33t {
 		return $qvars;
 	}
 	
-	function previewTypes($type = null) {
+	function previewTypes() {
 		
 		global $wp_query, $post;
 		
+		$args = func_get_args();
+		print_r($args);
+		
 		$post->page_template = $_GET['templ33t_preview'];
+		
+		
 		
 		//die('TESTING: '.print_r($wp_query, true).print_r($post, true));
 		
