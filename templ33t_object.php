@@ -404,8 +404,10 @@ class Templ33t {
 		$args = func_get_args();
 		print_r($args);
 		
-		$post->page_template = $_GET['templ33t_preview'];
+		//$post->page_template = $_GET['templ33t_preview'];
 		
+		include(TEMPLATEPATH . '/' . $_GET['templ33t_preview']);
+		exit();
 		
 		
 		//die('TESTING: '.print_r($wp_query, true).print_r($post, true));
