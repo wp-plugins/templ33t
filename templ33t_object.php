@@ -638,7 +638,7 @@ class Templ33t {
 		
 		//die();
 		
-		$preview = wp_remote_get('/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname);
+		$preview = wp_remote_get(site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname));
 		
 		if(!is_wp_error($preview)) {
 			
