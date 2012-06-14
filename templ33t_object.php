@@ -14,6 +14,7 @@ class Templ33t {
 	static $assets_url;
 	static $assets_dir;
 	static $settings_url;
+	static $preview_mode = false;
 	var $tab_pages = array(
 		'page.php',
 		'page-new.php',
@@ -400,6 +401,8 @@ class Templ33t {
 	function previewTemplate() {
 		
 		global $wp_query, $post;
+		
+		Templ33t::$preview_mode = true;
 		
 		include(TEMPLATEPATH . '/' . $_GET['templ33t_preview'] . '.php');
 		exit();

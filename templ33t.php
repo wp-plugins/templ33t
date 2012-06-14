@@ -70,11 +70,15 @@ function templ33t_block($block = null, $before = null, $after = null, $return = 
 	
 	$value = '';
 	
+	if(Templ33t::$preview_mode) {
+		$value .= '<!-- TEMPL33T_BLOCK_PREVIEW: '.$block.' -->';
+	}
+	
 	if(array_key_exists($block, $templ33t->block_objects)) {
 		if($templ33t->block_objects[$block] instanceOf Templ33tTab) {
-			$value = $templ33t->block_objects[$block]->output(true);
+			$value .= $templ33t->block_objects[$block]->output(true);
 		} else {
-			$value = $templ33t->block_objects[$block]->value;
+			$value .= $templ33t->block_objects[$block]->value;
 		}
 	}
 	
