@@ -574,11 +574,15 @@ class Templ33t {
 		*/
 	}
 
-	function parseTemplate($template = null) {
-
+	function parseTemplate($template = null, $theme = null) {
+		
 		// catch invalid file
 		if (empty($template) || !file_exists($template))
 			return false;
+		
+		
+		/*
+		
 		$template_data = implode('', file($template));
 
 		// get blocks
@@ -625,6 +629,27 @@ class Templ33t {
 
 			return false;
 		}
+		
+		*/
+		
+		$tname = str_replace('.php', '', basename($template));
+		
+		$preview = wp_remote_get('/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname);
+		
+		if(!is_wp_error($preview)) {
+			
+			$matches = array();
+			preg_match_all('/\<\-\-\s*TEMPL33T_BLOCK_PREVIEW\:\s*(.*)\s*\-\-\>/i', $response['body'], $matches);
+			
+			print_r($matches);
+			die();
+			
+		} else {
+			
+			return false;
+			
+		}
+		
 	}
 
 	public static function slug($key = null) {
@@ -1387,7 +1412,7 @@ class Templ33t {
 				} else {
 
 					// grab templ33t config
-					$config = $this->parseTemplate($tfile);
+					$config = $this->parseTemplate($tfile, $_POST['templ33t_theme']);
 
 					// set up insert array
 					$i_arr = array(
@@ -1738,7 +1763,7 @@ class Templ33t {
 						if (file_exists($tfile)) {
 
 							// grab templ33t config
-							$config = $this->parseTemplate($tfile);
+							$config = $this->parseTemplate($tfile, $temp['theme']);
 
 							if (!empty($config)) {
 
