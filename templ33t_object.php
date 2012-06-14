@@ -631,6 +631,7 @@ class Templ33t {
 		}
 		
 		*/
+		echo '<pre>'.print_r($orig, true).'</pre>';
 		
 		$tname = str_replace('.php', '', basename($template));
 		
