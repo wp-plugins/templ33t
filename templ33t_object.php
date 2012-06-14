@@ -646,6 +646,9 @@ class Templ33t {
 			preg_match_all('/\<\!\-\-\s*TEMPL33T\_BLOCK\_PREVIEW\:\s*(.*)\s*\-\-\>/i', $response['body'], $matches);
 			
 			print_r($matches);
+			
+			echo $response['body'];
+			
 			die();
 			
 		} else {
