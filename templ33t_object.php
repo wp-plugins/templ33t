@@ -631,13 +631,8 @@ class Templ33t {
 		}
 		
 		*/
-		echo '<pre>'.print_r($orig, true).'</pre>';
 		
 		$tname = str_replace('.php', '', basename($template));
-		
-		echo site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname);
-		
-		//die();
 		
 		$preview = wp_remote_get(site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname));
 		
@@ -741,9 +736,7 @@ class Templ33t {
 					'options' => $options
 				);
 				
-				echo '<pre>'.print_r($config, true).'</pre>';
-				
-				die();
+				return $config;
 				
 			} else {
 				
@@ -752,8 +745,7 @@ class Templ33t {
 			}
 			
 		} else {
-			echo '<h2>ERROR</h2><pre>'.print_r($preview, true).'</pre>';
-			die();
+			
 			return false;
 			
 		}
