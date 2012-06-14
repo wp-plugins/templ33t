@@ -576,6 +576,8 @@ class Templ33t {
 
 	function parseTemplate($template = null, $theme = null) {
 		
+		echo 'testing';
+		
 		// catch invalid file
 		if (empty($template) || !file_exists($template))
 			return false;
@@ -633,6 +635,10 @@ class Templ33t {
 		*/
 		
 		$tname = str_replace('.php', '', basename($template));
+		
+		echo '/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname;
+		
+		die();
 		
 		$preview = wp_remote_get('/?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname);
 		
