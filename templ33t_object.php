@@ -650,7 +650,7 @@ class Templ33t {
 			
 		} else {
 			echo '<h2>ERROR</h2><pre>'.print_r($preview, true).'</pre>';
-			
+			die();
 			return false;
 			
 		}
