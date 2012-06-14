@@ -117,7 +117,7 @@ class Templ33t {
 			//add_action('init', array($this, 'flushRewriteRules'));
 			//add_action('generate_rewrite_rules', array($this, 'addRewriteRules'));
 			//add_filter('query_vars', array($this, 'addQueryVars'));
-			add_action('template_redirect', array($this, 'previewTypes'));
+			add_action('template_redirect', array($this, 'previewTemplate'));
 		}
 		
 		
@@ -397,23 +397,12 @@ class Templ33t {
 		return $qvars;
 	}
 	
-	function previewTypes() {
+	function previewTemplate() {
 		
 		global $wp_query, $post;
 		
-		$args = func_get_args();
-		print_r($args);
-		
-		//$post->page_template = $_GET['templ33t_preview'];
-		
-		include(TEMPLATEPATH . '/' . $_GET['templ33t_preview']);
+		include(TEMPLATEPATH . '/' . $_GET['templ33t_preview'] . '.php');
 		exit();
-		
-		
-		//die('TESTING: '.print_r($wp_query, true).print_r($post, true));
-		
-		//print_r($post);
-		//die();
 		
 	}
 
