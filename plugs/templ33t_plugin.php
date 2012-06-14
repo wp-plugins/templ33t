@@ -37,6 +37,12 @@ abstract class Templ33tPlugin {
 	 * @var string
 	 */
 	var $default;
+	
+	/**
+	 * Plugin weight order
+	 * @var int
+	 */
+	var $weight;
 
 	/**
 	 * Block optional (block wrappers will not be displayed if value is empty)

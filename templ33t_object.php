@@ -2284,6 +2284,20 @@ class Templ33t {
 			
 		}
 		
+		// order group items
+		foreach($groups as $key => $val) {
+			$order = array();
+			foreach($val as $key2 => $val2) {
+				$order[$key2] = $val2->weight;
+			}
+			asort($order, SORT_STRING);
+			$old = $val;
+			$groups[$key] = array();
+			foreach($order as $key2 => $val2) {
+				$groups[$key][$key2] = $old[$key2];
+			}
+		}
+		
 		//print_r($groups);
 		
 		include(dirname(__FILE__).'/inc/customize_theme.php');
