@@ -405,8 +405,8 @@ class Templ33t {
 		
 		//die('TESTING: '.print_r($wp_query, true).print_r($post, true));
 		
-		print_r($post);
-		die();
+		//print_r($post);
+		//die();
 		
 	}
 
