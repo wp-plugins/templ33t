@@ -492,7 +492,7 @@ class Templ33t {
 	function parseTheme($theme = null, $orig = array()) {
 		
 		$themes = get_themes();
-		$theme = get_theme_data(get_theme_root() . '/' . $theme . '/style.css');
+		$theme_data = get_theme_data(get_theme_root() . '/' . $theme . '/style.css');
 		
 		$templates = array();
 		
@@ -514,8 +514,6 @@ class Templ33t {
 			$temp = basename($temp);
 			
 			if(!empty($temp) && !array_key_exists($temp, $config)) {
-				
-				echo get_theme_root() . '/' . $theme . '/' . $temp.'<br/>';
 				
 				if(array_key_exists($temp, $orig)) {
 					
