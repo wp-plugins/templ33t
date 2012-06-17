@@ -1907,12 +1907,12 @@ class Templ33t {
 									$this->updateOption('templ33t_map_dev', $t_dev);
 
 									// return to settings page
-									$redirect = self::$settings_url . '&theme=' . $temp['theme'];
+									$redirect = self::$settings_url . '&theme=' . $temp['theme'] . '&template='.$temp['template'];
 									wp_redirect($redirect);
 								} else {
 
 									// return to settings page
-									$redirect = self::$settings_url . '&theme=' . $temp['theme'] . '&error=nochange';
+									$redirect = self::$settings_url . '&theme=' . $temp['theme'] . '&template='.$temp['template'] . '&error=nochange';
 									wp_redirect($redirect);
 								}
 							} else {

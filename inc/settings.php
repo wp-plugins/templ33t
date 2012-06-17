@@ -109,11 +109,17 @@ foreach ($themes as $key => $val) { ?>
 					<?php if (!empty($templates)) { ?>
 				<div id="templ33t_control">
 					<ul>
-				<?php $x = 0;
+				<?php
+				
+				if(array_key_exists('template', $_GET)) {
+					$template = $_GET['template'];
+				}
+				
+				$x = 0;
 				foreach ($templates as $tkey => $tval) { ?>
-							<li<?php if ($x == 0) { ?> class="selected"<?php } ?>><a href="#" rel="<?php echo $tval['templ33t_template_id']; ?>"><?php echo $tval['template']; ?></a></li>
-		<?php $x++;
-	} ?>
+							<li<?php if ((!isset($template) && $x == 0) || ($template == $tval['template'])) { ?> class="selected"<?php } ?>><a href="#" rel="<?php echo $tval['templ33t_template_id']; ?>"><?php echo $tval['template']; ?></a></li>
+					<?php $x++;
+				} ?>
 					</ul>
 				</div>
 				<?php } ?>
@@ -187,7 +193,7 @@ foreach ($themes as $key => $val) { ?>
 <?php if (!empty($templates)) {
 	$x = 0;
 	foreach ($templates as $tkey => $tval) { ?>
-						<li class="templ33t_template_box" rel="<?php echo $tval['templ33t_template_id']; ?>" <?php if ($x > 0) { ?> style="display: none;"<?php } ?>>
+						<li class="templ33t_template_box" rel="<?php echo $tval['templ33t_template_id']; ?>" <?php if ((!isset($template) && $x == 0) || ($template == $tval['template'])) { ?> style="display: none;"<?php } ?>>
 							<div class="templ33t_right">
 
 
