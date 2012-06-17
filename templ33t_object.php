@@ -515,6 +515,8 @@ class Templ33t {
 			
 			if(!empty($temp) && !array_key_exists($temp, $config)) {
 				
+				echo get_theme_root() . '/' . $theme . '/' . $temp.'<br/>';
+				
 				if(array_key_exists($temp, $orig)) {
 					
 					$config[$temp] = $this->parseTemplate(get_theme_root() . '/' . $theme . '/' . $temp, $theme, $orig[$temp]);
