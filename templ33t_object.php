@@ -662,7 +662,7 @@ class Templ33t {
 								$orig['blocks'][$slug],
 								array(
 									'slug' => $slug,
-									'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+									//'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
 								)
 							);
 							
@@ -703,7 +703,7 @@ class Templ33t {
 								$orig['options'][$slug],
 								array(
 									'slug' => $slug,
-									'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
+									//'label' => ucwords(str_replace('_', ' ', str_replace('-', ' ', $slug)))
 								)
 							);
 							
