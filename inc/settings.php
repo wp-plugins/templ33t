@@ -193,7 +193,7 @@ foreach ($themes as $key => $val) { ?>
 <?php if (!empty($templates)) {
 	$x = 0;
 	foreach ($templates as $tkey => $tval) { ?>
-						<li class="templ33t_template_box" rel="<?php echo $tval['templ33t_template_id']; ?>" <?php if (!(!isset($template) && $x == 0) || !($template == $tval['template'])) { ?> style="display: none;"<?php } ?>>
+						<li class="templ33t_template_box" rel="<?php echo $tval['templ33t_template_id']; ?>" <?php if ((!isset($template) && $x != 0) || ($template != $tval['template'])) { ?> style="display: none;"<?php } ?>>
 							<div class="templ33t_right">
 
 
