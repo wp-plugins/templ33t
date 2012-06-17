@@ -513,7 +513,7 @@ class Templ33t {
 			
 			$temp = basename($temp);
 			
-			if(!empty($temp) && !array_key_exists($temp)) {
+			if(!empty($temp) && !array_key_exists($temp, $config)) {
 				
 				if(array_key_exists($temp, $orig)) {
 					
