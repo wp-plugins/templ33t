@@ -529,8 +529,14 @@ class Templ33t {
 			
 		}
 		
-		print_r($config);
-		die();
+		// clear non-templ33t templates
+		foreach($config as $key => $val) {
+			
+			if(empty($val)) {
+				unset($config[$key]);
+			}
+			
+		}
 		
 		return $config;
 		
