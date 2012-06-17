@@ -489,27 +489,50 @@ class Templ33t {
 		return (function_exists('is_multisite') && is_multisite());
 	}
 
-	function parseTheme($theme = null) {
+	function parseTheme($theme = null, $orig = array()) {
 		
 		$themes = get_themes();
 		$theme = get_theme_data(get_theme_root() . '/' . $theme . '/style.css');
 		
-		print_r($themes[$theme['Name']]);
+		$templates = array();
 		
-		$home = locate_template('home.php');
-		$page = locate_template('page.php');
+		$templates[] = locate_template('home.php');
+		$templates[] = locate_template('page.php');
+		$templates[] = locate_template('posts.php');
+		$templates[] = locate_template('single.php');
+		
 		$custom = get_page_templates();
-		$posts = locate_template('posts.php');
-		$single = locate_template('single.php');
 		
-		echo 'HOME: '.$home.'<br/>'
-			. 'PAGE: '.$page.'<br/>'
-			. 'CUSTOM: '.print_r($custom, true).'<br/>'
-			. 'POSTS: '.$posts.'<br/>'
-			. 'SINGLE: '.$single.'<br/>';
+		foreach($custom as $temp) {
+			$templates[] = $temp;
+		}
 		
+		$config = array();
+		
+		foreach($templates as $temp) {
+			
+			$temp = basename($temp);
+			
+			if(!empty($temp) && !array_key_exists($temp)) {
+				
+				if(array_key_exists($temp, $orig)) {
+					
+					$config[$temp] = $this->parseTemplate(get_theme_root() . '/' . $theme . '/' . $temp, $theme, $orig[$temp]);
+					
+				} else {
+					
+					$config[$temp] = $this->parseTemplate(get_theme_root() . '/' . $theme . '/' . $temp, $theme);
+					
+				}
+				
+			}
+			
+		}
+		
+		print_r($config);
 		die();
 		
+		return $config;
 		
 		
 		/*
@@ -1800,7 +1823,7 @@ class Templ33t {
 						}
 
 						// get templates
-						$templates = $this->parseTheme($theme);
+						$templates = $this->parseTheme($theme, $compare);
 
 						if ($compare != $templates) {
 
