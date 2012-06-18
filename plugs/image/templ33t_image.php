@@ -107,7 +107,7 @@ class Templ33tImage extends Templ33tPlugin implements Templ33tTab {
 		
 		$str = '<div class="postbox"><div class="inside">';
 		$str .= '<input type="hidden" name="meta['.$this->id.'][key]" value="templ33t_'.$this->slug.'" />';
-		$str .= '<input type="hidden" id="templ33t_image_value_'.$this->id.'" name="meta['.$this->id.'][value]" value="" />';
+		$str .= '<input type="hidden" id="templ33t_image_value_'.$this->id.'" name="meta['.$this->id.'][value]" value="'.$this->value.'" />';
 		$str .= '<p><a href="'.admin_url('media-upload.php?post_id='.$post->ID.'&type=image&TB_iframe=1').'" class="thickbox" onClick="templ33t_set_media_target('.$this->id.', templ33t_capture_image);">Choose Image</a></p>';
 		
 		$str .= '<div id="templ33t_image_preview_'.$this->id.'">'.(!empty($this->value) ? '<img id="'.$this->outputID.'" class="'.$this->outputClass.'" src="'.$this->value.'" />' : '').'</div>';
