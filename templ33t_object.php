@@ -1756,7 +1756,7 @@ class Templ33t {
 						}
 
 						// return to settings page
-						$redirect = self::$settings_url . '&theme=' . $theme;
+						$redirect = self::$settings_url . '&theme=' . $theme . '&template='.$template['template'];
 						wp_redirect($redirect);
 
 						break;
