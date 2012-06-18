@@ -35,18 +35,22 @@ jQuery(document).ready(
 	function() {
 
 		//alert(TL33T_def.toString());
+		
+		if(jQuery('select#page_template').length > 0) {
 
-		// save current template index
-		ctemp = jQuery('select#page_template').prop('selectedIndex');
+			// save current template index
+			ctemp = jQuery('select#page_template').prop('selectedIndex');
+			
+			// add event listener to template select
+			jQuery('select#page_template').change(templ33t_switchTemplate);
+
+		}
 		
 		//alert(getUserSetting('editor')+' = '+(!getUserSetting('editor')));
 		
 		// set current mode
 		ctmode = (getUserSetting('editor') == 'tinymce' || !getUserSetting('editor') ? false : true);
 		
-		// add event listener to template select
-		jQuery('select#page_template').change(templ33t_switchTemplate);
-
 		// set up templ33t
 		if(jQuery('div#templ33t_control').length) {
 
@@ -170,7 +174,7 @@ function templ33t_switchEditor(prel) {
 	var ncontent;
 	var fromcustom = (jQuery('#postdivrich').css('display') == 'none');
 	var tocustom;
-	var tslg = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
+	var tslg = jQuery('select#page_template').length == 0 || jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
 	if(nobj.parent().index() > 0)
 		tocustom = TL33T_def[tslg].blocks[(nobj.parent().index() - 1)].custom;
 	else
@@ -261,7 +265,7 @@ function templ33t_switchMode(switchTo) {
 
 				} else {
 					
-					var tslg = jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
+					var tslg = jQuery('select#page_template').length == 0 || jQuery('select#page_template').val() == 'default' ? TL33T_current.default_template : jQuery('select#page_template').val();
 					
 					if(!TL33T_def[tslg].blocks[(jQuery(this).index() - 1)].custom) {
 
