@@ -492,7 +492,8 @@ class Templ33t {
 	function parseTheme($theme = null, $orig = array()) {
 		
 		$themes = get_themes();
-		$theme_data = get_theme_data(get_theme_root() . '/' . $theme . '/style.css');
+		$theme_dir = get_theme_root() . DIRECTORY_SEPARATOR . $theme . DIRECTORY_SEPARATOR;
+		$theme_data = get_theme_data($theme_dir . 'style.css');
 		
 		$templates = array();
 		
@@ -510,7 +511,7 @@ class Templ33t {
 		*/
 
 		$files = array('home.php', 'page.php', 'posts.php', 'single.php');
-		foreach($templates as $file) {
+		foreach($files as $file) {
 			if(file_exists($theme_dir . $file)) {
 				$templates[] = $file;
 			}
