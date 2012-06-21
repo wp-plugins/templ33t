@@ -496,14 +496,29 @@ class Templ33t {
 		
 		$templates = array();
 		
+		/*
 		$templates[] = locate_template('home.php');
 		$templates[] = locate_template('page.php');
 		$templates[] = locate_template('posts.php');
 		$templates[] = locate_template('single.php');
 		
 		$custom = get_page_templates();
-		
+		 
 		foreach($custom as $temp) {
+			$templates[] = $temp;
+		} 
+		*/
+
+		$files = array('home.php', 'page.php', 'posts.php', 'single.php');
+		foreach($templates as $file) {
+			if(file_exists($theme_dir . $file)) {
+				$templates[] = $file;
+			}
+		}
+
+		$custom = wp_get_theme($theme)->get_page_templates();
+
+		foreach($custom as $temp => $tempname) {
 			$templates[] = $temp;
 		}
 		
