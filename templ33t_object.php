@@ -1523,7 +1523,7 @@ class Templ33t {
 					}
 				}
 
-				$tfile = get_theme_root() . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . $_POST['templ33t_theme'] . DIRECTORY_SEPARATOR . $_POST['templ33t_template'];
+				$tfile = get_theme_root() . DIRECTORY_SEPARATOR . $_POST['templ33t_theme'] . DIRECTORY_SEPARATOR . $_POST['templ33t_template'];
 
 				if (!file_exists($tfile))
 					$errors[] = 'notemp';
