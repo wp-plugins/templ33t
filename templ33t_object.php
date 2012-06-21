@@ -1523,7 +1523,7 @@ class Templ33t {
 					}
 				}
 
-				$tfile = get_theme_root() . DIRECTORY_SEPARATOR . $_POST['templ33t_theme'] . DIRECTORY_SEPARATOR . $_POST['templ33t_template'];
+				$tfile = Templ33t::$wp_content_dir . '/themes/' . $_POST['templ33t_theme'] . '/' . $_POST['templ33t_template'];
 
 				if (!file_exists($tfile))
 					$errors[] = 'notemp';
@@ -1887,7 +1887,7 @@ class Templ33t {
 
 					if (!empty($temp)) {
 
-						$tfile = self::$wp_content_dir . '/themes/' . $temp['theme'] . '/' . $temp['template'];
+						$tfile = Templ33t::$wp_content_dir . '/themes/' . $temp['theme'] . '/' . $temp['template'];
 
 						if (file_exists($tfile)) {
 
