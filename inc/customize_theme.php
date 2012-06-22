@@ -18,8 +18,22 @@ $messages = array(
 		right: 0px;
 		top: 0px;
 		z-index: 100;
+		-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+		filter: alpha(opacity=50);
+		-moz-opacity:0.5;
+		-khtml-opacity: 0.5;
+		opacity: 0.5;
 	}
 	.templ33t-customize-modal {
+		background: #FFF;
+		border: 1px solid #909090;
+		-moz-border-radius: 9px;
+		-webkit-border-radius: 9px;
+		-khtml-border-radius: 9px;
+		border-radius: 9px;
+		-moz-box-shadow: 0px 0px 24px #000;
+		-webkit-box-shadow: 0px 0px 24px #000;
+		box-shadow: 0px 0px 24px #000;
 		height: 400px;
 		left: 50%;
 		margin: -200px 0px 0px -250px;
