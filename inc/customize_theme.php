@@ -111,4 +111,5 @@ $messages = array(
 		</div>
 	</div>
 	<?php } } ?>
+<script type="text/javascript">jQuery('.templ33t-customize-modal, .templ33t-customize-modal-bg').prependTo('body');</script>
 
