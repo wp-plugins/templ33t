@@ -37,6 +37,7 @@ $messages = array(
 		height: 400px;
 		left: 50%;
 		margin: -200px 0px 0px -250px;
+		padding: 24px;
 		position: absolute;
 		top: 50%;
 		width: 500px;
