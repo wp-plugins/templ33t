@@ -404,7 +404,7 @@ class Templ33t {
 		
 		Templ33t::$preview_mode = true;
 		
-		include(TEMPLATEPATH . '/' . $_GET['templ33t_preview'] . '.php');
+		include(Templ33t::$wp_content_dir . '/themes/' . $_GET['stylesheet'] . '/' . $_GET['templ33t_preview'] . '.php');
 		exit();
 		
 	}
