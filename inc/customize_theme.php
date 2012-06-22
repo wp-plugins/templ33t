@@ -75,7 +75,7 @@ $messages = array(
 
 		<ul style="margin-left: 18px;">
 			<?php foreach($blocks as $slug => $block) { ?>
-			<li><a href="javascript:tempCustomizeModal('<?php echo $slug; ?>');" class="thickbox"><?php echo $block->label; ?></a></li>
+			<li><a href="javascript:tempCustomizeModal('<?php echo $slug; ?>');"><?php echo $block->label; ?></a></li>
 			<?php } ?>
 		</ul>
 
@@ -83,7 +83,16 @@ $messages = array(
 
 	<?php } ?>
 	
-	<div class="templ33t-customize-modal-bg"></div>
+	<?php } else { ?>
+	
+	<p>No default content required for this theme.</p>
+	
+	<?php } ?>
+
+</div>
+
+
+<div class="templ33t-customize-modal-bg"></div>
 	
 	<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
 	<div id="<?php echo $slug; ?>" class="templ33t-customize-modal" style="display: none;">
@@ -102,12 +111,4 @@ $messages = array(
 		</div>
 	</div>
 	<?php } } ?>
-	
-	<?php } else { ?>
-	
-	<p>No default content required for this theme.</p>
-	
-	<?php } ?>
-
-</div>
 
