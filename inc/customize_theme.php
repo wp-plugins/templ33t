@@ -44,7 +44,7 @@ $messages = array(
 	}
 	function tempHideCustomizeModal() {
 		
-		jQuery('.templ33t-customize-modal-bg').show();
+		jQuery('.templ33t-customize-modal-bg').hide();
 		jQuery('.templ33t-customize-modal').hide();
 		
 	}
