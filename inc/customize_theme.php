@@ -9,7 +9,46 @@ $messages = array(
 <style type="text/css">
 	label {display: inline-block; padding-bottom: 6px; font-weight: bold;}
 	div.postbox div.inside {padding: 12px;}
+	.templ33t-customize-modal-bg {
+		background: #303030;
+		bottom: 0px;
+		display: none;
+		left: 0px;
+		position: absolute;
+		right: 0px;
+		top: 0px;
+		z-index: 100;
+	}
+	.templ33t-customize-modal {
+		height: 400px;
+		left: 50%;
+		margin: -200px 0px 0px -250px;
+		position: absolute;
+		top: 50%;
+		width: 500px;
+		z-index: 101;
+	}
+	.templ33t-customize-modal > div {
+		height: 360px;
+		overflow: auto;
+	}
 </style>
+
+<script type="text/javascript">
+	function tempCustomizeModal(slug) {
+		
+		jQuery('.templ33t-customize-modal').hide();
+		jQuery('.templ33t-customize-modal-bg').show();
+		jQuery('#'+slug).show();
+		
+	}
+	function tempHideCustomizeModal() {
+		
+		jQuery('.templ33t-customize-modal-bg').show();
+		jQuery('.templ33t-customize-modal').hide();
+		
+	}
+</script>
 
 <div class="wrap">
 	
@@ -43,20 +82,24 @@ $messages = array(
 	</div>
 
 	<?php } ?>
-
+	
+	<div class="templ33t-customize-modal-bg"></div>
+	
 	<?php foreach($groups as $group => $blocks) { foreach($blocks as $slug => $block) { ?>
-	<div id="<?php echo $slug; ?>" style="display: none;">
-		<form method="post" action="?page=templ33t_customize">
-			<h2><?php echo $block->label; ?></h2>
-			<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
-			<div>
-				<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', str_replace('templ33t_', '', $block->displayPanel()))); ?>
-			</div>
-			<p>
-				<input type="button" value="Cancel" onclick="tb_remove(); return false;" />
-				<input type="submit" value="Save" />
-			</p>
-		</form>
+	<div id="<?php echo $slug; ?>" class="templ33t-customize-modal" style="display: none;">
+		<h2><?php echo $block->label; ?></h2>
+		<div>
+			<form method="post" action="?page=templ33t_customize">
+				<p><?php echo $block->customize_page_description ? $block->customize_page_description : ($block->description ? $block->description : 'Please enter content below.'); ?></p>
+				<div>
+					<?php echo str_replace('meta[][value]', 'block[value]', str_replace('meta[][key]', 'block[slug]', str_replace('templ33t_', '', $block->displayPanel()))); ?>
+				</div>
+				<p>
+					<input type="button" value="Cancel" onclick="tb_remove(); tempHideCustomizeModal();" />
+					<input type="submit" value="Save" />
+				</p>
+			</form>
+		</div>
 	</div>
 	<?php } } ?>
 	
