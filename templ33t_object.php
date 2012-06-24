@@ -679,7 +679,7 @@ class Templ33t {
 		
 		$tname = str_replace('.php', '', basename($template));
 		
-		$preview = wp_remote_get(site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname));
+		$preview = wp_remote_get(site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname.'&preview_iframe=1&TB_iframe=true'));
 		
 		if(!is_wp_error($preview)) {
 			
