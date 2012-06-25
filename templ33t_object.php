@@ -679,7 +679,19 @@ class Templ33t {
 		
 		$tname = str_replace('.php', '', basename($template));
 		
-		$preview = wp_remote_get(site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname.'&preview_iframe=1&TB_iframe=true'));
+		// put together cookies
+		$cookies = array();
+		if(!empty($_COOKIE)) {
+			foreach($_COOKIE as $key => $val) {
+					$c = new WP_Http_Cookie($key);
+					$c->name = $key;
+					$c->value = $val;
+					$c->domain = COOKIE_DOMAIN;
+					$cookies[] = $c;
+			}
+		}
+		
+		$preview = wp_remote_get(site_url('?preview=1&template='.$theme.'&stylesheet='.$theme.'&templ33t_preview='.$tname.'&preview_iframe=1&TB_iframe=true'), array('cookies' => $cookies));
 		
 		if(!is_wp_error($preview)) {
 			
