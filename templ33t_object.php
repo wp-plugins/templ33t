@@ -815,8 +815,48 @@ class Templ33t {
 		if (empty($post->page_template) || $post->page_template == 'default') {
 			$post->page_template = $this->default_template = basename(get_page_template());
 		}
+		
+		// just grab defaults if viewing post list or single post
+		if(is_home() || is_single()) {
+			
+			$theme = get_stylesheet();
+			
+			$defaults = get_option('templ33t_defaults');
 
-		if (array_key_exists($post->page_template, $this->templates)) {
+			if(!is_array($defaults)) {
+				$defaults = array();
+			}
+
+			foreach($this->map[$theme] as $template) {
+
+				$x = 1;
+				foreach($template['blocks'] as $slug => $config) {
+
+					if($config['customize_page']) {
+
+						$config['value'] = array_key_exists($theme, $defaults) && array_key_exists($slug, $defaults[$theme]) ? $defaults[$theme][$slug] : $config['default'];
+						$this->meta[$slug] = array_merge($this->config_defaults, $config);
+						$this->meta[$slug]['id'] = $x;
+						
+						// instantiate plugin
+						$block_handler = Templ33tPluginHandler::instantiate($config['type'], $this->meta[$slug]);
+
+						// init plugin
+						$block_handler->init();
+
+						// store object
+						$this->block_objects[$slug] = $block_handler;
+						
+						$x++;
+						
+					}
+
+				}
+
+			}
+			
+		// get template specific tabs if post is a page
+		} elseif (array_key_exists($post->page_template, $this->templates)) {
 			
 			$theme = get_stylesheet();
 			
