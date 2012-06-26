@@ -132,17 +132,33 @@ function templ33t_placeControl() {
 	pdr.before(te);
 	te.show();
 	
-	
+	// handle easy mode bugs
+	var isEasyMode = jQuery('body').prop('id') == 'wdeb-mode';
+	if(isEasyMode) {
+			nl.css('white-space', 'inherit');
+			nl.css('width', nl.width()+'px');
+	}
+
 	// calculate prev/next
 	var w = 0;
 	jQuery('li', nl).each(function() { w += jQuery(this).outerWidth()+parseInt(jQuery(this).css('margin-right')); });
 	if(w > nl.width()) {
-		tc.prepend('<span style="display: block; width: 30px; height: 30px; float: right;">&nbsp;</span>')
-			.prepend('<span style="display: block; width: 30px; height: 30px; float: left;">&nbsp;</span>');
-		//nl.css('margin-left', '30px');
-		//nl.css('margin-right', '30px');
-		tc.children('a').show();
+			tc.prepend('<span style="display: block; width: 30px; height: 30px; float: right;">&nbsp;</span>')
+					.prepend('<span style="display: block; width: 30px; height: 30px; float: left;">&nbsp;</span>');
+			//nl.css('margin-left', '30px');
+			//nl.css('margin-right', '30px');
+			//
+			// make room for tab nav in easy mode
+			if(isEasyMode) {
+					nl.css('margin-left', '30px');
+					nl.css('width', nl.width()-60);
+			}
+			
+			tc.children('a').show();
 	}
+	
+	// repair easy mode changes
+	nl.css('white-space', 'nowrap');
 	
 }
 
