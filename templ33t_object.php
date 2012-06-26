@@ -119,6 +119,7 @@ class Templ33t {
 			//add_action('generate_rewrite_rules', array($this, 'addRewriteRules'));
 			//add_filter('query_vars', array($this, 'addQueryVars'));
 			add_action('template_redirect', array($this, 'previewTemplate'));
+			add_filter('get_post_metadata', array($this, 'previewMeta'), true, 4);
 		}
 		
 		
@@ -407,6 +408,10 @@ class Templ33t {
 		include(Templ33t::$wp_content_dir . '/themes/' . $_GET['stylesheet'] . '/' . $_GET['templ33t_preview'] . '.php');
 		exit();
 		
+	}
+	
+	function previewMeta($metadata, $object_id, $metakey, $single) {
+		return (isset($metakey) && '_wp_page_template' == $metakey) ? $_GET['templ33t_preview'].'.php' : $metadata;
 	}
 
 	function menu() {
